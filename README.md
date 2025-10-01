@@ -26,16 +26,18 @@ We aim to design a toolkit that:
 <li>Shows the results where they matter:</li>
   <ul>
   <li>IDE</li>
+  <li>Pull requests</li>
+  </ul>
 
-  Possible Features:
+  <li>Possible Features:</li>
   <ul>
     <li>An IDE overlay that shows tokens, model used, cost, and carbon for each AI call.</li>
     <li>A “scenario tester” to compare the carbon and cost impact of using different models and LLM providers.</li>
     
   </ul>
   
-  <li>Pull requests</li>
-  </ul>
+
+ 
 
 
   <h2> User Stories: </h2>
