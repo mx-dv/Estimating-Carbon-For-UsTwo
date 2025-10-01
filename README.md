@@ -21,14 +21,14 @@ We aim to design a toolkit that:
   </ul>
   <h2> Team Members </h2>
   <ul>
-    Hao Ni (wx24939)
-    Iman Hadi (jp24368)
-    Jacob Connor (gn24034)
-    Max Davies (cg24012)
+   <li> Hao Ni (wx24939) </li>
+    <li>Iman Hadi (jp24368) </li>
+    <li>Jacob Connor (gn24034)</li>
+   <li>  Max Davies (cg24012)</li>
   </ul>
   <h2> Supporting Mentors</h2>
   <ul> 
-    Murray Groves (ij22909)
+    <li>Murray Groves (ij22909)</li>
   </ul>
 </ul>
 
