@@ -46,6 +46,12 @@ We aim to design a toolkit that:
     <li>As a Project Manager, I want to know how impactful my project is, and which areas of a coded solution are the most environmentally costly so I can identify less carbon heavy implementations, and utilise this to re-design prototypes</li>
     <li>As an Artifical Intelligence company, I can easily see and discover any massive inefficiencies in my AI model due to an overtly large relative carbon cost.</li>
   </ul>
+
+  <h2>Client Names</h2>
+  <ul>
+    <li>Paolo Rizzi</li>
+    <li>Nayan Jain</li>
+  </ul>
   
   <h2> Team Members </h2>
   <ul>
