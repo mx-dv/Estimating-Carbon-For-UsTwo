@@ -60,7 +60,7 @@ We aim to design a toolkit that:
     <li>Jacob Connor (gn24034)</li>
    <li>  Max Davies (cg24012)</li>
   </ul>
-  <h2> Supporting Mentors</h2>
+  <h2> Supporting Mentor</h2>
   <ul> 
     <li>Murray Groves (ij22909)</li>
   </ul>
