@@ -14,6 +14,16 @@ features).</li></ul>
 This is the gap we want to explore. By focusing on these two AI-specific metrics, we can give developers and teams
 visibility over both the carbon and cost of their AI usage, making it possible to make smarter, lower-impact choices earlier
 
+<pre>
+AI Users
+    ↓
+Tracking AI Usage
+    ↓
+Estimating the Carbon
+    ↓
+Visual Dashboard (Results)
+</pre>
+
 <h2>Building a Carbon-Aware Dev toolkit:</h2>
 
 We aim to design a toolkit that:
