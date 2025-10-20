@@ -23,7 +23,7 @@ body:
     id: detailed-description
     attributes:
       label: Detailed Description of the Issue
-      description: Please be as specific as possible. Include expected vs actual behavior seen from the bug.
+      description: Please be as specific as possible. Include expected vs actual behavior seen from the issue.
       placeholder: Tell us what you see, what you expected, and why.
       value: Pre-filled text goes here.
       render: shell 
@@ -34,7 +34,7 @@ body:
     id: environment
     attributes:
       label: Development / Runtime / UI
-      description: Which phase of the development are you experiencing this in?
+      description: Which phase of the development does this issue apply to?
       multiple: true # Allows selecting multiple options
       options:
         - Development
