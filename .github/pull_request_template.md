@@ -42,7 +42,16 @@ Tick all that apply:
 
 ## Reviewer Notes:
 
-*Please provide any additional notes for the reviewers here.*
+*Please provide any additional notes for the reviewers here. Be as relevant to your request as possible.*
+
+Please @mention the users that should review your code (delete any that aren't applicable):
+
+@mx-dv
+@JacobConnor5
+@iman-ui
+@Crystal-2006
+@m0g56
+
 
 ## Workflow
 
