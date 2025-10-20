@@ -12,24 +12,23 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	const disposableAPIKEY = vscode.commands.registerCommand('vsCodeExt.setApiKey', async () => {
-		
 		const apiKey = await vscode.window.showInputBox({
-			prompt: "Enter your API Key",
+			prompt: 'Enter your API Key',
 			placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 			ignoreFocusOut: true // keep input box open even if focus moves away from window
 
 		});
 		if (apiKey){
-			await context.secrets.store('myApiKey', apiKey) // securely stores apikey using key 'myApiKey'
+			await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
 			
 			// to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
 
-			vscode.window.showInformationMessage(`API Key successfully set!`);
+			vscode.window.showInformationMessage('API Key successfully set!');
 		}
 		else {
             vscode.window.showWarningMessage('API Key setting cancelled.');
 		}
-	})
+	});
 
 	context.subscriptions.push(disposableAPIKEY);
 
@@ -49,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('vsCodeExt.helloWorld', () => {
+	const disposable = vscode.commands.registerCommand('vsCodeExt.helloWorld', async () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
