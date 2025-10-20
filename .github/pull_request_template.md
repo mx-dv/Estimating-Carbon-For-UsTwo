@@ -6,7 +6,7 @@
 
 ## Issue related to PR
 
-Resolves #[issue number] (make sure to link this PR with an issue on GitHub)
+Resolves #issue-number
 
 ## Scope of issue 
 
