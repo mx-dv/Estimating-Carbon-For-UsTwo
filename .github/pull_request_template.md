@@ -2,7 +2,7 @@
 
 ## Description
 
-Please include a summary of the changes and the related issue. Please also include relevant motivation and context. List any dependencies that are required for this change.
+*Please include a summary of the changes and the related issue. Please also include relevant motivation and context. List any dependencies that are required for this change (if applicable)*
 
 ## Issue related to PR
 
@@ -25,7 +25,7 @@ Resolves #[issue number] (make sure to link this PR with an issue on GitHub)
 
 ## How Has This Been Tested?
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration.
+*Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration.*
 
 ## Checklist:
 
@@ -42,7 +42,7 @@ Tick all that apply:
 
 ## Reviewer Notes:
 
-Please provide any additional notes for the reviewers here.
+*Please provide any additional notes for the reviewers here.*
 
 ## Workflow
 
