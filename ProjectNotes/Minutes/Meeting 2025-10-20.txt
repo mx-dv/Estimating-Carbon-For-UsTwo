@@ -5,7 +5,7 @@ and we are focusing mainly on the tracking of token, we have come to three solut
 but this method isn't very privacy safe, so this is not going to be our main priority but it seems to be workable 
 
 2.our scond solution is inspired from another extension we found, it's similar with our projects 
-this approach takes the user's respond and sending it to LLM again 
+This approach takes the user's response and sends it to LLM again 
 It's a lot more of a privacy-friendly solution compared with the first solution, but via this route, it doubles the token usage and costs 
 so we are not considering this method
 
