@@ -24,13 +24,27 @@ export function activate(context: vscode.ExtensionContext) {
 		
 	});
 
-	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay',()=> {
+	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async ()=> {
 		
-		vscode.window.showInputBox()!;
+		vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
+
+		// const limit  = await vscode.window.showInputBox({
+		// 	prompt: 'enter your carbon limit',
+		// 	placeHolder:'eg. 5',
+		// 	ignoreFocusOut: true // keep input box open even if focus moves away from window
+		// });
 		
-		var x = vscode.window.createStatusBarItem("testing",1,1);
-		x.show();
+		// if (limit === "h"){
+		// 	vscode.window.showInformationMessage('satisfied ');
+		// }
+		// else{
+		// 	vscode.window.showInformationMessage('not satisfied!');
+
+		// }
+		
 	});
+	
+	context.subscriptions.push(input);
 
 	context.subscriptions.push(disposable);
 }
