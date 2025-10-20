@@ -1,7 +1,6 @@
-name: Bug Report Form
-description: A form for submitting bugs
-title: "[BUG] New Submission: <Brief description>"
-labels: ["bug"]
+name: Basic Issue Form
+description: A form for basic issues
+title: "[GENERIC] New Submission: <Brief description>"
 assignees:
   - mx-dv
   - Crystal-2006
@@ -14,7 +13,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Fill in the relevant fields with the information concerning the bug. 
+        Fill in the relevant fields with the information concerning the issue. 
 
         Be as descriptive and concise.
 
@@ -23,8 +22,8 @@ body:
   - type: textarea
     id: detailed-description
     attributes:
-      label: Detailed Description of the Bug
-      description: Please be as specific as possible. Include expected vs actual behavior seen from the bug.
+      label: Detailed Description of the Issue
+      description: Please be as specific as possible. Include expected vs actual behavior seen from the issue.
       placeholder: Tell us what you see, what you expected, and why.
       value: Pre-filled text goes here.
       render: shell 
@@ -35,7 +34,7 @@ body:
     id: environment
     attributes:
       label: Development / Runtime / UI
-      description: Which phase of the development are you experiencing this in?
+      description: Which phase of the development does this issue apply to?
       multiple: true # Allows selecting multiple options
       options:
         - Development
