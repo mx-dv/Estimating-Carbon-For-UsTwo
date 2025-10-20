@@ -9,7 +9,7 @@ This approach takes the user's response and sends it to LLM again
 It's a lot more of a privacy-friendly solution compared with the first solution, but via this route, it doubles the token usage and costs 
 so we are not considering this method
 
-3.finally we are thinking to directly to send to API and API will directly send everything to us 
+3.finally we are thinking to listen for AI API calls and then send an API usage request. OpenAI and Gemini both have usage api endpoints which we can query to find token data.
 this method is efficent doesn't duplicate calls and also privacy friendly this is our preffered method
 
 
