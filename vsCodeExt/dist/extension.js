@@ -51,11 +51,26 @@ function activate(context) {
       ignoreFocusOut: true
       // keep input box open even if focus moves away from window
     });
-    if (limit) {
-      barManager.backgroundColor = new vscode.ThemeColor("statusBarItem.errorBackground");
-      barManager.text = "$(error) limit has been reached";
-      vscode.window.showInformationMessage("satisfied ");
+    var num = Number(limit);
+    var colour = "statusBarItem.activeBackground";
+    var text = "Limit has not yet been reached";
+    if (num) {
+      if (num > 5) {
+        colour = "statusBarItem.errorBackground";
+        text = "$(error) Limit has been exceeded";
+        vscode.window.showInformationMessage("satisfied");
+      } else {
+        if (num === 5) {
+          colour = "statusBarItem.warningBackground";
+          text = "$(warning) Limit has been met";
+        }
+        vscode.window.showInformationMessage("satisfied but low");
+      }
+      barManager.backgroundColor = new vscode.ThemeColor(colour);
+      barManager.text = text;
     } else {
+      colour = "statusBarItem.errorBackground";
+      text = "Error Invaild input";
       vscode.window.showInformationMessage("not satisfied!");
     }
   });
