@@ -1,7 +1,7 @@
 use of AI in software development
 the point is try not to get hit in the face by AI
 
-how proffesional developers work :
+how professional developers work :
 nilton santos (restaurant booking system)
 he tells AI to implement according to some rules (analysis)
 he also need to do design (AI isn't good at designing)so he has to do the top level design(attributes,what to implement)
