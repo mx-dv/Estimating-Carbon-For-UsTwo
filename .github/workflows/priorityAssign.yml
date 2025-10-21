@@ -10,6 +10,8 @@ on:
 jobs:
   set_priority_label:
     runs-on: ubuntu-latest
+    # makes sure that event is an issue, is not a pull request, and contains the relevant 
+    # dropdown menu (found by text matching to title of dropdown)
     if: |
       ${{ github.event.issue && github.event.issue.pull_request == null 
       && contains(github.event.issue.body, 'Select Priority Level')}}
@@ -17,6 +19,7 @@ jobs:
     steps:
       - name: Set priority label based on issue form
         uses: actions/github-script@v6
+        # enters into a javascript script using api token 
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -37,6 +40,7 @@ jobs:
               return;
             }
 
+            // checks priority is a valid one (label exists)
             const selectedPriority = match[1].trim().toUpperCase();
 
             const validPriorities = ['P0', 'P1', 'P2', 'P3'];
@@ -52,6 +56,8 @@ jobs:
             const updatedLabels = [...labelsToKeep, selectedPriority];
 
             console.log(`Assigning priority for issue #${issue.number}: ${updatedLabels.join(', ')}`);
+            
+            // send api request to update issue
 
             await github.rest.issues.setLabels({
               owner: context.repo.owner,

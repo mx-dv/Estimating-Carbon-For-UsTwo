@@ -1,4 +1,4 @@
-name: Auto-Assign Issue by Form Selection
+name: Auto-Assign Members to Issue by Form Selection
 
 permissions:
   issues: write
@@ -10,7 +10,8 @@ on:
 jobs:
   auto_assign:
     runs-on: ubuntu-latest
-    # Only run for issues (not pull requests)
+    # makes sure that event is an issue, is not a pull request, and contains the relevant 
+    # dropdown menu (found by text matching to title of dropdown)
     if: |
       ${{ github.event.issue && github.event.issue.pull_request == null 
       && contains(github.event.issue.body, 'Which users should be assigned?')}}
@@ -20,6 +21,7 @@ jobs:
       - name: Auto-assign based on form selection
         uses: actions/github-script@v6
         with:
+        # enters into a javascript script using api token 
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // Use context.payload.issue instead of github.event.issue
