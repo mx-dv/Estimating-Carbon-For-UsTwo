@@ -28,9 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
-		
 	});
-
 	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async ()=> {
 		//vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
 		const limit  = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
@@ -44,17 +42,11 @@ export function activate(context: vscode.ExtensionContext) {
 		treeDataProvider.addMessage("Carbon Emissions level: "+num);
 
 		//defines the default background
-
-
-	});
-	
-	
+	});	
 	context.subscriptions.push(input);
 
 	context.subscriptions.push(disposable);
-
 	//This creates the view
-
 }
 
 // This method is called when your extension is deactivated
@@ -64,13 +56,12 @@ export function deactivate() {}
 class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
-	private items:vscode.TreeItem[] = [];
+	private items:vscode.TreeItem[] = []; //creates a list of tree items starts empty obviously
 
 	constructor(){
 		this.items.push(new vscode.TreeItem(
 				"Emission Levels:", 
-				vscode.TreeItemCollapsibleState.None));
-				
+				vscode.TreeItemCollapsibleState.None)); //initialises the messages with one title message		
 	}
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem{
@@ -85,12 +76,12 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 			return Promise.resolve(this.items);
 		}
 	}
-	addMessage(message:string){
-		this.items.push( new vscode.TreeItem(
+	addMessage(message:string){ //method which allows messaged to be added
+		this.items.push( new vscode.TreeItem( //adds a new item to the side bar
 			message,
 			vscode.TreeItemCollapsibleState.None
 		));
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(); //refreshes the sidebar
 
 	}
 
