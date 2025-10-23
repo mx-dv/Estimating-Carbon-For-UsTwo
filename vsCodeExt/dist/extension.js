@@ -36,16 +36,12 @@ __export(extension_exports, {
 module.exports = __toCommonJS(extension_exports);
 var vscode = __toESM(require("vscode"));
 function activate(context) {
-  const barManager = vscode.window.createStatusBarItem();
-  const loading = [];
-  barManager.text = "Limit:";
-  barManager.show();
-  for (var i = 0; i < 10; i++) {
-    loading.push(vscode.window.createStatusBarItem());
-    loading[i].text = "-";
-    loading[i].show();
-  }
-  context.subscriptions.push(barManager);
+  var barManager = new statusBarManager();
+  const treeDataProvider = new MyTreeDataProvider();
+  vscode.window.registerTreeDataProvider(
+    "myPrimaryView",
+    treeDataProvider
+  );
   console.log('Congratulations, your extension "vsCodeExt" is now active!');
   const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
     vscode.window.showInformationMessage("Hello World from EstimatingCarbon!");
@@ -59,43 +55,24 @@ function activate(context) {
       // keep input box open even if focus moves away from window
     });
     var num = Number(limit);
-    var colour = "statusBarItem.activeBackground";
-    if (num) {
-      if (num >= 8) {
-        colour = "statusBarItem.errorBackground";
-        vscode.window.showInformationMessage("passed limit");
-      } else {
-        colour = "statusBarItem.warningBackground";
-        vscode.window.showInformationMessage("below limit");
-      }
-      var i2 = 0;
-      vscode.window.showInformationMessage(colour);
-    } else {
-      colour = "statusBarItem.activeBackground";
-      num = 0;
-      vscode.window.showInformationMessage("not satisfied!");
-    }
-    for (i2 = 0; i2 < num; i2++) {
-      loading[i2].backgroundColor = new vscode.ThemeColor(colour);
-    }
-    for (i2; i2 < loading.length; i2++) {
-      loading[i2].backgroundColor = new vscode.ThemeColor("statusBarItem.activeBackground");
-    }
-    barManager.backgroundColor = new vscode.ThemeColor(colour);
+    barManager.updateBar(num, 8);
+    treeDataProvider.addMessage("Carbon Emissions level: " + num);
   });
   context.subscriptions.push(input);
   context.subscriptions.push(disposable);
-  const treeDataProvider = new MyTreeDataProvider();
-  vscode.window.registerTreeDataProvider(
-    "myPrimaryView",
-    new MyTreeDataProvider()
-  );
 }
 function deactivate() {
 }
 var MyTreeDataProvider = class {
   _onDidChangeTreeData = new vscode.EventEmitter();
   onDidChangeTreeData = this._onDidChangeTreeData.event;
+  items = [];
+  constructor() {
+    this.items.push(new vscode.TreeItem(
+      "Emission Levels:",
+      vscode.TreeItemCollapsibleState.None
+    ));
+  }
   getTreeItem(element) {
     return element;
   }
@@ -103,12 +80,57 @@ var MyTreeDataProvider = class {
     if (element) {
       return Promise.resolve([]);
     } else {
-      const infoMessage = new vscode.TreeItem(
-        "Here you will be able to track tokens and carbon emission",
-        vscode.TreeItemCollapsibleState.None
-      );
-      return Promise.resolve([infoMessage]);
+      return Promise.resolve(this.items);
     }
+  }
+  addMessage(message) {
+    this.items.push(new vscode.TreeItem(
+      message,
+      vscode.TreeItemCollapsibleState.None
+    ));
+    this._onDidChangeTreeData.fire();
+  }
+};
+var statusBarManager = class {
+  mainItem = vscode.window.createStatusBarItem();
+  //creates a status bar item for limit word
+  loading = [];
+  //creates a list of statusbar items for the loading bar items
+  defaultColour = "statusBarItem.activeBackground";
+  newColour;
+  constructor() {
+    this.newColour = this.defaultColour;
+    this.mainItem.text = "Limit:";
+    this.mainItem.show();
+    for (var i = 0; i < 10; i++) {
+      this.loading.push(vscode.window.createStatusBarItem());
+      this.loading[i].text = "-";
+      this.loading[i].show();
+    }
+  }
+  updateBar(input, limit) {
+    if (input) {
+      if (input >= limit) {
+        this.newColour = "statusBarItem.errorBackground";
+        vscode.window.showInformationMessage("passed limit");
+      } else {
+        this.newColour = "statusBarItem.warningBackground";
+        vscode.window.showInformationMessage("below limit");
+      }
+      var i = 0;
+      vscode.window.showInformationMessage(this.newColour);
+    } else {
+      this.newColour = "statusBarItem.activeBackground";
+      input = 0;
+      vscode.window.showInformationMessage("not satisfied!");
+    }
+    for (i = 0; i < input; i++) {
+      this.loading[i].backgroundColor = new vscode.ThemeColor(this.newColour);
+    }
+    for (i; i < this.loading.length; i++) {
+      this.loading[i].backgroundColor = new vscode.ThemeColor("statusBarItem.activeBackground");
+    }
+    this.mainItem.backgroundColor = new vscode.ThemeColor(this.newColour);
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

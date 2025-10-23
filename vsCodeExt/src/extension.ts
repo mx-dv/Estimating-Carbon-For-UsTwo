@@ -10,17 +10,13 @@ import * as https from 'https';
 // Your extension is activated the very first time the command is executed
 
 export function activate(context: vscode.ExtensionContext) {
-	const barManager = vscode.window.createStatusBarItem(); //creates a status bar item for limit word
-	const loading: vscode.StatusBarItem[] = []; //creates a list of statusbar items for the loading bar items
-	barManager.text = 'Limit:';
-	barManager.show();//displays the limit item
+	var barManager = new statusBarManager();
+	const treeDataProvider = new MyTreeDataProvider();
+	vscode.window.registerTreeDataProvider(
+			'myPrimaryView',
+			treeDataProvider
+		);
 
-	for (var i:number = 0;i<10;i++){
-		loading.push(vscode.window.createStatusBarItem());
-		loading[i].text = "-"; //fills the loading array with some items
-		loading[i].show(); //displays them
-	}
-	context.subscriptions.push(barManager);
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "vsCodeExt" is now active!');
@@ -44,34 +40,11 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 
 		var num = Number(limit); 
-		var colour = "statusBarItem.activeBackground"; 
-		//defines the default background
-		
-		if (num){
-			if (num >= 8){ //currently 8 represents the limit 
-				colour = "statusBarItem.errorBackground"; //if beyond the limit the loading bar goes red
-				vscode.window.showInformationMessage('passed limit');
-			}
-			else{
-				colour = "statusBarItem.warningBackground"; //if not beyond the limit loading bar is yellow
-				vscode.window.showInformationMessage('below limit');	
-			}
-			var i:number = 0;
-			vscode.window.showInformationMessage(colour);
-		}
-		else{
-			colour = "statusBarItem.activeBackground";
-			num = 0;
-			vscode.window.showInformationMessage('not satisfied!');
-		}
-		for(i = 0;i<num;i++){ //populates the loading bar
-			loading[i].backgroundColor = new vscode.ThemeColor(colour);
-			}
-		for(i;i<loading.length;i++){
-			loading[i].backgroundColor = new vscode.ThemeColor("statusBarItem.activeBackground");
-			}
+		barManager.updateBar(num,8);
+		treeDataProvider.addMessage("Carbon Emissions level: "+num);
 
-		barManager.backgroundColor = new vscode.ThemeColor(colour); //colours the word "loading"
+		//defines the default background
+
 
 	});
 	
@@ -79,18 +52,10 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(input);
 
 	context.subscriptions.push(disposable);
-}
+
 	//This creates the view
-	const treeDataProvider = new MyTreeDataProvider();
-	vscode.window.registerTreeDataProvider(
-			'myPrimaryView',
-			
-			new MyTreeDataProvider()
-		);
 
 }
-
-
 
 // This method is called when your extension is deactivated
 
@@ -99,6 +64,14 @@ export function deactivate() {}
 class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+	private items:vscode.TreeItem[] = [];
+
+	constructor(){
+		this.items.push(new vscode.TreeItem(
+				"Emission Levels:", 
+				vscode.TreeItemCollapsibleState.None));
+				
+	}
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem{
 		return element;
@@ -108,15 +81,65 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 		if(element){
 			return Promise.resolve([]);
 		}else{
-			//Here a top-level item will be created which will be where the message will be displayed
-			const infoMessage = new vscode.TreeItem(
-				"Here you will be able to track tokens and carbon emission", 
-				vscode.TreeItemCollapsibleState.None
-			);
-			
-			return Promise.resolve([infoMessage]);
+			//Here a top-level item will be created which will be where the message will be displayed			
+			return Promise.resolve(this.items);
+		}
+	}
+	addMessage(message:string){
+		this.items.push( new vscode.TreeItem(
+			message,
+			vscode.TreeItemCollapsibleState.None
+		));
+		this._onDidChangeTreeData.fire();
+
+	}
+
+}
+class statusBarManager{
+	mainItem = vscode.window.createStatusBarItem(); //creates a status bar item for limit word
+	loading: vscode.StatusBarItem[] = []; //creates a list of statusbar items for the loading bar items
+	defaultColour:string = "statusBarItem.activeBackground";
+	newColour:string;
+
+	constructor(){
+		this.newColour = this.defaultColour;
+		this.mainItem.text = 'Limit:';
+		this.mainItem.show();//displays the limit item
+
+		for (var i:number = 0;i<10;i++){
+			this.loading.push(vscode.window.createStatusBarItem());
+			this.loading[i].text = "-"; //fills the loading array with some items
+			this.loading[i].show(); //displays them
 		}
 
-		
+	}
+
+	updateBar(input:number,limit:number){
+
+		if (input){
+			if (input >= limit){ //currently 8 represents the limit 
+				this.newColour = "statusBarItem.errorBackground"; //if beyond the limit the loading bar goes red
+				vscode.window.showInformationMessage('passed limit');
+			}
+			else{
+				this.newColour = "statusBarItem.warningBackground"; //if not beyond the limit loading bar is yellow
+				vscode.window.showInformationMessage('below limit');	
+			}
+			var i:number = 0;
+			vscode.window.showInformationMessage(this.newColour);
+		}
+		else{
+			this.newColour = "statusBarItem.activeBackground";
+			input = 0;
+			vscode.window.showInformationMessage('not satisfied!');
+		}
+		for(i = 0;i<input;i++){ //populates the loading bar
+			this.loading[i].backgroundColor = new vscode.ThemeColor(this.newColour);
+			}
+		for(i;i<this.loading.length;i++){
+			this.loading[i].backgroundColor = new vscode.ThemeColor("statusBarItem.activeBackground");
+			}
+
+		this.mainItem.backgroundColor = new vscode.ThemeColor(this.newColour); //colours the word "loading"
 	}
 }
