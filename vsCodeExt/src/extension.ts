@@ -15,7 +15,34 @@ export function activate(context: vscode.ExtensionContext) {
 			'myPrimaryView',
 			treeDataProvider
 		);
+	
+	const disposables: vscode.Disposable[] = [];
+	const aiCommands = [
+		"editor.action.inlineSuggest.trigger",
+		"github.copilot.generate",
+		"cursor._executeCompletionItemProvider"
+	];
 
+	aiCommands.forEach(command => {
+        const disposable = vscode.commands.registerCommand(command, (...args) => {
+            // Intercept or monitor these commands
+            console.log(treeDataProvider.addMessage("AI happend"));
+			
+            // Your logic here
+        });
+        context.subscriptions.push(disposable);
+    });
+
+	disposables.push(vscode.workspace.onDidChangeTextDocument(evt => {
+		for (const change of evt.contentChanges){
+			if (change.text.length>1){ //if its more than 1 character
+				treeDataProvider.addMessage(change.text);
+				
+			}
+		}
+	}));
+
+	
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "vsCodeExt" is now active!');

@@ -42,6 +42,25 @@ function activate(context) {
     "myPrimaryView",
     treeDataProvider
   );
+  const disposables = [];
+  const aiCommands = [
+    "editor.action.inlineSuggest.trigger",
+    "github.copilot.generate",
+    "cursor._executeCompletionItemProvider"
+  ];
+  aiCommands.forEach((command) => {
+    const disposable2 = vscode.commands.registerCommand(command, (...args) => {
+      console.log(treeDataProvider.addMessage("AI happend"));
+    });
+    context.subscriptions.push(disposable2);
+  });
+  disposables.push(vscode.workspace.onDidChangeTextDocument((evt) => {
+    for (const change of evt.contentChanges) {
+      if (change.text.length > 1) {
+        treeDataProvider.addMessage(change.text);
+      }
+    }
+  }));
   console.log('Congratulations, your extension "vsCodeExt" is now active!');
   const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
     vscode.window.showInformationMessage("Hello World from EstimatingCarbon!");

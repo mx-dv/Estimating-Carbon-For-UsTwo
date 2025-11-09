@@ -1,10 +1,12 @@
 Architecture
 
     listens to workspace.onDidChangeTextDocument
-    using vscode.commands.onDidExecuteCommand 
+        specifically looking for edits of more than one character (i.e not typing copy and paste or AI generated)
+
         watches for inline suggestion accept commands  
             for example
                 editor.action.inline
+
 
         pass the newly generated code into tiktokeniser 
 
