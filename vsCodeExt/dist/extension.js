@@ -35,6 +35,13 @@ __export(extension_exports, {
 });
 module.exports = __toCommonJS(extension_exports);
 var vscode = __toESM(require("vscode"));
+
+// src/budget.ts
+function testFunc(amount) {
+  return "hello from budget!";
+}
+
+// src/extension.ts
 function activate(context) {
   var barManager = new statusBarManager();
   const treeDataProvider = new MyTreeDataProvider();
@@ -70,7 +77,7 @@ var MyTreeDataProvider = class {
   //creates a list of tree items starts empty obviously
   constructor() {
     this.items.push(new vscode.TreeItem(
-      "Emission Levels:",
+      testFunc(2),
       vscode.TreeItemCollapsibleState.None
     ));
   }

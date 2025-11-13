@@ -4,6 +4,7 @@
 
 import * as vscode from 'vscode';
 import * as https from 'https';
+import {testFunc}  from './budget';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -58,7 +59,7 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 
 	constructor(){
 		this.items.push(new vscode.TreeItem(
-				"Emission Levels:", 
+				"Emissions levels:", 
 				vscode.TreeItemCollapsibleState.None)); //initialises the messages with one title message		
 	}
 
