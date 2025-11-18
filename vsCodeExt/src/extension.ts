@@ -19,8 +19,9 @@ export function activate(context: vscode.ExtensionContext) {
 			treeDataProvider
 		);
 
-
 	budget.initStorage(context.workspaceState);
+	restoreCallHistory(treeDataProvider);
+	barManager.updateLimit(budget.updateLimit());
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "vsCodeExt" is now active!');
@@ -37,6 +38,8 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		budget.resetBudget();
+		treeDataProvider.clearTree();
+		barManager.updateLimit(0);
 		vscode.window.showInformationMessage('Past calls cleared.');
 	});
 	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async ()=> {
@@ -99,6 +102,10 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 		this._onDidChangeTreeData.fire(); //refreshes the sidebar
 
 	}
+	clearTree() {
+		this.items = [];
+		this._onDidChangeTreeData.fire();
+	}
 
 }
 class statusBarManager{
@@ -118,6 +125,10 @@ class statusBarManager{
 		// 	this.loading[i].show(); //displays them
 		// }
 
+	}
+
+	updateLimit(input:number) {
+		this.mainItem.text = 'Average carbon cost: ' + input + ' g CO₂e';
 	}
 
 	updateBar(input:number,limit:number){
@@ -149,3 +160,12 @@ class statusBarManager{
 		this.mainItem.backgroundColor = new vscode.ThemeColor(this.newColour); //colours the word "loading"
 	}
 }
+
+function restoreCallHistory(tree: MyTreeDataProvider) { //restores past calls to sidebar
+	var pCalls = budget.getCalls();
+	console.log("CALLS:", pCalls);
+	for (let i = 0; i < pCalls.length; i++) {
+		tree.addMessage("Call ID: xxxx - Emissions: " + pCalls[i].Emissions + ' g CO₂e');
+	}
+}
+

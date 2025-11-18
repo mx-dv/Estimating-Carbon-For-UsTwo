@@ -48,21 +48,33 @@ function initStorage(memento) {
 }
 function updateLimit() {
   calls = callStore.get(storeKey, []) || [];
-  calls.sort((a, b) => a - b);
-  console.log(calls);
-  var mid = calls.length / 2;
-  if (calls.length === 0) {
+  var emissions = getEmissionsFromCalls(calls);
+  emissions.sort((a, b) => a - b);
+  console.log(emissions);
+  var mid = emissions.length / 2;
+  if (emissions.length === 0) {
     return 0;
-  } else if (calls.length % 2 === 0) {
-    return (calls[mid] + calls[mid - 1]) / 2;
+  } else if (emissions.length % 2 === 0) {
+    return (emissions[mid] + emissions[mid - 1]) / 2;
   } else {
-    return calls[Math.floor(mid)];
+    return emissions[Math.floor(mid)];
   }
 }
 function storeCall(newCall) {
   calls = callStore.get(storeKey, []) || [];
-  calls.push(newCall.Emissions);
+  calls.push(newCall);
   callStore.update(storeKey, calls);
+}
+function getCalls() {
+  calls = callStore.get(storeKey, []) || [];
+  return calls;
+}
+function getEmissionsFromCalls(pCalls) {
+  var ems = [];
+  for (let i = 0; i < pCalls.length; i++) {
+    ems.push(pCalls[i].Emissions);
+  }
+  return ems;
 }
 
 // src/extension.ts
@@ -74,12 +86,16 @@ function activate(context) {
     treeDataProvider
   );
   initStorage(context.workspaceState);
+  restoreCallHistory(treeDataProvider);
+  barManager.updateLimit(updateLimit());
   console.log('Congratulations, your extension "vsCodeExt" is now active!');
   const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
     vscode.window.showInformationMessage("Hello World from EstimatingCarbon!");
   });
   const reset = vscode.commands.registerCommand("vsCodeExt.clearStore", () => {
     resetBudget();
+    treeDataProvider.clearTree();
+    barManager.updateLimit(0);
     vscode.window.showInformationMessage("Past calls cleared.");
   });
   const input = vscode.commands.registerCommand("vsCodeExt.inputdisplay", async () => {
@@ -132,6 +148,10 @@ var MyTreeDataProvider = class {
     ));
     this._onDidChangeTreeData.fire();
   }
+  clearTree() {
+    this.items = [];
+    this._onDidChangeTreeData.fire();
+  }
 };
 var statusBarManager = class {
   mainItem = vscode.window.createStatusBarItem();
@@ -144,6 +164,9 @@ var statusBarManager = class {
     this.newColour = this.defaultColour;
     this.mainItem.text = "Average carbon cost: g CO\u2082e";
     this.mainItem.show();
+  }
+  updateLimit(input) {
+    this.mainItem.text = "Average carbon cost: " + input + " g CO\u2082e";
   }
   updateBar(input, limit) {
     if (input) {
@@ -164,6 +187,13 @@ var statusBarManager = class {
     this.mainItem.backgroundColor = new vscode.ThemeColor(this.newColour);
   }
 };
+function restoreCallHistory(tree) {
+  var pCalls = getCalls();
+  console.log("CALLS:", pCalls);
+  for (let i = 0; i < pCalls.length; i++) {
+    tree.addMessage("Call ID: xxxx - Emissions: " + pCalls[i].Emissions + " g CO\u2082e");
+  }
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   activate,
