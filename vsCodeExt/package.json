@@ -1,6 +1,6 @@
 {
-  "name": "vsCodeExt",
-  "displayName": "EstimatingCarbon",
+  "name": "run-time-analysis",
+  "displayName": "EstimatingCarbon Runtime",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -22,6 +22,16 @@
       {
         "command": "vsCodeExt.setApiKey",
         "title": "Set Api Key"
+      },
+      {
+        "command": "interceptor.start",
+        "title": "Start Proxy Interceptor",
+        "category": "Interceptor"
+      },
+      {
+        "command": "interceptor.stop",
+        "title": "Stop Proxy Interceptor",
+        "category": "Interceptor"
       }
     ]
   },
@@ -54,6 +64,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "http-proxy": "^1.18.1"
+    "http-proxy": "^1.18.1",
+    "mockttp": "^4.2.1"
   }
 }

@@ -35,14 +35,97 @@ __export(extension_exports, {
 });
 module.exports = __toCommonJS(extension_exports);
 var vscode = __toESM(require("vscode"));
+
+// src/proxyServer.ts
+var http = __toESM(require("http"));
+var net = __toESM(require("net"));
+var import_url = require("url");
+var InterceptorProxy = class {
+  server;
+  port;
+  isRunning = false;
+  constructor(port) {
+    this.port = port;
+    this.server = http.createServer();
+  }
+  start() {
+    this.server.on("request", (req, res) => {
+      console.log("[HTTP] Intercepted: ${req.url}");
+      this.handleHttpRequest(req, res);
+    });
+    this.server.on("connect", (req, clientSocket, head) => {
+      console.log("[HTTPS] Intercepted: ${req.url}");
+      this.handleBlindTunnel(req, clientSocket, head);
+    });
+    this.server.listen(this.port, () => {
+      this.isRunning = true;
+      console.log(`Proxy server is running on port ${this.port}`);
+    });
+  }
+  stop() {
+    if (this.isRunning) {
+      this.server.close();
+      this.isRunning = false;
+      console.log("Proxy server has been stopped");
+    }
+  }
+  handleBlindTunnel(req, clientSocket, head) {
+    const { port, hostname } = new import_url.URL(`http://${req.url}`);
+    const serverSocket = net.connect(Number(port) || 443, hostname, () => {
+      clientSocket.write("HTTP/1.1 200 Connection Established\r\nProxy-agent: VSCodeInterceptor\r\n\r\n");
+      serverSocket.write(head);
+      serverSocket.pipe(clientSocket);
+      clientSocket.pipe(serverSocket);
+    });
+    serverSocket.on("error", (err) => {
+      console.error("Tunnel Error:", err);
+      clientSocket.end();
+    });
+  }
+  handleHttpRequest(req, res) {
+    const options = {
+      hostname: req.headers.host?.split(":")[0],
+      port: req.headers.host?.split(":")[1] || 80
+    };
+  }
+};
+
+// src/extension.ts
+var proxyServer;
+var PROXY_PORT = 3024;
 function activate(context) {
-  console.log('Congratulations, your extension "vsCodeExt" is now active!');
-  const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
-    vscode.window.showInformationMessage("Hello World from EstimatingCarbon!");
+  console.log("Interceptor Proxy Server is active");
+  let startDisposable = vscode.commands.registerCommand("interceptor.start", async () => {
+    try {
+      proxyServer = new InterceptorProxy(PROXY_PORT);
+      proxyServer.start();
+      const config = vscode.workspace.getConfiguration("http");
+      await config.update("proxy", `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
+      await config.update("proxyStrictSSL", false, vscode.ConfigurationTarget.Global);
+      vscode.window.showInformationMessage("Interceptor Proxy started on port " + PROXY_PORT);
+    } catch (error) {
+      vscode.window.showErrorMessage("Failed to start Interceptor Proxy: " + error);
+    }
   });
-  context.subscriptions.push(disposable);
+  let stopDisposable = vscode.commands.registerCommand("interceptor.stop", async () => {
+    if (proxyServer) {
+      proxyServer.stop();
+    }
+    const config = vscode.workspace.getConfiguration("http");
+    await config.update("proxy", void 0, vscode.ConfigurationTarget.Global);
+    await config.update("proxyStrictSSL", void 0, vscode.ConfigurationTarget.Global);
+    vscode.window.showInformationMessage("Interceptor Proxy stopped. Proxy settings cleared.");
+  });
+  context.subscriptions.push(startDisposable);
+  context.subscriptions.push(stopDisposable);
 }
-function deactivate() {
+async function deactivate() {
+  if (proxyServer) {
+    await proxyServer.stop();
+  }
+  const config = vscode.workspace.getConfiguration("http");
+  await config.update("proxy", void 0, vscode.ConfigurationTarget.Global);
+  await config.update("proxyStrictSSL", void 0, vscode.ConfigurationTarget.Global);
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
