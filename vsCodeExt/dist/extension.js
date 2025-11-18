@@ -37,8 +37,29 @@ module.exports = __toCommonJS(extension_exports);
 var vscode = __toESM(require("vscode"));
 
 // src/budget.ts
-function testFunc(amount) {
-  return "hello from budget!";
+var calls = [];
+var storeKey = "storeKey";
+var callStore;
+function initStorage(memento) {
+  callStore = memento;
+}
+function updateLimit() {
+  calls = callStore.get(storeKey, []) || [];
+  calls.sort((a, b) => a - b);
+  console.log(calls);
+  var mid = calls.length / 2;
+  if (calls.length === 0) {
+    return 0;
+  } else if (calls.length % 2 === 0) {
+    return (calls[mid] + calls[mid - 1]) / 2;
+  } else {
+    return calls[Math.floor(mid)];
+  }
+}
+function storeCall(newCall) {
+  calls = callStore.get(storeKey, []) || [];
+  calls.push(newCall.Emissions);
+  callStore.update(storeKey, calls);
 }
 
 // src/extension.ts
@@ -49,6 +70,7 @@ function activate(context) {
     "myPrimaryView",
     treeDataProvider
   );
+  initStorage(context.workspaceState);
   console.log('Congratulations, your extension "vsCodeExt" is now active!');
   const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
     vscode.window.showInformationMessage("Hello World from EstimatingCarbon!");
@@ -56,14 +78,18 @@ function activate(context) {
   const input = vscode.commands.registerCommand("vsCodeExt.inputdisplay", async () => {
     const limit = await vscode.window.showInputBox({
       //opens an input box currently representing the carbon footprint
-      prompt: "enter your carbon limit",
+      prompt: "Enter test call: ",
       placeHolder: "eg. 5",
       ignoreFocusOut: true
       // keep input box open even if focus moves away from window
     });
     var num = Number(limit);
-    barManager.updateBar(num, 8);
-    treeDataProvider.addMessage("Carbon Emissions level: " + num);
+    var newCall = { Emissions: num };
+    storeCall(newCall);
+    var cLimit = updateLimit();
+    console.log("limit: " + limit);
+    barManager.updateBar(num, cLimit);
+    treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num);
   });
   context.subscriptions.push(input);
   context.subscriptions.push(disposable);
@@ -77,7 +103,7 @@ var MyTreeDataProvider = class {
   //creates a list of tree items starts empty obviously
   constructor() {
     this.items.push(new vscode.TreeItem(
-      testFunc(2),
+      "Latest calls:",
       vscode.TreeItemCollapsibleState.None
     ));
   }
@@ -116,7 +142,7 @@ var statusBarManager = class {
     if (input) {
       if (input >= limit) {
         this.newColour = "statusBarItem.errorBackground";
-        vscode.window.showInformationMessage("passed limit");
+        vscode.window.showInformationMessage("High carbon AI call made (check pane for details)");
       } else {
         this.newColour = "statusBarItem.warningBackground";
         vscode.window.showInformationMessage("below limit");

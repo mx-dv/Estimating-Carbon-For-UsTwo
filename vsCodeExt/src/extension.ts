@@ -4,7 +4,8 @@
 
 import * as vscode from 'vscode';
 import * as https from 'https';
-import {testFunc}  from './budget';
+import * as budget from './budget';
+import { Memento } from "vscode";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -12,11 +13,14 @@ import {testFunc}  from './budget';
 export function activate(context: vscode.ExtensionContext) {
 	var barManager = new statusBarManager();
 	const treeDataProvider = new MyTreeDataProvider();
+	
 	vscode.window.registerTreeDataProvider(
 			'myPrimaryView',
 			treeDataProvider
 		);
 
+
+	budget.initStorage(context.workspaceState);
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "vsCodeExt" is now active!');
@@ -31,14 +35,19 @@ export function activate(context: vscode.ExtensionContext) {
 	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async ()=> {
 		//vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
 		const limit  = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
-			prompt: 'enter your carbon limit',
+			prompt: 'Enter test call: ',
 			placeHolder:'eg. 5',
 			ignoreFocusOut: true // keep input box open even if focus moves away from window
 		});
 
-		var num = Number(limit); 
-		barManager.updateBar(num,8);
-		treeDataProvider.addMessage("Carbon Emissions level: "+num);
+		var num = Number(limit);
+		var newCall: budget.Call = {Emissions: num};
+		budget.storeCall(newCall); 
+		var cLimit = budget.updateLimit();
+		console.log("limit: " + limit);
+		
+		barManager.updateBar(num,cLimit);
+		treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num);
 
 		//defines the default background
 	});	
@@ -59,7 +68,7 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 
 	constructor(){
 		this.items.push(new vscode.TreeItem(
-				"Emissions levels:", 
+				"Latest calls:", 
 				vscode.TreeItemCollapsibleState.None)); //initialises the messages with one title message		
 	}
 
@@ -109,7 +118,7 @@ class statusBarManager{
 		if (input){
 			if (input >= limit){ //currently 8 represents the limit 
 				this.newColour = "statusBarItem.errorBackground"; //if beyond the limit the loading bar goes red
-				vscode.window.showInformationMessage('passed limit');
+				vscode.window.showInformationMessage('High carbon AI call made (check pane for details)');
 			}
 			else{
 				this.newColour = "statusBarItem.warningBackground"; //if not beyond the limit loading bar is yellow
