@@ -16,9 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 			treeDataProvider
 		);
 	function convert(x:any){
-		x+1;
 		treeDataProvider.addMessage(String(x));
-
 		return x;
 	}
 	let suppressNextChange = false;
@@ -46,19 +44,14 @@ export function activate(context: vscode.ExtensionContext) {
 			suppressNextChange = false;
 			return;
 		}
-		let x = 0;
 		for (const change of evt.contentChanges){
 			//treeDataProvider.addMessage(change.text);
-			const tokens = enc.encode(change.text);
-			vscode.window.showInformationMessage(String(x));
+			//vscode.window.showInformationMessage(change.text);
 
 			if (change.text.length>2){ //if its more than 1 character
-				//treeDataProvider.addMessage(change.text);
-				//treeDataProvider.addMessage("test");
-				
+				const tokens = enc.encode(change.text);
 				convert(tokens.length);				
 			}
-			x++;
 		}
 		suppressNextChange = true;
 	}));

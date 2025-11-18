@@ -532,7 +532,7 @@ function activate(context) {
     let x = 0;
     for (const change of evt.contentChanges) {
       const tokens = enc.encode(change.text);
-      vscode.window.showInformationMessage(String(x));
+      vscode.window.showInformationMessage(change.text);
       if (change.text.length > 2) {
         convert(tokens.length);
       }
