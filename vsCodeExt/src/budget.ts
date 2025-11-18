@@ -17,6 +17,10 @@ export function testFunc(amount:number): string  {
     return 'hello from budget!';
 }
 
+export async function resetBudget(): Promise<void> { 
+    await callStore.update(storeKey, undefined);
+}
+
 export function initStorage(memento: Memento) {
     callStore = memento;
 }

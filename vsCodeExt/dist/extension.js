@@ -40,6 +40,9 @@ var vscode = __toESM(require("vscode"));
 var calls = [];
 var storeKey = "storeKey";
 var callStore;
+async function resetBudget() {
+  await callStore.update(storeKey, void 0);
+}
 function initStorage(memento) {
   callStore = memento;
 }
@@ -75,6 +78,10 @@ function activate(context) {
   const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
     vscode.window.showInformationMessage("Hello World from EstimatingCarbon!");
   });
+  const reset = vscode.commands.registerCommand("vsCodeExt.clearStore", () => {
+    resetBudget();
+    vscode.window.showInformationMessage("Past calls cleared.");
+  });
   const input = vscode.commands.registerCommand("vsCodeExt.inputdisplay", async () => {
     const limit = await vscode.window.showInputBox({
       //opens an input box currently representing the carbon footprint
@@ -87,9 +94,9 @@ function activate(context) {
     var newCall = { Emissions: num };
     storeCall(newCall);
     var cLimit = updateLimit();
-    console.log("limit: " + limit);
+    console.log("limit: " + cLimit);
     barManager.updateBar(num, cLimit);
-    treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num);
+    treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num + " g CO\u2082e");
   });
   context.subscriptions.push(input);
   context.subscriptions.push(disposable);
@@ -135,11 +142,12 @@ var statusBarManager = class {
   newColour;
   constructor() {
     this.newColour = this.defaultColour;
-    this.mainItem.text = "Limit:";
+    this.mainItem.text = "Average carbon cost: g CO\u2082e";
     this.mainItem.show();
   }
   updateBar(input, limit) {
     if (input) {
+      this.mainItem.text = "Average carbon cost: " + limit + " g CO\u2082e";
       if (input >= limit) {
         this.newColour = "statusBarItem.errorBackground";
         vscode.window.showInformationMessage("High carbon AI call made (check pane for details)");
