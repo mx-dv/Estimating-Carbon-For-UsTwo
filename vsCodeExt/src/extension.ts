@@ -15,14 +15,20 @@ export function activate(context: vscode.ExtensionContext) {
 			'myPrimaryView',
 			treeDataProvider
 		);
-	
+	function convert(x:any){
+		x+1;
+		treeDataProvider.addMessage(String(x));
+
+		return x;
+	}
+	let suppressNextChange = false;
 	const disposables: vscode.Disposable[] = [];
 	const aiCommands = [
 		"editor.action.inlineSuggest.trigger",
 		"github.copilot.generate",
 		"cursor._executeCompletionItemProvider"
 	];
-
+	
 	aiCommands.forEach(command => {
         const disposable = vscode.commands.registerCommand(command, (...args) => {
             // Intercept or monitor these commands
@@ -33,17 +39,29 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(disposable);
     });
 
+
 	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
 		const enc = await encoding_for_model("gpt-4o");
-		for (const change of evt.contentChanges){
-			const tokens = enc.encode(change.text);
-			if (change.text.length>2){ //if its more than 1 character
-				treeDataProvider.addMessage(String(tokens.length));
-				
-			}
+		if (suppressNextChange){
+			suppressNextChange = false;
+			return;
 		}
+		let x = 0;
+		for (const change of evt.contentChanges){
+			//treeDataProvider.addMessage(change.text);
+			const tokens = enc.encode(change.text);
+			vscode.window.showInformationMessage(String(x));
+
+			if (change.text.length>2){ //if its more than 1 character
+				//treeDataProvider.addMessage(change.text);
+				//treeDataProvider.addMessage("test");
+				
+				convert(tokens.length);				
+			}
+			x++;
+		}
+		suppressNextChange = true;
 	}));
-	
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "vsCodeExt" is now active!');

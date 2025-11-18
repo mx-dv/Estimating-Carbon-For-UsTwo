@@ -505,6 +505,12 @@ function activate(context) {
     "myPrimaryView",
     treeDataProvider
   );
+  function convert(x) {
+    x + 1;
+    treeDataProvider.addMessage(String(x));
+    return x;
+  }
+  let suppressNextChange = false;
   const disposables = [];
   const aiCommands = [
     "editor.action.inlineSuggest.trigger",
@@ -519,12 +525,20 @@ function activate(context) {
   });
   disposables.push(vscode.workspace.onDidChangeTextDocument(async (evt) => {
     const enc = await (0, import_tiktoken.encoding_for_model)("gpt-4o");
+    if (suppressNextChange) {
+      suppressNextChange = false;
+      return;
+    }
+    let x = 0;
     for (const change of evt.contentChanges) {
       const tokens = enc.encode(change.text);
+      vscode.window.showInformationMessage(String(x));
       if (change.text.length > 2) {
-        treeDataProvider.addMessage(String(tokens.length));
+        convert(tokens.length);
       }
+      x++;
     }
+    suppressNextChange = true;
   }));
   console.log('Congratulations, your extension "vsCodeExt" is now active!');
   const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
