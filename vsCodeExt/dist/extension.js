@@ -107,12 +107,16 @@ function activate(context) {
       // keep input box open even if focus moves away from window
     });
     var num = Number(limit);
-    var newCall = { Emissions: num };
-    storeCall(newCall);
-    var cLimit = updateLimit();
-    console.log("limit: " + cLimit);
-    barManager.updateBar(num, cLimit);
-    treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num + " g CO\u2082e");
+    if (!Number.isNaN(num)) {
+      var newCall = { Emissions: num };
+      storeCall(newCall);
+      var cLimit = updateLimit();
+      console.log("limit: " + cLimit);
+      barManager.updateBar(num, cLimit);
+      treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num + " g CO\u2082e");
+    } else {
+      vscode.window.showInformationMessage("Error: NaN inputted.");
+    }
   });
   context.subscriptions.push(input);
   context.subscriptions.push(disposable);
@@ -167,16 +171,19 @@ var statusBarManager = class {
   }
   updateLimit(input) {
     this.mainItem.text = "Average carbon cost: " + input + " g CO\u2082e";
+    this.newColour = "statusBarItem.activeBackground";
   }
   updateBar(input, limit) {
     if (input) {
       this.mainItem.text = "Average carbon cost: " + limit + " g CO\u2082e";
-      if (input >= limit) {
+      if (input >= 3 * limit) {
         this.newColour = "statusBarItem.errorBackground";
+        vscode.window.showInformationMessage("VERY high carbon AI call made (check pane for details)");
+      } else if (input >= 1.5 * limit) {
+        this.newColour = "statusBarItem.warningBackground";
         vscode.window.showInformationMessage("High carbon AI call made (check pane for details)");
       } else {
-        this.newColour = "statusBarItem.warningBackground";
-        vscode.window.showInformationMessage("below limit");
+        this.newColour = "statusBarItem.activeBackground";
       }
       var i = 0;
     } else {
