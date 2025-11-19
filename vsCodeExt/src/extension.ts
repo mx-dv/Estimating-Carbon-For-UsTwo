@@ -97,14 +97,21 @@ export function activate(context: vscode.ExtensionContext) {
 			ignoreFocusOut: true // keep input box open even if focus moves away from window
 		});
 
-		var num = Number(limit);
-		var newCall: budget.Call = {Emissions: num};
-		budget.storeCall(newCall); 
-		var cLimit = budget.updateLimit();
-		console.log("limit: " + cLimit);
 		
-		barManager.updateBar(num,cLimit);
-		treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num + ' g CO₂e');
+		var num = Number(limit);
+		if (!Number.isNaN(num)) {
+			var newCall: budget.Call = {Emissions: num};
+			budget.storeCall(newCall); 
+			var cLimit = budget.updateLimit();
+			console.log("limit: " + cLimit);
+		
+			barManager.updateBar(num,cLimit);
+			treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num + ' g CO₂e');
+		}
+		else {
+			vscode.window.showInformationMessage('Error: NaN inputted.');
+		}
+
 
 		//defines the default background
 	});	
@@ -176,19 +183,24 @@ class statusBarManager{
 
 	updateLimit(input:number) {
 		this.mainItem.text = 'Average carbon cost: ' + input + ' g CO₂e';
+		this.newColour = "statusBarItem.activeBackground";
 	}
 
 	updateBar(input:number,limit:number){
 
 		if (input){
 			this.mainItem.text = 'Average carbon cost: ' + limit + ' g CO₂e';
-			if (input >= limit){ //currently 8 represents the limit 
-				this.newColour = "statusBarItem.errorBackground"; //if beyond the limit the loading bar goes red
+			if (input >= 3 * limit){ //currently 8 represents the limit 
+				this.newColour = "statusBarItem.errorBackground"; //if well beyond the limit the loading bar goes red
+				vscode.window.showInformationMessage('VERY high carbon AI call made (check pane for details)');
+			}
+			else if (input >= 1.5 * limit) {
+				this.newColour = "statusBarItem.warningBackground"; //if beyond the limit the loading bar goes yellow
 				vscode.window.showInformationMessage('High carbon AI call made (check pane for details)');
 			}
 			else{
-				this.newColour = "statusBarItem.warningBackground"; //if not beyond the limit loading bar is yellow
-				vscode.window.showInformationMessage('below limit');	
+				this.newColour = "statusBarItem.activeBackground"; //if not beyond the limit loading bar is clear
+				//vscode.window.showInformationMessage('below limit');	
 			}
 			var i:number = 0;
 		}
