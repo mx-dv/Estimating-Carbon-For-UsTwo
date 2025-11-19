@@ -13,6 +13,7 @@
     "onCommand:vsCodeExt.helloWorld",
     "onCommand:vsCodeExt.resetStore",
     "onCommand:vsCodeExt.inputdisplay",
+    "onCommand:vsCodeExt.setApiKey",
     "onView:myPrimaryView"
   ],
   "main": "./dist/extension.js",
@@ -40,13 +41,14 @@
         "command": "vsCodeExt.helloWorld",
         "title": "Hello World"
       },
-            {
+      {
         "command": "vsCodeExt.clearStore",
         "title": "Clear stored calls"
       },
       {
         "command": "vsCodeExt.inputdisplay",
         "title": "Input Display"
+      },
       {
         "command": "vsCodeExt.setApiKey",
         "title": "Set Api Key"

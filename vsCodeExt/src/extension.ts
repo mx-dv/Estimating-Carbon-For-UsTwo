@@ -73,14 +73,6 @@ export function activate(context: vscode.ExtensionContext) {
 		
 	});
 
-	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay',()=> {
-		
-		vscode.window.showInputBox()!;
-		
-		var x = vscode.window.createStatusBarItem("testing",1,1);
-		x.show();
-	});
-
 	const reset = vscode.commands.registerCommand('vsCodeExt.clearStore', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user

@@ -89,7 +89,23 @@ function activate(context) {
   restoreCallHistory(treeDataProvider);
   barManager.updateLimit(updateLimit());
   console.log('Congratulations, your extension "vsCodeExt" is now active!');
-  const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
+  const BarManager = vscode.window.createStatusBarItem();
+  const disposableAPIKEY = vscode.commands.registerCommand("vsCodeExt.setApiKey", async () => {
+    const apiKey = await vscode.window.showInputBox({
+      prompt: "Enter your API Key",
+      placeHolder: "e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      ignoreFocusOut: true
+      // keep input box open even if focus moves away from window
+    });
+    if (apiKey) {
+      await context.secrets.store("myApiKey", apiKey);
+      vscode.window.showInformationMessage("API Key successfully set!");
+    } else {
+      vscode.window.showWarningMessage("API Key setting cancelled.");
+    }
+  });
+  context.subscriptions.push(disposableAPIKEY);
+  const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", async () => {
     vscode.window.showInformationMessage("Hello World from EstimatingCarbon!");
   });
   const reset = vscode.commands.registerCommand("vsCodeExt.clearStore", () => {
