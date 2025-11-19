@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			// set VSCode to use local proxy
 			const config = vscode.workspace.getConfiguration('http');
-			await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global)
+			await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
 
 			//QUICK FIX TO NOT NEED SSL CERTS FOR NOW
 			await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
@@ -68,11 +68,11 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		});
 
-		terminal.show()
+		terminal.show();
 		vscode.window.showInformationMessage("Opened Terminal with Proxy Environment Vars");
 	});
 
-	context.subscriptions.push(terminalDisposable)
+	context.subscriptions.push(terminalDisposable);
 	context.subscriptions.push(startDisposable);
 	context.subscriptions.push(stopDisposable);
 }
