@@ -18,3 +18,8 @@ Issues currently being faced
 
 Possible solutions
     instead of making it model specific find a mean number of tokens by tokenising the message under multiple different models
+
+Solutions Tried
+    overriding the AI commands to add my functionality then calling the original 
+    checking every interval to see if copilot has suggested a change
+    setting up a new command and overriding the keypress to accept

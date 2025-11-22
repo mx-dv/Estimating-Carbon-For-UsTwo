@@ -10,12 +10,16 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:vsCodeExt.helloWorld",
-    "onCommand:vsCodeExt.inputdisplay",
-    "onView:myPrimaryView"
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "keybindings": [
+      {
+        "command": "vsCodeExt.wrappedInline",
+        "key": "ctrl+i",
+        "when": "editorTextFocus && inlineSuggestionVisible"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {

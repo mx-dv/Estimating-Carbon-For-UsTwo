@@ -4,6 +4,7 @@
 
 import * as vscode from 'vscode';
 import * as https from 'https';
+
 import { encoding_for_model } from "tiktoken";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -11,6 +12,8 @@ import { encoding_for_model } from "tiktoken";
 export function activate(context: vscode.ExtensionContext) {
 	var barManager = new statusBarManager();
 	const treeDataProvider = new MyTreeDataProvider();
+	//treeDataProvider.addMessage("AI happened");
+
 	vscode.window.registerTreeDataProvider(
 			'myPrimaryView',
 			treeDataProvider
@@ -19,41 +22,37 @@ export function activate(context: vscode.ExtensionContext) {
 		treeDataProvider.addMessage(String(x));
 		return x;
 	}
-	let suppressNextChange = false;
+	//let lastInlineState = false;
+	var accept = false;
 	const disposables: vscode.Disposable[] = [];
 	const aiCommands = [
 		"editor.action.inlineSuggest.trigger",
 		"github.copilot.generate",
 		"cursor._executeCompletionItemProvider"
 	];
-	
-	aiCommands.forEach(command => {
-        const disposable = vscode.commands.registerCommand(command, (...args) => {
-            // Intercept or monitor these commands
-            console.log(treeDataProvider.addMessage("AI happend"));
-			
-            // Your logic here
-        });
-        context.subscriptions.push(disposable);
-    });
 
+	vscode.commands.registerCommand('vsCodeExt.wrappedInline', async () => {
+		accept = true;
+		await vscode.commands.executeCommand("editor.action.inlineSuggest.commit");
+	});
 
 	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
 		const enc = await encoding_for_model("gpt-4o");
-		if (suppressNextChange){
-			suppressNextChange = false;
-			return;
-		}
-		for (const change of evt.contentChanges){
-			//treeDataProvider.addMessage(change.text);
-			//vscode.window.showInformationMessage(change.text);
+		vscode.window.showInformationMessage (String (accept)); //accept is never set to true
 
-			if (change.text.length>2){ //if its more than 1 character
-				const tokens = enc.encode(change.text);
-				convert(tokens.length);				
+		if (accept){
+			for (const change of evt.contentChanges){
+				//treeDataProvider.addMessage(change.text);
+				//vscode.window.showInformationMessage(change.text);
+
+				if (change.text.length>2){ //if its more than 2 character
+					const tokens = enc.encode(change.text);
+					convert(tokens.length);				
+				}
 			}
+			accept = false;
 		}
-		suppressNextChange = true;
+		//suppressNextChange = true;
 	}));
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
@@ -81,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
 		//defines the default background
 	});	
 	context.subscriptions.push(input);
-
+	//context.subscriptions.push(disposable2);
 	context.subscriptions.push(disposable);
 	//This creates the view
 }
@@ -90,6 +89,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 //
+async function getCommand(commandName: string){
+	vscode.window.showInformationMessage (`Command ${commandName} happend`);
+}
+
+
 class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;

@@ -506,39 +506,32 @@ function activate(context) {
     treeDataProvider
   );
   function convert(x) {
-    x + 1;
     treeDataProvider.addMessage(String(x));
     return x;
   }
-  let suppressNextChange = false;
+  var accept = false;
   const disposables = [];
   const aiCommands = [
     "editor.action.inlineSuggest.trigger",
     "github.copilot.generate",
     "cursor._executeCompletionItemProvider"
   ];
-  aiCommands.forEach((command) => {
-    const disposable2 = vscode.commands.registerCommand(command, (...args) => {
-      console.log(treeDataProvider.addMessage("AI happend"));
-    });
-    context.subscriptions.push(disposable2);
+  vscode.commands.registerCommand("vsCodeExt.wrappedInline", async () => {
+    accept = true;
+    await vscode.commands.executeCommand("editor.action.inlineSuggest.commit");
   });
   disposables.push(vscode.workspace.onDidChangeTextDocument(async (evt) => {
     const enc = await (0, import_tiktoken.encoding_for_model)("gpt-4o");
-    if (suppressNextChange) {
-      suppressNextChange = false;
-      return;
-    }
-    let x = 0;
-    for (const change of evt.contentChanges) {
-      const tokens = enc.encode(change.text);
-      vscode.window.showInformationMessage(change.text);
-      if (change.text.length > 2) {
-        convert(tokens.length);
+    vscode.window.showInformationMessage(String(accept));
+    if (accept) {
+      for (const change of evt.contentChanges) {
+        if (change.text.length > 2) {
+          const tokens = enc.encode(change.text);
+          convert(tokens.length);
+        }
       }
-      x++;
+      accept = false;
     }
-    suppressNextChange = true;
   }));
   console.log('Congratulations, your extension "vsCodeExt" is now active!');
   const disposable = vscode.commands.registerCommand("vsCodeExt.helloWorld", () => {
