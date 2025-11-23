@@ -23,19 +23,19 @@ export function activate(context: vscode.ExtensionContext) {
 		return x;
 	}
 
-	function getTextAroundCursor(linesBefore: number = 150, linesAfter: number = 150): string{
+	function getTextAroundCursor(linesBefore: number = 150, linesAfter: number = 150): string{ //use 150 becuase from research copilot sends around that portion of the document
 		const editor = vscode.window.activeTextEditor;
 		if (!editor){
 			return "";//if document is empty
 		} 
-		const docu = editor.document;
-		const cursorPos = editor.selection.active;
+		const docu = editor.document;//pretty self explanitory
+		const cursorPos = editor.selection.active; 
 		const startLine = Math.max(0,cursorPos.line-linesBefore);
 		const endLine = Math.min(docu.lineCount-1, cursorPos.line+linesAfter);
 
-		const start = new vscode.Position(startLine, 0);
-    	const end = new vscode.Position(endLine, docu.lineAt(endLine).text.length);
-    	const range = new vscode.Range(start, end);
+		const start = new vscode.Position(startLine, 0); //sets the start to the start of the first line
+    	const end = new vscode.Position(endLine, docu.lineAt(endLine).text.length); //sets end to the end of the last line
+    	const range = new vscode.Range(start, end); //range is the range
 		return docu.getText(range);
 	}
 
@@ -48,10 +48,9 @@ export function activate(context: vscode.ExtensionContext) {
 		"cursor._executeCompletionItemProvider"
 	];
 
-	const inline = vscode.commands.registerCommand('vsCodeExt.wrappedInline', async () => {
+	const inline = vscode.commands.registerCommand('vsCodeExt.wrappedInline', async () => { //adds my functionality to accepting an autocomplete
 		accept = true;
-		vscode.window.showInformationMessage ("in wrapped inline"+String (accept)); //accept is never set to true
-		await vscode.commands.executeCommand("editor.action.inlineSuggest.commit");
+		await vscode.commands.executeCommand("editor.action.inlineSuggest.commit"); //then does the accept command
 	});
 
 	// const inlineChat = vscode.commands.registerCommand('vsCodeExt.wrappedInlineChat',async () =>{
@@ -61,17 +60,17 @@ export function activate(context: vscode.ExtensionContext) {
 	//initial attempt at inline chat usage
 
 	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
-		const enc = await encoding_for_model("gpt-4o");
+		const enc = await encoding_for_model("gpt-4o"); //use gpt-4o for now because copilot very secretive
 
 		if (accept){
 			for (const change of evt.contentChanges){
 
 				if (change.text.length>2){ //if its more than 2 character
-					const tokens = enc.encode(change.text+getTextAroundCursor());
-					convert(tokens.length);				
+					const tokens = enc.encode(change.text+getTextAroundCursor()); //tokenises the new text(output tokens) along with a portion of the doucment (input tokens)
+					convert(tokens.length); //placeholder for a convertion function			
 				}
 			}
-			accept = false;
+			accept = false;//accept boolean stops like copy and paste having an effect
 		}
 	}));
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
