@@ -3,7 +3,7 @@ so we are first talking about the problem of our project(the problem we meet in 
 then our client describe what do they mean local to us and they ask us to use a proxy
 as for the UI side we already sent a first release to them, so we are walking through it right now
 So for now our UI is a dummy, and we are setting an arbitrary number for the max level of emission and based on that, it will calculate how much it has exceeded the limit
-we need to let the engineers to know how good or how bad they're doing and they want a smaller sidebar
+We need to let the engineers know how good or how bad they're doing with their carbon emissions. Client stated they want a smaller sidebar
 Further research will be needed to look into what constitutes a good/context applicable budget
 1.our client(project manager) what us to be able to do expectations before our client do anything and he is asking if that's possible
 our client(IT manager) said it's not possible but this is what will happen in real life(people asking you to do not real stuff)
