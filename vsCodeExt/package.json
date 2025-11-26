@@ -1,7 +1,7 @@
 {
   "name": "vsCodeExt",
   "displayName": "EstimatingCarbon",
-  "description": "A simple ",
+  "description": "",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.104.0"
@@ -18,7 +18,6 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-
     "viewsContainers": {
       "activitybar": [
         {
@@ -28,7 +27,7 @@
         }
       ]
     },
-    "views": { 
+    "views": {
       "my-view-container": [
         {
           "id": "myPrimaryView",
@@ -52,6 +51,21 @@
       {
         "command": "vsCodeExt.setApiKey",
         "title": "Set Api Key"
+      },
+      {
+        "command": "interceptor.start",
+        "title": "Start Proxy Interceptor",
+        "category": "Interceptor"
+      },
+      {
+        "command": "interceptor.stop",
+        "title": "Stop Proxy Interceptor",
+        "category": "Interceptor"
+      },
+      {
+        "command": "interceptor.openTerminal",
+        "title": "Open Runtime Terminal",
+        "category": "Interceptor"
       }
     ]
   },
@@ -84,6 +98,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "http-proxy": "^1.18.1"
+    "http-proxy": "^1.18.1",
+    "mockttp": "^4.2.1"
   }
 }

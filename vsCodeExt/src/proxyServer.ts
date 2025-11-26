@@ -1,0 +1,68 @@
+import * as vscode from 'vscode';
+import * as cp from 'child_process';
+import * as path from 'path';
+
+export class InterceptorProxy {
+    private child?: cp.ChildProcess;
+    private port: number;
+    private logger: vscode.OutputChannel;
+    public certPath: string = "";
+
+    constructor(port: number) {
+        this.port = port;
+        this.logger = vscode.window.createOutputChannel("Interceptor");
+    }
+
+    public async start(storagePath: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            // point to compiled serverWorker
+            const workerPath = path.join(__dirname, 'serverWorker.js');
+
+            this.child = cp.fork(workerPath, [], {
+                env: { ...process.env }
+            });
+
+            this.child.on('message', (msg: any) => {
+                if (msg.type === 'started') {
+                    this.certPath = msg.certPath;
+                    this.logger.show(true);
+                    this.logger.appendLine(`Interceptor Proxy running on port ${this.port}`);
+                    resolve();
+                } else if (msg.type === 'log') {
+                    // check message content, and show popups. 
+
+                    //!! purely for Dev, can be removed in main once incoorperated with UI
+                    this.logger.appendLine(msg.message);
+                    if (msg.message.includes('🔥🔥')) {
+                        vscode.window.showInformationMessage(msg.message);
+                    }
+                    if (msg.message.includes('>> Analysis:')) {
+                        vscode.window.showInformationMessage(msg.message);
+                    }
+                    if (msg.message.includes('>> Est. Carbon:')) {
+                        vscode.window.showInformationMessage(msg.message);
+                    }
+                    //!!
+                } else if (msg.type === 'error') {
+                    vscode.window.showErrorMessage(`Proxy Error: ${msg.message}`);
+                    reject(msg.message);
+                }
+            });
+
+            this.child.on('error', (err) => {
+                reject(err);
+            });
+
+            // start server
+            this.child.send({ command: 'start', port: this.port, storagePath });
+        });
+    }
+
+    public async stop() {
+        if (this.child) {
+            this.child.send({ command: 'stop' });
+            this.child.kill(); // ensure stopped
+            this.logger.appendLine('Interceptor Proxy stopped');
+        }
+    }
+}

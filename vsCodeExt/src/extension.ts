@@ -1,7 +1,3 @@
-// The module 'vscode' contains the VS Code extensibility API
-
-// Import the module and reference it with the alias vscode in your code below
-
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as budget from './budget';
@@ -12,126 +8,51 @@ import { stringify } from 'querystring';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
+import { InterceptorProxy } from './proxyServer';
+
+
+let proxyServer: InterceptorProxy;
+const PROXY_PORT = 3024;
+
 export function activate(context: vscode.ExtensionContext) {
+
 	var barManager = new statusBarManager();
 	const treeDataProvider = new MyTreeDataProvider();
-	
+
 	vscode.window.registerTreeDataProvider(
-			'myPrimaryView',
-			treeDataProvider
-		);
+		'myPrimaryView',
+		treeDataProvider
+	);
 
 	budget.initStorage(context.workspaceState);
 	restoreCallHistory(treeDataProvider);
 	barManager.updateLimit(budget.updateLimit());
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vsCodeExt" is now active!');
 	const BarManager = vscode.window.createStatusBarItem();
 
-	const disposableAPIKEY = vscode.commands.registerCommand('vsCodeExt.setApiKey', async () => {
-		const apiKey = await vscode.window.showInputBox({
-			prompt: 'Enter your API Key',
-			placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-			ignoreFocusOut: true // keep input box open even if focus moves away from window
-
-		});
-		if (apiKey){
-			await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
-			
-			// to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
-
-			vscode.window.showInformationMessage('API Key successfully set!');
-		}
-		else {
-            vscode.window.showWarningMessage('API Key setting cancelled.');
-		}
-	});
-
-	context.subscriptions.push(disposableAPIKEY);
-
-
-	//1. Wait and listen for an API call to be made to gemini / openAI
-
-	//2. Determine model used by looking at API call
-
-	//3. Send usage request to correct API usage endpoint using correct API key
-
-	//4. Find Tokens and calculate costs
-	function calculateEmission(model: string,token: number,carbon: number){
-		const chatgpt4oshort = 0.000000370125;
-		const chatgpt4omedium = 0.000000212625; 
-		const chatgpt4olong = 0.0000000875;  
-		const chatgpt4ominishort =  0.00923;
-		const chatgpt4ominimedium = 0.00369;
-		const chatgpt4ominilong = 0.0006293 ;
-		const chatgpt4point5 = 0.0003;
-
-		if (model === "gpt-4o"){
-			if ( token<=400 ){
-				carbon = chatgpt4oshort * token
-			}else if(token<=2000) {
-carbon = chatgpt4omedium * token
-			}else if (token >= 11500){
-				carbon = chatgpt4olong * token
-			}
-		} else if (model === "gpt-4o-mini"){
-			if(token<=400){
-				carbon = chatgpt4ominishort * token
-			}else if(token <= 2000){
-carbon = chatgpt4ominimedium * token 
-			}else if(token <= 11500){
-         carbon = chatgpt4ominilong * token
-			}
-		}else if (model ==="gpt-4.5"){
-			carbon = chatgpt4point5 * token
-		} else{
-			console.error("Could not recognise the model", model);
-			return 0 ;
-		}
-	return carbon
-		
-	}
-
-
-
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('vsCodeExt.helloWorld', async () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-
-		vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
-		
-	});
 
 	const reset = vscode.commands.registerCommand('vsCodeExt.clearStore', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
 		budget.resetBudget();
 		treeDataProvider.clearTree();
 		barManager.updateLimit(0);
 		vscode.window.showInformationMessage('Past calls cleared.');
 	});
-	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async ()=> {
+	const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async () => {
 		//vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
-		const limit  = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
+		const limit = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
 			prompt: 'Enter test call: ',
-			placeHolder:'eg. 5',
+			placeHolder: 'eg. 5',
 			ignoreFocusOut: true // keep input box open even if focus moves away from window
 		});
 
-		
+
 		var num = Number(limit);
 		if (!Number.isNaN(num)) {
-			var newCall: budget.Call = {Emissions: num};
-			budget.storeCall(newCall); 
+			var newCall: budget.Call = { Emissions: num };
+			budget.storeCall(newCall);
 			var cLimit = budget.updateLimit();
 			console.log("limit: " + cLimit);
-		
-			barManager.updateBar(num,cLimit);
+
+			barManager.updateBar(num, cLimit);
 			treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num + ' g CO₂e');
 		}
 		else {
@@ -139,43 +60,131 @@ carbon = chatgpt4ominimedium * token
 		}
 
 
-		//defines the default background
-	});	
+	});
 	context.subscriptions.push(input);
+	console.log('Interceptor Proxy Server is active');
 
-	context.subscriptions.push(disposable);
-	//This creates the view
+	let startDisposable = vscode.commands.registerCommand('interceptor.start', async () => {
+		try {
+			// start local server
+			proxyServer = new InterceptorProxy(PROXY_PORT);
+			await proxyServer.start(context.globalStorageUri.fsPath);
+
+			// set VSCode to use local proxy
+			const config = vscode.workspace.getConfiguration('http');
+			await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
+
+			//QUICK FIX TO NOT NEED SSL CERTS FOR NOW
+			// NEED TO CHANGE FOR BETA
+			await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
+
+
+			// const disposableAPIKEY = vscode.commands.registerCommand('vsCodeExt.setApiKey', async () => {
+			// 	const apiKey = await vscode.window.showInputBox({
+			// 		prompt: 'Enter your API Key',
+			// 		placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+			// 		ignoreFocusOut: true // keep input box open even if focus moves away from window
+
+			// 	});
+			// 	if (apiKey) {
+			// 		await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
+
+			// 		// to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
+
+			vscode.window.showInformationMessage('Interceptor Proxy started on port ' + PROXY_PORT);
+		} catch (error) {
+			vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
+		}
+	});
+
+	let stopDisposable = vscode.commands.registerCommand('interceptor.stop', async () => {
+		// stop local server
+		if (proxyServer) {
+			proxyServer.stop();
+		}
+
+		// clear VSCode proxy settings
+		const config = vscode.workspace.getConfiguration('http');
+		await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
+		await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
+
+		vscode.window.showInformationMessage('Interceptor Proxy stopped. Proxy settings cleared.');
+	});
+
+	let terminalDisposable = vscode.commands.registerCommand('interceptor.openTerminal', async () => {
+		if (!proxyServer) {
+			vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `interceptor.start`");
+			return;
+		}
+
+		const proxyUrl = `http://127.0.0.1:${PROXY_PORT}`;
+
+		//create a new terminal with specific Environment Vars
+
+		const terminal = vscode.window.createTerminal({
+			name: "Estimating Carbon Terminal",
+			env: {
+				// proxy environment variables
+				"HTTP_PROXY": proxyUrl,
+				"HTTPS_PROXY": proxyUrl,
+				"http_proxy": proxyUrl,
+				"https_proxy": proxyUrl,
+
+				// python specific
+				"REQUESTS_CA_BUNDLE": proxyServer.certPath,
+
+				// nodejs specific
+				"NODE_EXTRA_CA_CERTS": proxyServer.certPath
+			}
+		});
+
+		terminal.show();
+		vscode.window.showInformationMessage("Opened Terminal with Proxy Environment Vars");
+	});
+
+	context.subscriptions.push(terminalDisposable);
+	context.subscriptions.push(startDisposable);
+	context.subscriptions.push(stopDisposable);
 }
 
-// This method is called when your extension is deactivated
 
-export function deactivate() {}
-//
-class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
+export async function deactivate() {
+	// make sure that the vscode isn't always vulnerable, disable configurations
+	if (proxyServer) {
+		await proxyServer.stop();
+	}
+	const config = vscode.workspace.getConfiguration('http');
+	await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
+	await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
+}
+
+
+
+class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
-	private items:vscode.TreeItem[] = []; //creates a list of tree items starts empty obviously
+	private items: vscode.TreeItem[] = []; //creates a list of tree items starts empty obviously
 
-	constructor(){
+	constructor() {
 		this.items.push(new vscode.TreeItem(
-				"Latest calls:", 
-				vscode.TreeItemCollapsibleState.None)); //initialises the messages with one title message		
+			"Latest calls:",
+			vscode.TreeItemCollapsibleState.None)); //initialises the messages with one title message		
 	}
 
-	getTreeItem(element: vscode.TreeItem): vscode.TreeItem{
+	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
 		return element;
 	}
-	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]>{
+	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
 		//If an element is passed it means we are getting children of a sub-item --> no nested items here so empty array returned
-		if(element){
+		if (element) {
 			return Promise.resolve([]);
-		}else{
+		} else {
 			//Here a top-level item will be created which will be where the message will be displayed			
 			return Promise.resolve(this.items);
 		}
 	}
-	addMessage(message:string){ //method which allows messaged to be added
-		this.items.push( new vscode.TreeItem( //adds a new item to the side bar
+	addMessage(message: string) { //method which allows messaged to be added
+		this.items.push(new vscode.TreeItem( //adds a new item to the side bar
 			message,
 			vscode.TreeItemCollapsibleState.None
 		));
@@ -188,13 +197,13 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
 	}
 
 }
-class statusBarManager{
+class statusBarManager {
 	mainItem = vscode.window.createStatusBarItem(); //creates a status bar item for limit word
 	loading: vscode.StatusBarItem[] = []; //creates a list of statusbar items for the loading bar items
-	defaultColour:string = "statusBarItem.activeBackground";
-	newColour:string;
+	defaultColour: string = "statusBarItem.activeBackground";
+	newColour: string;
 
-	constructor(){
+	constructor() {
 		this.newColour = this.defaultColour;
 		this.mainItem.text = 'Average carbon cost: g CO₂e';
 		this.mainItem.show();//displays the limit item
@@ -207,16 +216,16 @@ class statusBarManager{
 
 	}
 
-	updateLimit(input:number) {
+	updateLimit(input: number) {
 		this.mainItem.text = 'Average carbon cost: ' + input + ' g CO₂e';
 		this.newColour = "statusBarItem.activeBackground";
 	}
 
-	updateBar(input:number,limit:number){
+	updateBar(input: number, limit: number) {
 
-		if (input){
+		if (input) {
 			this.mainItem.text = 'Average carbon cost: ' + limit + ' g CO₂e';
-			if (input >= 3 * limit){ //currently 8 represents the limit 
+			if (input >= 3 * limit) { //currently 8 represents the limit 
 				this.newColour = "statusBarItem.errorBackground"; //if well beyond the limit the loading bar goes red
 				vscode.window.showInformationMessage('VERY high carbon AI call made (check pane for details)');
 			}
@@ -224,13 +233,13 @@ class statusBarManager{
 				this.newColour = "statusBarItem.warningBackground"; //if beyond the limit the loading bar goes yellow
 				vscode.window.showInformationMessage('High carbon AI call made (check pane for details)');
 			}
-			else{
+			else {
 				this.newColour = "statusBarItem.activeBackground"; //if not beyond the limit loading bar is clear
 				//vscode.window.showInformationMessage('below limit');	
 			}
-			var i:number = 0;
+			var i: number = 0;
 		}
-		else{
+		else {
 			this.newColour = "statusBarItem.activeBackground";
 			input = 0;
 			vscode.window.showInformationMessage('not satisfied!');
