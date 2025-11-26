@@ -43,21 +43,16 @@ export function activate(context: vscode.ExtensionContext) {
 			placeHolder: 'eg. 5',
 			ignoreFocusOut: true // keep input box open even if focus moves away from window
 		});
-
-
 		var num = Number(limit);
 		if (!Number.isNaN(num)) {
 			var newCall: budget.Call = { Emissions: num };
 			budget.storeCall(newCall);
-			var cLimit = budget.updateLimit();
-			console.log("limit: " + cLimit);
-
-			barManager.updateBar(num, cLimit);
-			treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + num + ' g CO₂e');
+			updateTree(treeDataProvider, barManager, newCall);
 		}
 		else {
 			vscode.window.showInformationMessage('Error: NaN inputted.');
 		}
+		
 
 
 	});
@@ -261,5 +256,13 @@ function restoreCallHistory(tree: MyTreeDataProvider) { //restores past calls to
 	for (let i = 0; i < pCalls.length; i++) {
 		tree.addMessage("Call ID: xxxx - Emissions: " + pCalls[i].Emissions + ' g CO₂e');
 	}
+}
+
+export function updateTree(tree: MyTreeDataProvider, bar: statusBarManager, call: budget.Call ) {
+	var cLimit = budget.updateLimit();
+	console.log("limit: " + cLimit);
+	bar.updateBar(call.Emissions, cLimit);
+	tree.addMessage("Call ID: xxxx - Emissions: " + call.Emissions + ' g CO₂e');
+
 }
 
