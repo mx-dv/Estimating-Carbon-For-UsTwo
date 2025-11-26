@@ -1,25 +1,27 @@
-Model	Token Cost (Input per 1M tokens)	Token Cost (Output per 1M tokens, including thinking tokens)	Emission Factor	Compute / Hosting Platform
-Gemini 2.5 Flash	$0.30 (text/image/video), $1.00 (audio), $2.50 (>200k tokens)	$2.50	≈ 0.000075 g CO₂e / token (= 0.03 ÷ 400). Google Cloud Blog 0.03 g CO₂e / prompt ≈ 0.24 Wh / prompt	Google Cloud
-Gemini 2.5 Flash-Lite	$0.10 (text/image/video), $0.30 (audio), $1.25 (≤ 200k tokens)	$0.40	≈ 0.000075 g CO₂e / token (= 0.03 ÷ 400). Google Cloud Blog 0.03 g CO₂e / prompt ≈ 0.24 Wh / prompt	Google Cloud
-Gemini 2.0 Flash-Lite	$0.075	$0.30	≈ 0.000075 g CO₂e / token (= 0.03 ÷ 400). Google Cloud Blog 0.03 g CO₂e / prompt ≈ 0.24 Wh / prompt	Google Cloud
-Gemini 2.0 Flash	$0.10 (text/image/video), $0.70 (audio)	$0.40	≈ 0.000075 g CO₂e / token (= 0.03 ÷ 400). Google Cloud Blog 0.03 g CO₂e / prompt ≈ 0.24 Wh / prompt	Google Cloud
-Google Gemini 2.5 Pro	$0.10 (text/image/video), $0.70 (audio), $2.50 (> 200k tokens)	$10 (≤ 200k tokens), $15 (> 200k tokens)	Google Cloud Blog, Greenly Report. ≈ 0.0185 g CO₂e / token (14.6 Wh / prompt ≈ 7.4 g CO₂e / prompt, ~400 tokens/prompt)	Google Cloud
-Claude Haiku 4.5	$1 / M input token	$5 / M output token	≈ 0.00009 kg CO₂e / token (client data)	AWS (us-east-1)
-Claude Sonnet 4.5	$3 / M input token	$15 / M output token	≈ 0.00009 kg CO₂e / token (client data)	AWS (us-east-1)
-Claude Opus 4.1	$15 / M input token	$75 / M output token	≈ 0.00009 kg CO₂e / token (client data)	AWS (us-east-1)
-Cursor Co-Pilot Composer	$1.25 (approx., Medium Blog)	$10 (approx.)	≈ 0.00009 kg CO₂e / token (estimated)	Cursor internal / unspecified
+## Model Pricing and Emissions
+
+| Model                     | Token Cost (Input per 1M)                                  | Token Cost (Output per 1M)                         | Emission Factor (per token)                                                | Platform       |
+|---------------------------|--------------------------------------------------------------|------------------------------------------------------|----------------------------------------------------------------------------|----------------|
+| **Gemini 2.5 Flash**      | $0.30 (text/image/video), $1.00 (audio), $2.50 (>200k tok.) | $2.50                                                | ≈ 0.000075 g CO₂e/token (0.03 g/prompt ÷ 400)                              | Google Cloud   |
+| **Gemini 2.5 Flash-Lite** | $0.10 (text/image/video), $0.30 (audio), $1.25 (≤200k tok.) | $0.40                                                | ≈ 0.000075 g CO₂e/token                                                    | Google Cloud   |
+| **Gemini 2.0 Flash-Lite** | $0.075                                                       | $0.30                                                | ≈ 0.000075 g CO₂e/token                                                    | Google Cloud   |
+| **Gemini 2.0 Flash**      | $0.10 (text/image/video), $0.70 (audio)                     | $0.40                                                | ≈ 0.000075 g CO₂e/token                                                    | Google Cloud   |
+| **Gemini 2.5 Pro**        | $0.10 (text/image/video), $0.70 (audio), $2.50 (>200k tok.) | $10 (≤200k tok.), $15 (>200k tok.)                  | ≈ 0.0185 g CO₂e/token (7.4 g/prompt ÷ ~400 tokens)                         | Google Cloud   |
+| **Claude Haiku 4.5**      | $1 / M                                                       | $5 / M                                               | ≈ 0.00009 kg CO₂e/token (= 0.09 g/token)                                    | AWS us-east-1  |
+| **Claude Sonnet 4.5**     | $3 / M                                                       | $15 / M                                              | ≈ 0.00009 kg CO₂e/token                                                    | AWS us-east-1  |
+| **Claude Opus 4.1**       | $15 / M                                                      | $75 / M                                              | ≈ 0.00009 kg CO₂e/token                                                    | AWS us-east-1  |
+| **Cursor Co-Pilot**       | ~$1.25                                                       | ~$10                                                 | ≈ 0.00009 kg CO₂e/token (est.)                                             | Cursor (unk.)  |
 
 
 
 
+## Energy Consumption (Wh) and Per-Token Values
 
-4o	4.5	4o-mini
-Energy consumption (100–300 prompt). WH	0.423 = 0.0010575 (token)	0.3 = 0.0003 (token) https://epoch.ai/gradient-updates/how-much-energy-does-chatgpt-use?utm_source=chatgpt.com	3.649 = 0.00923 (token)
-Energy consumption (1K prompt). WH	1.215 = 0.0006075 (token)	0.3	7.380 = 0.00369 (token)
-Energy consumption (10K prompt). WH	2.875 = 0.00025 (token)	0.3	7.237 = 0.0006293 (token)
-Carbon intensity. kgCO2e/kWh	0.35	https://medium.com/data-science/the-carbon-footprint-of-gpt-4-d6c676eb21ae. 0.2406 as a general (west US)	0.35
-Emission factor	0.000000370125 kg 0.000000212625 kg 0.0000000875 kg	0.000105 g CO₂e per token	0.0000032305 0.0000012915 0.000000220255
-
+| Model       | 100–300 token prompt (Wh) | Per-token (Wh)     | 1k-token prompt (Wh) | Per-token (Wh)     | 10k-token prompt (Wh) | Per-token (Wh)       |
+|-------------|----------------------------|---------------------|------------------------|----------------------|-------------------------|------------------------|
+| **GPT-4o**        | 0.423                      | 0.0010575            | 1.215                  | 0.0006075             | 2.875                   | 0.00025                |
+| **GPT-4.5**       | 0.300                      | 0.00030              | 0.300                  | 0.00030               | 0.300                   | 0.00030                |
+| **GPT-4o-mini**   | 3.649                      | 0.00923              | 7.380                  | 0.00369               | 7.237                   | 0.0006293              |
 
 
 https://www.semanticscholar.org/reader/75bca8d05232deab461d8033bcf4255ebbb3773d
