@@ -5,7 +5,7 @@ as for the UI side we already sent a first release to them, so we are walking th
 So for now our UI is a dummy, and we are setting an arbitrary number for the max level of emission and based on that, it will calculate how much it has exceeded the limit
 We need to let the engineers know how good or how bad they're doing with their carbon emissions. Client stated they want a smaller sidebar
 Further research will be needed to look into what constitutes a good/context applicable budget
-1.our client(project manager) what us to be able to do expectations before our client do anything and he is asking if that's possible
+1. Our client(project manager) wants us to be able to set expectations before our client does anything (how many tokens they would use based on their prompt ), and he asked if that was a possible feature
 our client(IT manager) said it's not possible but this is what will happen in real life(people asking you to do not real stuff)
 2.needed more thinking before implementation.
 and for the next MVP release client meeting is on 11.19 10:00
