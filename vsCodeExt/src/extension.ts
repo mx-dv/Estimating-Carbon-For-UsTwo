@@ -1,11 +1,11 @@
+
 // The module 'vscode' contains the VS Code extensibility API
 
 // Import the module and reference it with the alias vscode in your code below
 
 import * as vscode from 'vscode';
-import * as https from 'https';
+import * as devTok from './devTokens';
 
-import { encoding_for_model } from "tiktoken";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
@@ -23,54 +23,16 @@ export function activate(context: vscode.ExtensionContext) {
 		return x;
 	}
 
-	function getTextAroundCursor(linesBefore: number = 150, linesAfter: number = 150): string{ //use 150 becuase from research copilot sends around that portion of the document
-		const editor = vscode.window.activeTextEditor;
-		if (!editor){
-			return "";//if document is empty
-		} 
-		const docu = editor.document;//pretty self explanitory
-		const cursorPos = editor.selection.active; 
-		const startLine = Math.max(0,cursorPos.line-linesBefore);
-		const endLine = Math.min(docu.lineCount-1, cursorPos.line+linesAfter);
-
-		const start = new vscode.Position(startLine, 0); //sets the start to the start of the first line
-    	const end = new vscode.Position(endLine, docu.lineAt(endLine).text.length); //sets end to the end of the last line
-    	const range = new vscode.Range(start, end); //range is the range
-		return docu.getText(range);
-	}
+	devTok.getTextAroundCursor();
 
 	//let lastInlineState = false;
-	var accept = false;
 	const disposables: vscode.Disposable[] = [];
-	const aiCommands = [
-		"editor.action.inlineSuggest.trigger",
-		"github.copilot.generate",
-		"cursor._executeCompletionItemProvider"
-	];
-
-	const inline = vscode.commands.registerCommand('vsCodeExt.wrappedInline', async () => { //adds my functionality to accepting an autocomplete
-		accept = true;
-		await vscode.commands.executeCommand("editor.action.inlineSuggest.commit"); //then does the accept command
-	});
-
-	// const inlineChat = vscode.commands.registerCommand('vsCodeExt.wrappedInlineChat',async () =>{
-	// 	accept = true;
-	// 	await vscode.commands.executeCommand("inlineChat.start");
-	// });
-	//initial attempt at inline chat usage
 
 	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
-		const enc = await encoding_for_model("gpt-4o"); //use gpt-4o for now because copilot very secretive
+		const tokens = await devTok.change(evt);
 
-		if (accept){
-			for (const change of evt.contentChanges){
-
-				if (change.text.length>2){ //if its more than 2 character
-					const tokens = enc.encode(change.text+getTextAroundCursor()); //tokenises the new text(output tokens) along with a portion of the doucment (input tokens)
-					convert(tokens.length); //placeholder for a convertion function			
-				}
-			}
-			accept = false;//accept boolean stops like copy and paste having an effect
+		if (tokens !== -1){
+			treeDataProvider.addMessage("adding"+String(tokens));
 		}
 	}));
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -88,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 		//vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
 		const limit  = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
 			prompt: 'enter your carbon limit',
-			placeHolder:'eg. 5',
+			placeHolder:'eg. 10',
 			ignoreFocusOut: true // keep input box open even if focus moves away from window
 		});
 
@@ -99,8 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 		//defines the default background
 	});	
 	context.subscriptions.push(input);
-	context.subscriptions.push(inline);
-	//context.subscriptions.push(inlineChat);
+	context.subscriptions.push(devTok.inline);
 
 	//context.subscriptions.push(disposable2);
 	context.subscriptions.push(disposable);
