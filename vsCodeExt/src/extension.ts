@@ -70,8 +70,12 @@ carbon = chatgpt4ominimedium * token
 			}
 		}else if (model ==="gpt-4.5"){
 			carbon = chatgpt4point5 * token
+		} else{
+			console.error("Could not recognise the model", model);
+			return 0 ;
 		}
 	return carbon
+		
 	}
 
 
