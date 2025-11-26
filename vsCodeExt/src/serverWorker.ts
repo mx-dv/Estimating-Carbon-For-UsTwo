@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { RawBodyIncludesMatcher } from 'mockttp/dist/rules/matchers';
 
-// 1. Clean Environment: Ensure this process ignores the VS Code proxy settings
+// Clean Environment: Ensure this process ignores the VS Code proxy settings
 process.env.HTTP_PROXY = '';
 process.env.HTTPS_PROXY = '';
 process.env.NO_PROXY = '*';
@@ -24,7 +24,7 @@ async function startServer(port: number, storagePath: string) {
     try {
         if (!fs.existsSync(storagePath)) { fs.mkdirSync(storagePath, { recursive: true }); };
 
-        // Generate and Save CA
+        // generate certificate of authorisation
         const https = await mockttp.generateCACertificate();
         const certPath = path.join(storagePath, 'mockttp-ca.pem');
         fs.writeFileSync(certPath, https.cert);
@@ -37,10 +37,10 @@ async function startServer(port: number, storagePath: string) {
             beforeRequest: async (req) => {
                 const body = await req.body.getText() || '';
 
-                // Log Request
+                // log if request message
                 sendLog(`[REQUEST] ${req.method} ${req.url}`);
 
-                // === check a token / api call is made ===
+                // check tokens
                 detectTokens(req.headers, body);
 
                 if (body) { sendLog(`Body: ${body.substring(0, 200)}...`); };
@@ -48,19 +48,12 @@ async function startServer(port: number, storagePath: string) {
             },
             beforeResponse: async (res) => {
                 const status = res.statusCode;
-                // sendLog(`[RESPONSE] Status: ${res.statusCode}`);
 
                 try {
                     const body = await res.body.getText() || "";
-                    // const jsonBody = JSON.parse(body)
                     const preview = RawBodyIncludesMatcher.length > 2000
                         ? body.substring(0, 2000) + "... (Shortened to 2000 chars)"
                         : body;
-                    // if (jsonBody.usage && jsonBody.model) {
-                    //     const totalTokens = jsonBody.usage.total_tokens;
-                    //     const modelName = jsonBody.model;
-                    //     const emission = calculateEmission(modelName, totalTokens);
-                    // }
                     getJsonTokenCount(body);
                     sendLog(` << status: ${status}`);
                     sendLog(` << body: ${preview}`);
@@ -74,7 +67,7 @@ async function startServer(port: number, storagePath: string) {
 
         await server.start(port);
 
-        // Notify parent that we started and where the cert is
+        // notify parent that worker has started and certificate location
         if (process.send) { process.send({ type: 'started', certPath }); };
 
     } catch (error: any) {
@@ -86,18 +79,18 @@ function sendLog(message: string) {
     if (process.send) { process.send({ type: 'log', message }); };
 }
 
-// === MVP Token Detection ===
+// token detection
 function detectTokens(headers: mockttp.Headers, body: string) {
     const TOKEN_KEYS = ['authorization', 'x-api-key', 'api-key', 'token', 'access_token'];
 
-    // 1. Check Headers
+    // see if headers contain apikey. if so then must be ai call
     Object.keys(headers).forEach(key => {
         if (TOKEN_KEYS.includes(key.toLowerCase())) {
-            sendLog(`🔥🔥 TOKENS DETECTED `);//(Header [${key}]): ${headers[key]}`);
+            sendLog(`🔥🔥 TOKENS DETECTED `);
         }
     });
 
-    // 2. Check Body (JSON)
+    // check body of json message
     if (body && (body.startsWith('{') || body.startsWith('['))) {
         try {
             scanJsonForTokens(JSON.parse(body));
@@ -112,7 +105,7 @@ function scanJsonForTokens(obj: any) {
     Object.keys(obj).forEach(key => {
         const value = obj[key];
         if (TOKEN_MATCHERS.some(m => m.test(key)) && typeof value === 'string' && value.length > 8) {
-            sendLog(`🔥🔥 TOKEN DETECTED `);//(Body JSON [${key}]): ${value}`);
+            sendLog(`🔥🔥 TOKEN DETECTED `);
         }
         if (typeof value === 'object') { scanJsonForTokens(value); };
     });
@@ -133,6 +126,7 @@ function getJsonTokenCount(body: string) {
 
 }
 
+// convert tokens to carbon
 function calculateEmission(model: string, token: number) {
     const chatgpt4oshort = 0.000000370125;
     const chatgpt4omedium = 0.000000212625;

@@ -19,6 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
 			await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
 
 			//QUICK FIX TO NOT NEED SSL CERTS FOR NOW
+			// NEED TO CHANGE FOR BETA
 			await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
 
 			vscode.window.showInformationMessage('Interceptor Proxy started on port ' + PROXY_PORT);
@@ -54,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const terminal = vscode.window.createTerminal({
 			name: "Estimating Carbon Terminal",
 			env: {
-				//Standard Proxy Vars
+				// proxy environment variables
 				"HTTP_PROXY": proxyUrl,
 				"HTTPS_PROXY": proxyUrl,
 				"http_proxy": proxyUrl,
@@ -63,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
 				// python specific
 				"REQUESTS_CA_BUNDLE": proxyServer.certPath,
 
-				// NODE JS SPECIFIC: Trust the proxy
+				// nodejs specific
 				"NODE_EXTRA_CA_CERTS": proxyServer.certPath
 			}
 		});
@@ -79,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 export async function deactivate() {
-	// Make sure that the vscode isn't always vulnerable
+	// make sure that the vscode isn't always vulnerable, disable configurations
 	if (proxyServer) {
 		await proxyServer.stop();
 	}
