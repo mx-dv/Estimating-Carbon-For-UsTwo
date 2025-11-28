@@ -1,0 +1,17 @@
+.
+├── Images # architecture diagrams
+├── ProjectNotes # meeting minutes and other project notes
+├── README.md
+├── tree.txt
+└── vsCodeExt # main directory for VS Code extension
+    ├── howToRun.md # instructions on how to run the extension
+    ├── package.json # config file containing extension metadata
+    ├── src
+    │   ├── extension.ts # main UI features and commands 
+    │   ├── budget.ts # interface for Call structure and usage calculations
+    │   ├── serverWorker.ts # listens on proxyServer and handles parsing
+    │   ├── proxyServer.ts # starts server, receives parsed information
+    ├── tsconfig.json
+    └── vsc-extension-quickstart.md
+
+317 directories, 24 files
