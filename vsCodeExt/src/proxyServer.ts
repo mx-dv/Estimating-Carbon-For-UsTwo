@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as path from 'path';
 // import { treeDataProvider } from './extension';
-import { updateTree } from './extension'
-import * as budget from './budget'
+import { updateTree } from './extension';
+import * as budget from './budget';
 
 export class InterceptorProxy {
     private child?: cp.ChildProcess;
@@ -48,16 +48,19 @@ export class InterceptorProxy {
                     //     vscode.window.showInformationMessage(msg.message);
                     // }
                     if (msg.message.includes('>> DateTime:')) {
-                        id = msg.message.slice(16)
+                        id = msg.message.slice(16);
+                        console.log(`id: ${id}`);
                     }
                     if (msg.message.includes('>> Model:')) {
                         // vscode.window.showInformationMessage(msg.message);
-                        mod = msg.message.slice(13)
+                        mod = msg.message.slice(13);
+                        console.log(`model: ${mod}`);
                     }
                     if (msg.message.includes('>> Emissions:')) {
                         // vscode.window.showInformationMessage(msg.message);
-                        cost = msg.message.slice(17)
+                        cost = msg.message.slice(17);
                         fullCall = true;
+                        console.log(`cost: ${cost}`);
                     }
                     //!!
                     if (fullCall) {

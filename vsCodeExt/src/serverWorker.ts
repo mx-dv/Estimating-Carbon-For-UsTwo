@@ -121,8 +121,8 @@ function getJsonTokenCount(body: string) {
         const totalTokens = jsonBody.usage.total_tokens;
         const modelName = jsonBody.model;
         const emission = calculateEmission(modelName, totalTokens);
-        let dateTime = new Date()
-        dateTime.getTime()
+        let dateTime = new Date();
+        dateTime.getTime();
         // sendLog(`{ID: ${dateTime}, Model: ${modelName}, Emissions: ${emission.toFixed(8)} gCO2e}🔥`)
         sendLog(`   >> DateTime: ${dateTime}`);
         sendLog(`   >> Model: ${modelName}`);
