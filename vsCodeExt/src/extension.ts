@@ -55,8 +55,8 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 		var num = Number(limit);
 		if (!Number.isNaN(num)) {
-			var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: "1/1/97 00:00:00" };
-			budget.storeCall(newCall);
+			let date = new Date();
+			var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: date.toLocaleString() };
 			updateTree(newCall);
 		}
 		else {
@@ -264,15 +264,16 @@ function restoreCallHistory(tree: MyTreeDataProvider) { //restores past calls to
 	var pCalls = budget.getCalls();
 	console.log("CALLS:", pCalls);
 	for (let i = 0; i < pCalls.length; i++) {
-		tree.addMessage("Call ID: xxxx - Emissions: " + pCalls[i].Emissions + ' g CO₂e');
+		tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + pCalls[i].DateTime);
 	}
 }
 
 export function updateTree(call: budget.Call) {
+	budget.storeCall(call);
 	var cLimit = budget.updateLimit();
 	console.log("limit: " + cLimit);
 	bar.updateBar(call.Emissions, cLimit);
-	tree.addMessage("Date: " + call.DateTime + " - Model: " + call.Model + " - Emissions: " + call.Emissions);
+	tree.addMessage("Emissions: " + call.Emissions + " - Model: " + call.Model + " - Date: " + call.DateTime);
 
 }
 
