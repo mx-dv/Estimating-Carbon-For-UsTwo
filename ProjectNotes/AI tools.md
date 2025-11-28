@@ -19,6 +19,7 @@ These are small scripts that are hard to remember all of the details for. AI is 
 <li>1. We use AI to find the papers that got the data we need in them, but we read the papers and gets the data manually so that AI won't be making up data</li>
 <li>2. AI was used to research about the auto complete tokens </li>
 <li>3. AI was used to understand how to implement a graph in the panel section of vscode.</li>
+<li>4. We used AI when deciding how to approach tracking tokens during dev time as we found the published documentation to be quite reserved</li>
 </ul>
 <h3>Debugging with AI</h3>
 <ul>
