@@ -4,6 +4,7 @@ import * as path from 'path';
 // import { treeDataProvider } from './extension';
 import { updateTree } from './extension';
 import * as budget from './budget';
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
 
 export class InterceptorProxy {
     private child?: cp.ChildProcess;
@@ -18,6 +19,9 @@ export class InterceptorProxy {
 
     public async start(storagePath: string): Promise<void> {
         return new Promise((resolve, reject) => {
+            let id: string = " ";
+            let mod: string = " ";
+            let cost: number = 0;
             // point to compiled serverWorker
             const workerPath = path.join(__dirname, 'serverWorker.js');
 
@@ -33,9 +37,6 @@ export class InterceptorProxy {
                     resolve();
                 } else if (msg.type === 'log') {
                     let fullCall = false;
-                    let id: string = " ";
-                    let mod: string = " ";
-                    let cost: number = 0;
                     // check message content, and show popups. 
 
                     //!! purely for Dev, can be removed in main once incoorperated with UI
@@ -63,7 +64,8 @@ export class InterceptorProxy {
                         console.log(`cost: ${cost}`);
                     }
                     //!!
-                    if (fullCall) {
+                    if (fullCall === true) {
+                        console.log(`id: ${id}, model: ${mod}, cost: ${cost}`);
                         var call: budget.Call = { DateTime: id, Model: mod, Emissions: +cost };
                         updateTree(call);
                     }
