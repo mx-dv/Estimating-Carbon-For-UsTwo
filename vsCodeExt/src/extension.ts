@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as budget from './budget';
-import { Memento } from "vscode";
+import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 
 
