@@ -59,7 +59,6 @@ export function activate(context: vscode.ExtensionContext) {
 			var newCall: budget.Call = { Emissions: emissions };
 			budget.storeCall(newCall);
 			var cLimit = budget.updateLimit();
-			console.log("limit: " + cLimit);
 
 			barManager.updateBar(tokens, cLimit);
 			treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + emissions + ' g CO₂e');
