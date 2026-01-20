@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 			treeDataProvider
 		);
 	function convert(x:any){
-		treeDataProvider.addMessage(String(x));
+		//treeDataProvider.addMessage(String(x));
 		return x;
 	}
 
@@ -40,14 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//let lastInlineState = false;
 	const disposables: vscode.Disposable[] = [];
 
-	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
-		const tokens = await devTok.change(evt);
 
-		if (tokens !== -1){
-			convert(tokens);
-		}
-	}));
-	
 	vscode.window.registerTreeDataProvider(
 		'myPrimaryView',
 		treeDataProvider
@@ -58,7 +51,22 @@ export function activate(context: vscode.ExtensionContext) {
 	barManager.updateLimit(budget.updateLimit());
 	const BarManager = vscode.window.createStatusBarItem();
 
+	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
+		const tokens = Number(await devTok.change(evt));
 
+		if (tokens !== -1){
+			var emissions = convert(tokens);
+			var newCall: budget.Call = { Emissions: emissions };
+			budget.storeCall(newCall);
+			var cLimit = budget.updateLimit();
+			console.log("limit: " + cLimit);
+
+			barManager.updateBar(tokens, cLimit);
+			treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + emissions + ' g CO₂e');
+
+		}
+	}));
+	
 	const reset = vscode.commands.registerCommand('vsCodeExt.clearStore', () => {
 		budget.resetBudget();
 		treeDataProvider.clearTree();
