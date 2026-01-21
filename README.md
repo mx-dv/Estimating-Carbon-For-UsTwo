@@ -100,7 +100,10 @@ We aim to design a toolkit that:
 4. Run <code>npm run compile</code>
 4. Run extension.ts in extension development environment  
 5. For runtime analysis, run "Start Proxy Interceptor" command in active extension.
-This is currently the same for both developers and users 
+   
+<p>
+    This is currently the same for both developers and users
+</p>
     
   
 <h2 id="structure">Project Structure</h2>
