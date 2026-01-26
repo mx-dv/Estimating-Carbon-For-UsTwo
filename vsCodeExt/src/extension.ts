@@ -1,3 +1,9 @@
+
+// The module 'vscode' contains the VS Code extensibility API
+
+// Import the module and reference it with the alias vscode in your code below
+
+import * as devTok from './devTokens';
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as budget from './budget';
@@ -26,6 +32,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 	var barManager = new statusBarManager();
 	const treeDataProvider = new MyTreeDataProvider();
+	//treeDataProvider.addMessage("AI happened");
+
+	vscode.window.registerTreeDataProvider(
+			'myPrimaryView',
+			treeDataProvider
+		);
+	function convert(x:any){
+		//treeDataProvider.addMessage(String(x));
+		return x;
+	}
+
+	devTok.getTextAroundCursor();
+
+	//let lastInlineState = false;
+	const disposables: vscode.Disposable[] = [];
+
 
 	setDisplay(treeDataProvider, barManager);
 	vscode.window.registerTreeDataProvider(
@@ -38,7 +60,21 @@ export function activate(context: vscode.ExtensionContext) {
 	barManager.updateLimit(budget.updateLimit());
 	const BarManager = vscode.window.createStatusBarItem();
 
+	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
+		const tokens = Number(await devTok.change(evt));
 
+		if (tokens !== -1){
+			var emissions = convert(tokens);
+			var newCall: budget.Call = { Emissions: emissions };
+			budget.storeCall(newCall);
+			var cLimit = budget.updateLimit();
+
+			barManager.updateBar(tokens, cLimit);
+			treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + emissions + ' g CO₂e');
+
+		}
+	}));
+	
 	const reset = vscode.commands.registerCommand('vsCodeExt.clearStore', () => {
 		budget.resetBudget();
 		treeDataProvider.clearTree();
@@ -66,6 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 	context.subscriptions.push(input);
+	context.subscriptions.push(devTok.inline);
+
 	console.log('Interceptor Proxy Server is active');
 
 	let startDisposable = vscode.commands.registerCommand('interceptor.start', async () => {
