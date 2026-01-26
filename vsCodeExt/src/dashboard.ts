@@ -43,17 +43,21 @@ export class CarbonDashboardPanel {
     }
 
     private _getWebviewContent() {
-        return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Carbon Dashboard</title>
-        </head>
-        <body style="background-color: #1e1e1e; color: #ccc; padding: 20px; font-family: sans-serif;">
-            <h1>Carbon Dashboard Initialised</h1>
-            <p> The webview is successfully running.</p>
-        </body>
-        </html>`;
-    }
+            return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Carbon Dashboard</title>
+    
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Carbon Emissions Tracker</h1>
+            <p>Dashboard structure initialised. Chart.js loaded.</p>
+        </div>
+    </body>
+    </html>`;
+        }
 }
