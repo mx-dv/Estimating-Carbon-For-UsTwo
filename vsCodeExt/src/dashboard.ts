@@ -78,14 +78,14 @@ export class CarbonDashboardPanel {
         const ctx = document.getElementById('emissionChart');
         const myCHART = NEW chart(ctx, {
         type: "pie",
-        data; {
-            labels;[],
-            datasets;[{
-                label:'File Size',
-                data:[],
-                borderWidth:2}
-                ]
-                },
+        data: {
+                labels: ['Main.js', 'test.js', 'worker1.js', 'Helperfunction.js'],
+                datasets: [{
+                    label: 'File Size',
+                    data: [300, 150, 80, 60], // Dummy size data
+                    borderWidth: 2
+                }]
+            },
                 options: {
                     responsive:true,
                     maintain
