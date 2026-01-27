@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+
 export class CarbonDashboardPanel {
     public static currentPanel: CarbonDashboardPanel | undefined;
     private readonly _panel: vscode.WebviewPanel;
@@ -75,24 +76,59 @@ export class CarbonDashboardPanel {
             < canvas id="emissionChart"></canvas>
         </div>
         <script>
+        // 1. Define your data array here
+        const fileSizes = [300, 150, 80, 60,25];  // dummy data representing file sizes 
+        
+
+        // function so that colours in the file are distinct 
+        function generateColors(count) {
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                // Rotates around the colour wheel based on how many files there are 
+                const hue = Math.floor(i * (360 / count));
+                colors.push('hsl(' + hue + ', 70%, 50%)');
+            }
+            return colors;
+        }
+
         const ctx = document.getElementById('emissionChart');
-        const myCHART = NEW chart(ctx, {
-        type: "pie",
-        data: {
-                labels: ['Main.js', 'test.js', 'worker1.js', 'Helperfunction.js'],
+
+        const myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Main.js', 'test.js', 'worker1.js', 'Helperfunction.js', 'Other Files'],
                 datasets: [{
                     label: 'File Size',
-                    data: [300, 150, 80, 60], // Dummy size data
+                    
+                    
+                    data: fileSizes, 
+                    
+                    // call the function to generate distinct colours
+                    backgroundColor: generateColors(fileSizes.length),
+                    
+                    borderColor: '#1e1e1e',
                     borderWidth: 2
                 }]
             },
-                options: {
-                    responsive:true,
-                    maintain
-                    AspectRatio: false,}
-                    });
-        </script>
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#ccc' }
+                    }
+                }
+            }
+        });
+
+        
+    </script>
     </body>
     </html>`;
         }
+}
+
+function hsl($: any, arg1: { hue: any; }, arg2: number, arg3: number) {
+    throw new Error('Function not implemented.');
 }
