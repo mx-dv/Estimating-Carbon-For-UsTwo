@@ -65,18 +65,16 @@ export class CarbonDashboardPanel {
                 h2 { text-align: center; font-weight: normal; margin-bottom; 10px;}
         </style>
 
-        <div class="chart-container">
-            <h2>File by size in Repo</h2>
-            <canvas id="emissionChart"></canvas>
-        </div>
+        
     
         </head>
     <body>
-        <div class="container">
-            < canvas id="emissionChart"></canvas>
-        </div>
+        <div class="chart-container">
+        <h2>File by Size in Repo</h2>
+        <canvas id="emissionChart"></canvas>
+    </div>
         <script>
-        // 1. Define your data array here
+       
         const fileSizes = [300, 150, 80, 60,25];  // dummy data representing file sizes 
         
 
