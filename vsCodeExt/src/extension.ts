@@ -69,7 +69,11 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (tokens !== -1){
             var emissions = convert(tokens);
-            var newCall: budget.Call = { Emissions: emissions };
+            var newCall: budget.Call = {
+				Emissions: emissions,
+				Model: '',
+				DateTime: ''
+			};
             budget.storeCall(newCall);
             var cLimit = budget.updateLimit();
 
