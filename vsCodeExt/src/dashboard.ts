@@ -64,6 +64,10 @@ export class CarbonDashboardPanel {
                 h2 { text-align: center; font-weight: normal; margin-bottom; 10px;}
         </style>
 
+        <div class="chart-container">
+            <h2>File by size in Repo</h2>
+            <canvas id="emissionChart"></canvas>
+        </div>
     
         </head>
     <body>
