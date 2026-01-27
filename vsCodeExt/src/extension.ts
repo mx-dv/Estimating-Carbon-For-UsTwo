@@ -1,3 +1,9 @@
+
+// The module 'vscode' contains the VS Code extensibility API
+
+// Import the module and reference it with the alias vscode in your code below
+
+import * as devTok from './devTokens';
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as budget from './budget';
@@ -26,9 +32,24 @@ export function activate(context: vscode.ExtensionContext) {
 
 	var barManager = new statusBarManager();
 	const treeDataProvider = new MyTreeDataProvider();
+	//treeDataProvider.addMessage("AI happened");
+
+	vscode.window.registerTreeDataProvider(
+			'myPrimaryView',
+			treeDataProvider
+		);
+	function convert(x:any){
+		//treeDataProvider.addMessage(String(x));
+		return x;
+	}
+
+	devTok.getTextAroundCursor();
+
+	//let lastInlineState = false;
+	const disposables: vscode.Disposable[] = [];
+
 
 	setDisplay(treeDataProvider, barManager);
-
 	vscode.window.registerTreeDataProvider(
 		'myPrimaryView',
 		treeDataProvider
@@ -39,7 +60,17 @@ export function activate(context: vscode.ExtensionContext) {
 	barManager.updateLimit(budget.updateLimit());
 	const BarManager = vscode.window.createStatusBarItem();
 
+	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
+		const tokens = Number(await devTok.change(evt));
 
+		if (tokens !== -1){
+			var emissions = convert(tokens);
+			let date = new Date();
+			var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.toLocaleString() };
+			updateTree(newCall);
+		}
+	}));
+	
 	const reset = vscode.commands.registerCommand('vsCodeExt.clearStore', () => {
 		budget.resetBudget();
 		treeDataProvider.clearTree();
@@ -77,6 +108,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 	context.subscriptions.push(cursorInput);
+	context.subscriptions.push(devTok.inline);
+
 	console.log('Interceptor Proxy Server is active');
 
 	let startDisposable = vscode.commands.registerCommand('interceptor.start', async () => {
