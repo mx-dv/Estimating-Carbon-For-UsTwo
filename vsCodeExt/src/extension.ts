@@ -5,7 +5,7 @@ import * as devTok from './devTokens';
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as budget from './budget';
-import { Memento } from "vscode";
+import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 
 import { CarbonDashboardPanel } from './dashboard'; 
@@ -258,9 +258,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 	});
-	context.subscriptions.push(input);
-	context.subscriptions.push(devTok.inline);
 
+	context.subscriptions.push(devTok.inline);
 	console.log('Interceptor Proxy Server is active');
 
 	let startDisposable = vscode.commands.registerCommand('interceptor.start', async () => {
