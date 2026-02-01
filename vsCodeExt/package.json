@@ -1,6 +1,7 @@
 {
   "name": "vsCodeExt",
   "displayName": "EstimatingCarbon",
+  "publisher": "development",
   "description": "",
   "version": "0.0.1",
   "engines": {
