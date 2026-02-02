@@ -8,9 +8,11 @@ import * as budget from './budget';
 import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 
-import { CarbonDashboardPanel } from './dashboard'; 
+import { CarbonDashboardPanel } from './dashboard';
+import { state } from './state';
 
 import { InterceptorProxy } from './proxyServer';
+import { privateEncrypt } from 'crypto';
 
 export let tree: MyTreeDataProvider;
 export let bar: statusBarManager;
@@ -28,13 +30,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     var barManager = new statusBarManager();
     const treeDataProvider = new MyTreeDataProvider();
-    
+
     vscode.window.registerTreeDataProvider(
-            'myPrimaryView',
-            treeDataProvider
-        );
-        
-    function convert(x:any){
+        'myPrimaryView',
+        treeDataProvider
+    );
+
+    function convert(x: any) {
         //treeDataProvider.addMessage(String(x));
         return x;
     }
@@ -51,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
         'myPrimaryView',
         treeDataProvider
     );
-    
+
 
     budget.initStorage(context.workspaceState);
     restoreCallHistory(treeDataProvider);
@@ -61,7 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
     disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
         const tokens = Number(await devTok.change(evt));
 
-        if (tokens !== -1){
+        if (tokens !== -1) {
             var emissions = convert(tokens);
 
             
@@ -74,8 +76,8 @@ export function activate(context: vscode.ExtensionContext) {
 
         }
     }));
-    
-    const reset = vscode.commands.registerCommand('vsCodeExt.clearStore', () => {
+
+    const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
         budget.resetBudget();
         treeDataProvider.clearTree();
         barManager.updateLimit(0);
@@ -83,14 +85,14 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Dashboard command 
-    const dashboardCommand = vscode.commands.registerCommand('vsCodeExt.openDashboard', () => {
+    const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
         CarbonDashboardPanel.createOrShow(context.extensionUri);
         console.log('Carbon Dashboard command registered.');
     });
 
-    
 
-    const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async () => {
+
+    const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {
         //vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
         const limit = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
             prompt: 'Enter test call: ',
@@ -116,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log('Interceptor Proxy Server is active');
 
-    let startDisposable = vscode.commands.registerCommand('interceptor.start', async () => {
+    let startDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorStart', async () => {
         try {
             // start local server
             proxyServer = new InterceptorProxy(PROXY_PORT);
@@ -131,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
             await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
 
 
-            // const disposableAPIKEY = vscode.commands.registerCommand('vsCodeExt.setApiKey', async () => {
+            // const disposableAPIKEY = vscode.commands.registerCommand('ecode.setApiKey', async () => {
             //  const apiKey = await vscode.window.showInputBox({
             //      prompt: 'Enter your API Key',
             //      placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
@@ -142,14 +144,14 @@ export function activate(context: vscode.ExtensionContext) {
             //      await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
 
             //      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
-
+            state.runningInterceptor = true;
             vscode.window.showInformationMessage('Interceptor Proxy started on port ' + PROXY_PORT);
         } catch (error) {
             vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
         }
     });
 
-    let stopDisposable = vscode.commands.registerCommand('interceptor.stop', async () => {
+    let stopDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorStop', async () => {
         // stop local server
         if (proxyServer) {
             proxyServer.stop();
@@ -163,9 +165,9 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Interceptor Proxy stopped. Proxy settings cleared.');
     });
 
-    let terminalDisposable = vscode.commands.registerCommand('interceptor.openTerminal', async () => {
+    let terminalDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorOpenTerminal', async () => {
         if (!proxyServer) {
-            vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `interceptor.start`");
+            vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `ecode.InterceptorStart`");
             return;
         }
 
@@ -214,7 +216,7 @@ export async function deactivate() {
 
 
 class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null> = new vscode.EventEmitter<vscode.TreeItem | undefined | null >();
+    private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null> = new vscode.EventEmitter<vscode.TreeItem | undefined | null>();
     readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null> = this._onDidChangeTreeData.event;
     private items: vscode.TreeItem[] = []; //creates a list of tree items starts empty obviously
 

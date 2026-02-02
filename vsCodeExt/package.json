@@ -1,6 +1,7 @@
 {
-  "name": "vsCodeExt",
+  "name": "ecode",
   "displayName": "EstimatingCarbon",
+  "publisher": "development",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -10,24 +11,24 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:vsCodeExt.helloWorld",
-    "onCommand:vsCodeExt.resetStore",
-    "onCommand:vsCodeExt.inputdisplay",
-    "onCommand:vsCodeExt.setApiKey",
-    "onCommand:vsCodeExt.openDashboard",
+    "onCommand:ecode.helloWorld",
+    "onCommand:ecode.resetStore",
+    "onCommand:ecode.inputdisplay",
+    "onCommand:ecode.setApiKey",
+    "onCommand:ecode.openDashboard",
     "onView:myPrimaryView"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "keybindings": [
       {
-        "command": "vsCodeExt.wrappedInline",
+        "command": "ecode.wrappedInline",
         "key": "tab",
         "when": "editorTextFocus && inlineSuggestionVisible && !isSnippetMode"
       },
       {
         "key": "ctrl+i",
-        "command": "vsCodeExt.wrappedInlineChat",
+        "command": "ecode.wrappedInlineChat",
         "when": "editorFocus && inlineChatHasEditsAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor != 'workbench.editor.notebook' || editorFocus && inlineChatHasNotebookAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook' || editorFocus && inlineChatHasNotebookInline && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook' || editorFocus && inlineChatHasProvider && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor != 'workbench.editor.notebook'"
       }
     ],
@@ -50,45 +51,41 @@
     },
     "commands": [
       {
-        "command": "vsCodeExt.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "vsCodeExt.openDashboard",
+        "command": "ecode.openDashboard",
         "title": "Open Carbon Dashboard"
       },
       {
-        "command": "vsCodeExt.clearStore",
+        "command": "ecode.clearStore",
         "title": "Clear stored calls"
       },
       {
-        "command": "vsCodeExt.inputdisplay",
+        "command": "ecode.inputdisplay",
         "title": "Input Display"
       },
       {
-        "command": "vsCodeExt.wrappedInline",
+        "command": "ecode.wrappedInline",
         "title": "Inline Commit"
       },
       {
-        "command": "vsCodeExt.wrappedInlineChat",
+        "command": "ecode.wrappedInlineChat",
         "title": "Inline chat accepted"
       },
       {
-        "command": "vsCodeExt.setApiKey",
+        "command": "ecode.setApiKey",
         "title": "Set Api Key"
       },
       {
-        "command": "interceptor.start",
+        "command": "HIDDENecode.interceptorStart",
         "title": "Start Proxy Interceptor",
         "category": "Interceptor"
       },
       {
-        "command": "interceptor.stop",
+        "command": "HIDDENecode.interceptorStop",
         "title": "Stop Proxy Interceptor",
         "category": "Interceptor"
       },
       {
-        "command": "interceptor.openTerminal",
+        "command": "HIDDENecode.interceptorOpenTerminal",
         "title": "Open Runtime Terminal",
         "category": "Interceptor"
       }
@@ -113,6 +110,8 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.18.11",
 
+    "@types/sinon": "^21.0.0",
+
     "@types/vscode": "^1.108.1",
 
     "@typescript-eslint/eslint-plugin": "^8.45.0",
@@ -122,6 +121,7 @@
     "esbuild": "^0.25.10",
     "eslint": "^9.36.0",
     "npm-run-all": "^4.1.5",
+    "sinon": "^21.0.1",
     "typescript": "^5.9.3",
     "vscode": "^1.1.34"
   },
