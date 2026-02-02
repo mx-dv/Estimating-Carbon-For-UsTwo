@@ -41,13 +41,6 @@ export class InterceptorProxy {
 
                     //!! purely for Dev, can be removed in main once incoorperated with UI
                     this.logger.appendLine(msg.message);
-                    // if (msg.message.includes('gCO2e}🔥')) {
-                    //     // let parsedMessage = msg.message.slice(0, msg.message.length)
-                    // updateTree()
-                    // }
-                    // if (msg.message.includes('🔥🔥')) {
-                    //     vscode.window.showInformationMessage(msg.message);
-                    // }
                     if (msg.message.includes('>> DateTime:')) {
                         id = msg.message.slice(16);
                         console.log(`id: ${id}`);
@@ -63,7 +56,6 @@ export class InterceptorProxy {
                         fullCall = true;
                         console.log(`cost: ${cost}`);
                     }
-                    //!!
                     if (fullCall === true) {
                         console.log(`id: ${id}, model: ${mod}, cost: ${cost}`);
                         var call: budget.Call = { DateTime: id, Model: mod, Emissions: +cost };
