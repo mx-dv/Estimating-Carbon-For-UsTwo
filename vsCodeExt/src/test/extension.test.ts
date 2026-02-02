@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { isFunctionDeclaration } from 'typescript';
 import * as sinon from 'sinon';
 import { state } from '../state';
+import { appendFile } from 'fs';
 
 
 // suite('Extension Test Suite', () => {
@@ -21,11 +22,13 @@ import { state } from '../state';
 suite('CommandTests', () => {
 	// gets all registered commands
 	let allCommands: string[];
+	let dynamics: any;
 	setup(async () => {
 		// WHEN PUBLISHING, CHANGE PUBLISHER FIELD IN PACKAGE.JSON AND ALSO REPLACE 'development'
 		// IN LINE BELOW WITH NEW PUBLISHER NAME.
 		const ext = vscode.extensions.getExtension('development.ecode');
 		await ext?.activate(); // Ensure the extension is actually running
+		dynamics = ext?.exports;
 		allCommands = await vscode.commands.getCommands(true);
 	});
 
@@ -53,8 +56,9 @@ suite('CommandTests', () => {
 
 					vscode.commands.executeCommand(command);
 					await new Promise(res => setTimeout(res, 500));
+					const status = dynamics.isInterceptorRunning();
 
-					assert.strictEqual(state.runningInterceptor, true, "Interceptor Not Running Correctly");
+					assert.strictEqual(status, true, "Interceptor Not Running Correctly");
 					// if (command.includes("ecode.interceptor")) {
 					// 	await Promise.race([
 					// 		vscode.commands.executeCommand(command),

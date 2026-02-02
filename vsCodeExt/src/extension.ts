@@ -112,7 +112,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log('Interceptor Proxy Server is active');
 
-    let startDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorStart', async () => {
+    let startDisposable = vscode.commands.registerCommand('ecode.interceptorStart', async () => {
         try {
             // start local server
             proxyServer = new InterceptorProxy(PROXY_PORT);
@@ -139,13 +139,14 @@ export function activate(context: vscode.ExtensionContext) {
 
             //      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
             state.runningInterceptor = true;
-            vscode.window.showInformationMessage('Interceptor Proxy started on port ' + PROXY_PORT);
+            vscode.window.showInformationMessage('Interceptor Proxy started on port ' + "->" + PROXY_PORT + state.runningInterceptor + "DONE");
+            vscode.window.showInformationMessage("Status: " + state.runningInterceptor)
         } catch (error) {
             vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
         }
     });
 
-    let stopDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorStop', async () => {
+    let stopDisposable = vscode.commands.registerCommand('ecode.interceptorStop', async () => {
         // stop local server
         if (proxyServer) {
             proxyServer.stop();
@@ -159,7 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Interceptor Proxy stopped. Proxy settings cleared.');
     });
 
-    let terminalDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorOpenTerminal', async () => {
+    let terminalDisposable = vscode.commands.registerCommand('ecode.interceptorOpenTerminal', async () => {
         if (!proxyServer) {
             vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `ecode.InterceptorStart`");
             return;
@@ -194,6 +195,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(startDisposable);
     context.subscriptions.push(stopDisposable);
 
+    return {
+        isInterceptorRunning: () => state.runningInterceptor
+    };
 }
 
 
