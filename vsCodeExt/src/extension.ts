@@ -9,6 +9,7 @@ import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 
 import { CarbonDashboardPanel } from './dashboard';
+import { state } from './state';
 
 import { InterceptorProxy } from './proxyServer';
 import { privateEncrypt } from 'crypto';
@@ -111,7 +112,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     console.log('Interceptor Proxy Server is active');
 
-    let startDisposable = vscode.commands.registerCommand('interceptor.start', async () => {
+    let startDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorStart', async () => {
         try {
             // start local server
             proxyServer = new InterceptorProxy(PROXY_PORT);
@@ -137,14 +138,14 @@ export function activate(context: vscode.ExtensionContext) {
             //      await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
 
             //      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
-
+            state.runningInterceptor = true;
             vscode.window.showInformationMessage('Interceptor Proxy started on port ' + PROXY_PORT);
         } catch (error) {
             vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
         }
     });
 
-    let stopDisposable = vscode.commands.registerCommand('interceptor.stop', async () => {
+    let stopDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorStop', async () => {
         // stop local server
         if (proxyServer) {
             proxyServer.stop();
@@ -158,9 +159,9 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Interceptor Proxy stopped. Proxy settings cleared.');
     });
 
-    let terminalDisposable = vscode.commands.registerCommand('interceptor.openTerminal', async () => {
+    let terminalDisposable = vscode.commands.registerCommand('HIDDENecode.interceptorOpenTerminal', async () => {
         if (!proxyServer) {
-            vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `interceptor.start`");
+            vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `ecode.InterceptorStart`");
             return;
         }
 

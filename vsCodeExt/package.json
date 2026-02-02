@@ -51,10 +51,6 @@
     },
     "commands": [
       {
-        "command": "ecode.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "ecode.openDashboard",
         "title": "Open Carbon Dashboard"
       },
@@ -79,17 +75,17 @@
         "title": "Set Api Key"
       },
       {
-        "command": "interceptor.start",
+        "command": "HIDDENecode.interceptorStart",
         "title": "Start Proxy Interceptor",
         "category": "Interceptor"
       },
       {
-        "command": "interceptor.stop",
+        "command": "HIDDENecode.interceptorStop",
         "title": "Stop Proxy Interceptor",
         "category": "Interceptor"
       },
       {
-        "command": "interceptor.openTerminal",
+        "command": "HIDDENecode.interceptorOpenTerminal",
         "title": "Open Runtime Terminal",
         "category": "Interceptor"
       }

@@ -3,9 +3,11 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import * as extension from '../extension';
+// import * as extension from '../extension';
 import { isFunctionDeclaration } from 'typescript';
 import * as sinon from 'sinon';
+import { state } from '../state';
+
 
 // suite('Extension Test Suite', () => {
 // 	vscode.window.showInformationMessage('Start all tests.');
@@ -47,8 +49,27 @@ suite('CommandTests', () => {
 		try {
 			for (const command of myExtensionCommands) {
 				console.log(`Running: ${command}`);
+				if (command === "ecode.interceptorStart") {
 
-				await vscode.commands.executeCommand(command);
+					vscode.commands.executeCommand(command);
+					await new Promise(res => setTimeout(res, 500));
+
+					assert.strictEqual(state.runningInterceptor, true, "Interceptor Not Running Correctly");
+					// if (command.includes("ecode.interceptor")) {
+					// 	await Promise.race([
+					// 		vscode.commands.executeCommand(command),
+					// 		new Promise((_, reject) => setTimeout(() => reject("Timeout Reached"), 1500))
+					// 	]).catch(err => {
+					// 		if (err !== "Timeout Reached") {
+					// 			throw err;
+					// 		}
+					// 		console.log("Interceptor is running in the background - it started correctly");
+					// 		// assert.equal(extension.runningInterceptor, true, "Interceptor Not Running Correctly");
+					// 	});
+				} else {
+					await vscode.commands.executeCommand(command);
+				}
+
 			}
 		} catch (error) {
 			assert.fail(`Command failed to execute: ${error}`);
