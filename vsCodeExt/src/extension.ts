@@ -8,9 +8,10 @@ import * as budget from './budget';
 import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 
-import { CarbonDashboardPanel } from './dashboard'; 
+import { CarbonDashboardPanel } from './dashboard';
 
 import { InterceptorProxy } from './proxyServer';
+import { privateEncrypt } from 'crypto';
 
 export let tree: MyTreeDataProvider;
 export let bar: statusBarManager;
@@ -28,13 +29,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     var barManager = new statusBarManager();
     const treeDataProvider = new MyTreeDataProvider();
-    
+
     vscode.window.registerTreeDataProvider(
-            'myPrimaryView',
-            treeDataProvider
-        );
-        
-    function convert(x:any){
+        'myPrimaryView',
+        treeDataProvider
+    );
+
+    function convert(x: any) {
         //treeDataProvider.addMessage(String(x));
         return x;
     }
@@ -51,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
         'myPrimaryView',
         treeDataProvider
     );
-    
+
 
     budget.initStorage(context.workspaceState);
     restoreCallHistory(treeDataProvider);
@@ -61,15 +62,15 @@ export function activate(context: vscode.ExtensionContext) {
     disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
         const tokens = Number(await devTok.change(evt));
 
-        if (tokens !== -1){
+        if (tokens !== -1) {
             var emissions = convert(tokens);
             let date = new Date();
             var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.toLocaleString() };
             updateTree(newCall);
         }
     }));
-    
-    const reset = vscode.commands.registerCommand('vsCodeExt.clearStore', () => {
+
+    const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
         budget.resetBudget();
         treeDataProvider.clearTree();
         barManager.updateLimit(0);
@@ -77,14 +78,14 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Dashboard command 
-    const dashboardCommand = vscode.commands.registerCommand('vsCodeExt.openDashboard', () => {
+    const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
         CarbonDashboardPanel.createOrShow(context.extensionUri);
         console.log('Carbon Dashboard command registered.');
     });
 
-    
 
-    const input = vscode.commands.registerCommand('vsCodeExt.inputdisplay', async () => {
+
+    const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {
         //vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
         const limit = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
             prompt: 'Enter test call: ',
@@ -125,7 +126,7 @@ export function activate(context: vscode.ExtensionContext) {
             await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
 
 
-            // const disposableAPIKEY = vscode.commands.registerCommand('vsCodeExt.setApiKey', async () => {
+            // const disposableAPIKEY = vscode.commands.registerCommand('ecode.setApiKey', async () => {
             //  const apiKey = await vscode.window.showInputBox({
             //      prompt: 'Enter your API Key',
             //      placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
@@ -208,7 +209,7 @@ export async function deactivate() {
 
 
 class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null> = new vscode.EventEmitter<vscode.TreeItem | undefined | null >();
+    private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null> = new vscode.EventEmitter<vscode.TreeItem | undefined | null>();
     readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null> = this._onDidChangeTreeData.event;
     private items: vscode.TreeItem[] = []; //creates a list of tree items starts empty obviously
 
