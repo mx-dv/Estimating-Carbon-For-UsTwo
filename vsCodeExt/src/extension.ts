@@ -67,9 +67,15 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (tokens !== -1) {
             var emissions = convert(tokens);
+
+            
+            treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + emissions + ' g CO₂e');
+
+
             let date = new Date();
             var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.toLocaleString() };
             updateTree(newCall);
+
         }
     }));
 
