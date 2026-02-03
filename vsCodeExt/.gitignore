@@ -5,4 +5,8 @@ out/
 dist/
 node_modules/
 .vscode/
+<<<<<<< HEAD
 .vscode-test
+=======
+.vscode-test/
+>>>>>>> dev
