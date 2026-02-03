@@ -5,6 +5,9 @@ import * as devTok from './devTokens';
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as budget from './budget';
+import * as logCap from './logCapture';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 
@@ -74,6 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
+
         budget.resetBudget();
         treeDataProvider.clearTree();
         barManager.updateLimit(0);
@@ -86,6 +90,26 @@ export function activate(context: vscode.ExtensionContext) {
     const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
         CarbonDashboardPanel.createOrShow(context.extensionUri);
         console.log('Carbon Dashboard command registered.');
+    });
+
+    const refresh = vscode.commands.registerCommand('ecode.refreshLogs', () => {
+        try {
+        console.log("LOG FILE PATH HERE!");
+        const filePath = logCap.getLogFilePath(context);
+        console.log(filePath);
+        const logUri = path.join(path.dirname(filePath), "GitHub.copilot-chat", "GitHub Copilot Chat.log");
+        fs.readFile(logUri, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            return;
+         }
+        console.log(data);
+        });
+        vscode.window.showInformationMessage("Copilot log files refreshed.");
+        }
+        catch (error) {
+            vscode.window.showErrorMessage("Error: Copilot log files not found.");
+        }
     });
 
 
