@@ -25,14 +25,6 @@
         "command": "ecode.wrappedInline",
         "key": "tab",
         "when": "editorTextFocus && inlineSuggestionVisible && !isSnippetMode"
-<<<<<<< HEAD
-=======
-      },
-      {
-        "key": "ctrl+i",
-        "command": "ecode.wrappedInlineChat",
-        "when": "editorFocus && inlineChatHasEditsAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor != 'workbench.editor.notebook' || editorFocus && inlineChatHasNotebookAgent && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook' || editorFocus && inlineChatHasNotebookInline && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor == 'workbench.editor.notebook' || editorFocus && inlineChatHasProvider && inlineChatPossible && !editorReadonly && !editorSimpleInput && activeEditor != 'workbench.editor.notebook'"
->>>>>>> dev
       }
     ],
     "viewsContainers": {
@@ -69,16 +61,9 @@
         "command": "ecode.wrappedInline",
         "title": "Inline Commit"
       },
-      {
-<<<<<<< HEAD
-        "command": "vsCodeExt.setApiKey",
-=======
-        "command": "ecode.wrappedInlineChat",
-        "title": "Inline chat accepted"
-      },
+
       {
         "command": "ecode.setApiKey",
->>>>>>> dev
         "title": "Set Api Key"
       },
       {
@@ -110,7 +95,7 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "node ./out/test/runTest.js"
+    "test": "vscode-test"
   },
   "devDependencies": {
     "@types/http-proxy": "^1.17.16",
@@ -120,6 +105,7 @@
     "@types/vscode": "^1.108.1",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
+    "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.25.10",
     "eslint": "^9.36.0",
