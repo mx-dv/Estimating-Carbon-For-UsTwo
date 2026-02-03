@@ -60,11 +60,11 @@ suite("CommandTests", () => {
 });
 
 suite("UI Tests", () => {
-		
+	
 });
 
 suite("RunTime Tests", () => {
-
+	
 });
 
 suite("DevTime Tests", () => {
