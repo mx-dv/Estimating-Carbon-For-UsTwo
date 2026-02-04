@@ -61,6 +61,10 @@
         "command": "ecode.wrappedInline",
         "title": "Inline Commit"
       },
+      {
+        "command": "ecode.newFile",
+        "title": "Open New File"
+      },
 
       {
         "command": "ecode.setApiKey",

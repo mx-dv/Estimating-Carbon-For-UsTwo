@@ -41,8 +41,6 @@ export function activate(context: vscode.ExtensionContext) {
         return x;
     }
 
-    devTok.getTextAroundCursor();
-
     //let lastInlineState = false;
     const disposables: vscode.Disposable[] = [];
 
@@ -60,6 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
     barManager.updateLimit(budget.updateLimit());
     const BarManager = vscode.window.createStatusBarItem();
 
+
     disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
         const tokens = Number(await devTok.change(evt));
 
@@ -70,6 +69,16 @@ export function activate(context: vscode.ExtensionContext) {
             updateTree(newCall);
         }
     }));
+
+    const newF = vscode.commands.registerCommand('ecode.newFile',async () =>{
+        vscode.workspace.openTextDocument({content:" "}).then(async doc => {				
+            await vscode.window.showTextDocument(doc);
+            const position = new vscode.Position(10, 28);
+            new vscode.Selection(position, position);
+            await vscode.commands.executeCommand('type', { text: "HELLO" });
+
+        });
+    });
 
     const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
         budget.resetBudget();
