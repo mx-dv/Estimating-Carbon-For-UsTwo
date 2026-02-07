@@ -10,8 +10,6 @@ export interface Call {
     Emissions: number;
 }
 
-var calls: Call[] = [];
-var storeKey: string = "storeKey";
 var callStore: Memento;
 let dateTime = new Date();
 
@@ -50,8 +48,8 @@ export class budget{
         this.callStore.update(this.storeKey, this.calls);
     }
     getCalls(): Call[] {
-        this.calls = this.callStore.get<Call[]>(storeKey, []) || [];
-        return calls;
+        this.calls = this.callStore.get<Call[]>(this.storeKey, []) || [];
+        return this.calls;
     }
 
     getEmissionsFromCalls(pCalls: Call[]): number[] {

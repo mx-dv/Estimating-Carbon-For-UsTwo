@@ -32,7 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     var barManager = new statusBarManager();
     const treeDataProvider = new MyTreeDataProvider();
-    console.log("Testing testing testing");
     vscode.window.registerTreeDataProvider(
         'myPrimaryView',
         treeDataProvider
@@ -69,6 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
             let date = new Date();
             var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.toLocaleString() };
             updateTree(newCall);
+
         }
     }));
 
@@ -93,6 +93,12 @@ export function activate(context: vscode.ExtensionContext) {
     const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
         CarbonDashboardPanel.createOrShow(context.extensionUri);
         console.log('Carbon Dashboard command registered.');
+    });
+    vscode.commands.registerCommand('ecode.testInput',async () =>{
+        let date = new Date();
+        var newCall: budget.Call = { Emissions: 5, Model: "TEST", DateTime: date.toLocaleString() };
+        updateTree(newCall);
+
     });
 
     const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {

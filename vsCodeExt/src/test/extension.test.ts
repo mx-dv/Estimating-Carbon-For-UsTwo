@@ -107,16 +107,14 @@ suite('devtime', ()=>{
 
 	test ('Copy and Paste tests', async () =>{
 
-		//console.log("testttttttttt");
-		budge.getCalls();
+		var pCalls = budge.getCalls();
 		const doc = await vscode.workspace.openTextDocument({content:" "});			
 		await vscode.window.showTextDocument(doc);
-		const position = new vscode.Position(10, 28);
-		new vscode.Selection(position, position);
 		await vscode.commands.executeCommand('type', { text: "HELLO" });
+		var pCalls2 = budge.getCalls();
 
-		assert.strictEqual(1,1);
+		assert.strictEqual(pCalls.length,pCalls2.length);
 	
-	});
+	});	
 });
 

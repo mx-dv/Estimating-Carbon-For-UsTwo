@@ -50,6 +50,10 @@
         "title": "Open Carbon Dashboard"
       },
       {
+        "command": "ecode.testInput",
+        "title": "test input"
+      },
+      {
         "command": "ecode.clearStore",
         "title": "Clear stored calls"
       },
