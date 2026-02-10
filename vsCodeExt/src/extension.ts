@@ -123,8 +123,6 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage('Error: NaN inputted.');
         }
 
-
-
     });
     context.subscriptions.push(input);
     context.subscriptions.push(dashboardCommand);
@@ -279,11 +277,6 @@ class statusBarManager {
         this.mainItem.text = 'Average carbon cost: g CO₂e';
         this.mainItem.show();//displays the limit item
 
-        // for (var i:number = 0;i<10;i++){
-        //  this.loading.push(vscode.window.createStatusBarItem());
-        //  this.loading[i].text = "-"; //fills the loading array with some items
-        //  this.loading[i].show(); //displays them
-        // }
 
     }
 
