@@ -303,7 +303,7 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
             const value = carbonChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
             
             //Logic fo r budget (dummy values used : budget of 500)
-            const bdget = 500;
+            const budget = 500;
             const remainingBudget = Math.max(0, budget - value);)
 
             // update thebudget chart with the new values
