@@ -273,7 +273,25 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
                 }
        });
         
-         
+    let budgetChart; // declare the variable for the budget chart
+    
+    const ctxBudget = document.getElementById('budgetChart');
+    budgetChart = new Chart(ctxBudget, {
+        type: 'pie',
+        data:{
+            labels: ['Carbon Emission', 'Remaining Budget'],
+            datasets: [{
+                data: [70, 30], // dummy data for carbon emission and remaining budget
+                backgroundColor: ['#ff6384', '#36a2eb'],
+                borderColor: '#1e1e1e',
+                borderWidth: 2
+            }]
+
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+    });
     </script>
     </body>
     </html>`;
