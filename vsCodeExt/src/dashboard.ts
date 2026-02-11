@@ -148,13 +148,22 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
   <header>
 
 
-  <h1>chart 1</h1>
-  <p> something here</p>
+  <h1>Carbon Analysis</h1>
+  <p> Carbon impact based on each file will be depicted below via pie charts</p>
 </header>
-       <section> 
+       <section class = "dashboard-grid"> 
+       <div class="chart-wrapper">
         <h2>File by Size in Repo</h2>
         <div class="chart-container">
-        <canvas id="emissionChart"></canvas>
+            <canvas id="emissionChart"></canvas>
+        </div>
+
+    </div>
+    <div class="chart-wrapper">
+        <h2>Carnon Cost in Repo by File</h2>
+        <div class="chart-container">
+            <canvas id="carbonCostChart"></canvas>
+        </div>
     </div>
     </section>
     <script>
