@@ -225,7 +225,12 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
             const message = event.data;
             if (message.command === 'updateData') {
                 // This will be used when real data is available, the dummy data used above will be ignored
-                myChart.data.datasets[0].data = message.data;
+                myChart.data.datasets[0].data = message.fileSizes;
+                carbonChart.update();
+                
+                carbonChart.data.datasets[0].data = message.carbonData;
+                carbonChart.update();
+
                 myChart.data.datasets[0].backgroundColor = generateColors(message.data.length);
                 myChart.update();
             }
