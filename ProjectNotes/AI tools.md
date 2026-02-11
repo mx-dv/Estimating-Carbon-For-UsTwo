@@ -43,10 +43,19 @@ The error occured when I would run the webview when I was initially creating it 
 <h3>Review</h3>
 
 <h2>Hao Ni</h2>
+<p> I, Hao Ni declare that this document is accurate to my AI usage throughout the course of SEP</p>
 
 <h3>Development</h3>
+reseach into which papers to look into for carbon to emission formula
+
+> Prompt used - " I am reasearching into how to calculate carbon emmissions per token in AI usage, can you find me some relevent papers I can look into"
+I was having problem finding relevent papers online, because most of the materials I can find is from personal bloggs and reddit notes which is highly unprofessional and not releveant enough so I use AI to help find relevant papers.
 
 <h3>Debugging</h3>
+I use AI when my code can't run but I can't spot where's the problem
+
+> Prompt used - " I am suppose to the Dash board's color change to black now, why is it not working"
+The problem occur when I finish the implementation of the mode toggle but the switch isn't working and I was having problem finding the bug. The reason is I can't put the .js file and the .css file outside Dashboard.ts and should keep all the js and css part inside getwebview.
 
 <h3>Review</h3>
 
