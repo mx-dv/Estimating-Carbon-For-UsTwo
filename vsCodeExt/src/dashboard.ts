@@ -115,7 +115,7 @@ body.darkmode #theme-switch svg:first-child{ display: none; }
 body.darkmode #theme-switch svg:last-child{ display: block; }
             .chart-container {
                 position: relative;
-                height: 400px;
+                height: 300px;
                 width: 100%;
                 max-width: 800px;
                 margin: 0 auto;
@@ -126,7 +126,7 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
             max-width: 500px;
             }
             .dashboard-grid{
-            display:flex;
+            display: flex;
             flex-wrap:wrap;
             justify-content: space-around;
             gap: 20px;
@@ -160,7 +160,7 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
 
     </div>
     <div class="chart-wrapper">
-        <h2>Carnon Cost in Repo by File</h2>
+        <h2>Carbon Cost in Repo by File</h2>
         <div class="chart-container">
             <canvas id="carbonCostChart"></canvas>
         </div>
