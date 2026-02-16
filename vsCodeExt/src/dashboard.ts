@@ -115,12 +115,24 @@ body.darkmode #theme-switch svg:first-child{ display: none; }
 body.darkmode #theme-switch svg:last-child{ display: block; }
             .chart-container {
                 position: relative;
-                height: 400px;
+                height: 300px;
                 width: 100%;
                 max-width: 800px;
                 margin: 0 auto;
             }
-                h2 { text-align: center; font-weight: normal; margin-bottom; 10px;}
+            .chart-wrapper{
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            }
+            .dashboard-grid{
+            display: flex;
+            flex-wrap:wrap;
+            justify-content: space-around;
+            gap: 20px;
+            padding: 20px;
+            }
+                h2 { text-align: center; font-weight: normal; margin-bottom: 10px;}
         </style>
 
         
@@ -136,13 +148,22 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
   <header>
 
 
-  <h1>chart 1</h1>
-  <p> something here</p>
+  <h1>Carbon Analysis</h1>
+  <p> Carbon impact based on each file will be depicted below via pie charts</p>
 </header>
-       <section> 
+       <section class = "dashboard-grid"> 
+       <div class="chart-wrapper">
         <h2>File by Size in Repo</h2>
         <div class="chart-container">
-        <canvas id="emissionChart"></canvas>
+            <canvas id="emissionChart"></canvas>
+        </div>
+
+    </div>
+    <div class="chart-wrapper">
+        <h2>Carbon Cost in Repo by File</h2>
+        <div class="chart-container">
+            <canvas id="carbonCostChart"></canvas>
+        </div>
     </div>
     </section>
     <script>
@@ -204,13 +225,41 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
             const message = event.data;
             if (message.command === 'updateData') {
                 // This will be used when real data is available, the dummy data used above will be ignored
-                myChart.data.datasets[0].data = message.data;
-                myChart.data.datasets[0].backgroundColor = generateColors(message.data.length);
+                carbonChart.data.datasets[0].data = message.carbonData;
+                carbonChart.update();
+                myChart.data.datasets[0].data = message.fileSizes;
+                myChart.data.datasets[0].backgroundColor = generateColors(message.fileSizes.length);
                 myChart.update();
             }
         });
 
+       const carbonData = [400, 200, 50, 30, 100]; // dummy data
+       
+       const ctxCarbon = document.getElementById('carbonCostChart');
+       const carbonChart = new Chart(ctxCarbon, {
+              type: 'pie',
+                data: {
+                    labels: ['Main.js', 'test.js', 'worker1.js', 'Helperfunction.js', 'Other Files'],
+                    datasets: [{
+                        data: carbonData,
+                        backgroundColor: generateColors(carbonData.length),
+                        borderColor: '#1e1e1e',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#ccc' }   
+                        }
+                    }
+                }
+       });
         
+         
     </script>
     </body>
     </html>`;
