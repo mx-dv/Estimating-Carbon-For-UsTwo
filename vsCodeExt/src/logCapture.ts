@@ -12,42 +12,48 @@ export function getLogFilePath(context: vscode.ExtensionContext) {
     return context.logUri.fsPath;
 }
 
-export async function identifyModel(rawLog: string): Promise<string[]> {
+export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     var matches = [];
     var claudeFlag: boolean = false;
+    var activeCall: budget.Call = { Emissions: 0, Model: "TEST", DateTime: "today" };
     const lines: string[] = rawLog.split(/\r?\n/);
     for (var line of lines) {
         //console.log(line);
         const match = line.match(modelPattern);
         if (claudeFlag) {
             const result = findClaude(line);
-            if (result !== -1) { claudeFlag = false;}
+            if (result !== -1) { 
+                activeCall.Emissions = result;
+                let date = new Date();
+                activeCall.DateTime = date.toLocaleString();
+                claudeFlag = false;
+                matches.push(activeCall);
+            }
         }
 
         if (match === null) {continue;}
 
         console.log(match[0]);
-        matches.push(match[0]);
         switch (match[0]) {
             case 'claude-haiku-4.5':
+                activeCall.Model = match[0];
                 claudeFlag = true;
-                console.log("CLAUDE DETECTED !!!!!!!!");
                 break;
             case 'claude-opus-4.5':
+                activeCall.Model = match[0];
                 claudeFlag = true;
-                console.log("CLAUDE DETECTED !!!!!!!!");
                 break;
             case 'claude-opus-4.6':
+                activeCall.Model = match[0];
                 claudeFlag = true;
-                console.log("CLAUDE DETECTED !!!!!!!!");
                 break;
             case 'claude-sonnet-4':
+                activeCall.Model = match[0];
                 claudeFlag = true;
-                console.log("CLAUDE DETECTED !!!!!!!!");
                 break;
             case 'claude-sonnet-4.5':
+                activeCall.Model = match[0];
                 claudeFlag = true;
-                console.log("CLAUDE DETECTED !!!!!!!!");
                 break;
             default:
                 console.log("Functionality coming soon!");

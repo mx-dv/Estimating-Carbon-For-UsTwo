@@ -107,8 +107,11 @@ export function activate(context: vscode.ExtensionContext) {
 
         // reads file and outputs lines to console one at a time
         const content = fs.readFileSync(logUri, 'utf-8');
-        const models: string[] = await logCap.identifyModel(content);
-        console.log("MODELS DETECTED: ", models);
+        const models: budget.Call[] = await logCap.identifyModel(content);
+        console.log("CALLS: ", models);
+        for (let index = 0; index < models.length; index++) {
+            updateTree(models[index]);
+        }
         vscode.window.showInformationMessage("Copilot log files refreshed.");
         }
         catch (error) {
