@@ -33,6 +33,22 @@ export async function identifyModel(rawLog: string): Promise<string[]> {
                 claudeFlag = true;
                 console.log("CLAUDE DETECTED !!!!!!!!");
                 break;
+            case 'claude-opus-4.5':
+                claudeFlag = true;
+                console.log("CLAUDE DETECTED !!!!!!!!");
+                break;
+            case 'claude-opus-4.6':
+                claudeFlag = true;
+                console.log("CLAUDE DETECTED !!!!!!!!");
+                break;
+            case 'claude-sonnet-4':
+                claudeFlag = true;
+                console.log("CLAUDE DETECTED !!!!!!!!");
+                break;
+            case 'claude-sonnet-4.5':
+                claudeFlag = true;
+                console.log("CLAUDE DETECTED !!!!!!!!");
+                break;
             default:
                 console.log("Functionality coming soon!");
                 break;
