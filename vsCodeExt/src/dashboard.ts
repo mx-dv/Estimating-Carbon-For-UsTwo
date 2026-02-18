@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as budget from './budget';
 
 
 
@@ -25,6 +26,7 @@ export class CarbonDashboardPanel {
         // already have a panel
         if (CarbonDashboardPanel.currentPanel) {
             CarbonDashboardPanel.currentPanel._panel.reveal(column);
+            CarbonDashboardPanel.currentPanel._sendData();
             return;
         }
 
@@ -37,6 +39,32 @@ export class CarbonDashboardPanel {
         );
 
         CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
+        CarbonDashboardPanel.currentPanel._sendData();
+    }
+
+    // Call this from extension whenever a new call is recorded to keep the chart live
+    public static sendData() {
+        if (CarbonDashboardPanel.currentPanel) {
+            CarbonDashboardPanel.currentPanel._sendData();
+        }
+    }
+
+    private _sendData() {
+        // Aggregate emissions by model from stored calls
+        const calls = budget.getCalls();
+        const modelMap: Record<string, number> = {};
+        for (const call of calls) {
+            const model = call.Model || 'Unknown';
+            modelMap[model] = (modelMap[model] || 0) + call.Emissions;
+        }
+        const modelLabels = Object.keys(modelMap);
+        const modelEmissions = modelLabels.map(k => modelMap[k]);
+
+        this._panel.webview.postMessage({
+            command: 'updateData',
+            modelLabels,
+            modelEmissions
+        });
     }
 
     public dispose() {
@@ -94,6 +122,7 @@ export class CarbonDashboardPanel {
                     <canvas id="carbonCostChart"></canvas>
                 </div>
             </div>
+            
         </section>
 
         <section id="drilldown-view">
@@ -111,4 +140,3 @@ export class CarbonDashboardPanel {
     </html>`;
     }
 }
-
