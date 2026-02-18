@@ -150,7 +150,7 @@ export function activate(context: vscode.ExtensionContext) {
 			//      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
 			state.runningInterceptor = true;
 			// vscode.window.showInformationMessage('Interceptor Proxy started on port ' + "->" + PROXY_PORT + state.runningInterceptor + "DONE");
-			vscode.window.showInformationMessage("Status: " + state.runningInterceptor);
+			// vscode.window.showInformationMessage("Status: " + state.runningInterceptor);
 		} catch (error) {
 			vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
 		}
@@ -195,12 +195,23 @@ export function activate(context: vscode.ExtensionContext) {
 				"SSL_CERT_FILE": proxyServer.certPath,
 
 				// nodejs specific
-				"NODE_EXTRA_CA_CERTS": proxyServer.certPath
+				"NODE_EXTRA_CA_CERTS": proxyServer.certPath,
+				"NODE_OPTIONS": "--use-env-proxy"
+
 			}
 		});
 
 		terminal.show();
 		vscode.window.showInformationMessage("Opened Terminal with Proxy Environment Vars");
+	});
+
+	let runtimeDisposable = vscode.commands.registerCommand("ecode.runtimeAnalysis", async () => {
+		try {
+			await vscode.commands.executeCommand("ecode.interceptorStart");
+			await vscode.commands.executeCommand("ecode.interceptorOpenTerminal");
+		} catch (error) {
+			vscode.window.showErrorMessage("Failed to launch runtime analysis service");
+		}
 	});
 
 	context.subscriptions.push(terminalDisposable);

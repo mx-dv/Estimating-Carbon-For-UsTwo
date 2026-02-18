@@ -11,7 +11,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:ecode.helloWorld",
     "onCommand:ecode.resetStore",
     "onCommand:ecode.inputdisplay",
     "onCommand:ecode.setApiKey",
@@ -88,6 +87,11 @@
         "command": "ecode.interceptorOpenTerminal",
         "title": "Open Runtime Terminal",
         "category": "Interceptor"
+      },
+      {
+        "command": "ecode.runtimeAnalysis",
+        "title": "Ecode: Analyse Runtime",
+        "category": "Interceptor"
       }
     ]
   },
@@ -124,6 +128,7 @@
   },
   "dependencies": {
     "axios": "^1.13.2",
+    "global-agent": "^4.1.2",
     "http-proxy": "^1.18.1",
     "mockttp": "^4.2.1",
     "tiktoken": "^1.0.22"
