@@ -2,6 +2,7 @@ import { error } from 'console';
 import { resolve } from 'path';
 import * as budget from './budget';
 import * as vscode from 'vscode';
+import * as convert from './convert';
 
 
 const modelPattern = /(?<=\[debug\] chat model )(.*)/g;
@@ -26,10 +27,9 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
         if (claudeFlag) {
             const [time, result] = findClaude(line);
             if (result !== -1) { 
-                activeCall.Emissions = result;
+                activeCall.Emissions = convert.calculateEmission(activeCall.Model, result);
                 activeCall.DateTime = time;
                 claudeFlag = false;
-                console.log("INIT MATCHES:\n", matches);
                 matches.push(activeCall);
                 var activeCall: budget.Call = { Emissions: 0, Model: "TEST", DateTime: 0 };
             }
@@ -82,7 +82,8 @@ function findClaude(line: string): [number, number] {
             result += Number(match[i]);
         }
         console.log("C L A U D E T O K E N S !!");
-        const timestamp: number = new Date(match[0]).getTime();
+        var timestamp: number = new Date(match[0]).getTime();
+        if (match[0] === '0') {timestamp = new Date().getTime();}
         console.log("Timestamp: ", timestamp);
         console.log(match);
         console.log(result);

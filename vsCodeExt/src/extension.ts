@@ -67,22 +67,22 @@ export function activate(context: vscode.ExtensionContext) {
     barManager.updateLimit(budget.updateLimit());
     const BarManager = vscode.window.createStatusBarItem();
 
-    disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
-        const tokens = Number(await devTok.change(evt));
+    // disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
+    //     const tokens = Number(await devTok.change(evt));
 
-        if (tokens !== -1) {
-            var emissions = convert(tokens);
+    //     if (tokens !== -1) {
+    //         var emissions = convert(tokens);
 
             
-            treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + emissions + ' g CO₂e');
+    //         treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + emissions + ' g CO₂e');
 
 
-            let date = new Date();
-            var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.getTime() };
-            updateTree(newCall);
+    //         let date = new Date();
+    //         var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.getTime() };
+    //         updateTree(newCall);
 
-        }
-    }));
+    //     }
+    // }));
 
     disposables.push(vscode.workspace.onDidSaveTextDocument(async evt => {
         console.log("Updating logs..........");
