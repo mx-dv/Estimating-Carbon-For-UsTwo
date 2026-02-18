@@ -59,6 +59,10 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                 activeCall.Model = match[0];
                 claudeFlag = true;
                 break;
+            case 'claude-sonnet-4.6':
+                activeCall.Model = match[0];
+                claudeFlag = true;
+                break;
             default:
                 console.log("Functionality coming soon!");
                 break;
