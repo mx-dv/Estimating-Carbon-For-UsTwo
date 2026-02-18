@@ -5,6 +5,9 @@ import * as devTok from './devTokens';
 import * as vscode from 'vscode';
 import * as https from 'https';
 import * as budget from './budget';
+import * as logCap from './logCapture';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 
@@ -76,8 +79,13 @@ export function activate(context: vscode.ExtensionContext) {
 			var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.toLocaleString() };
 			updateTree(newCall);
 
-		}
-	}));
+    const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
+
+        budget.resetBudget();
+        treeDataProvider.clearTree();
+        barManager.updateLimit(0);
+        vscode.window.showInformationMessage('Past calls cleared.');
+        // state.runningInterceptor = true;
 
 	const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
 		budget.resetBudget();
@@ -93,6 +101,27 @@ export function activate(context: vscode.ExtensionContext) {
 		CarbonDashboardPanel.createOrShow(context.extensionUri);
 		console.log('Carbon Dashboard command registered.');
 	});
+  const refresh = vscode.commands.registerCommand('ecode.refreshLogs', () => {
+      try {
+
+      // concactenates correct file name to access Copilot logs
+      const filePath = logCap.getLogFilePath(context);
+      console.log(filePath);
+      const logUri = path.join(path.dirname(filePath), "GitHub.copilot-chat", "GitHub Copilot Chat.log");
+
+      // reads file and outputs lines to console one at a time
+      const content = fs.readFileSync(logUri, 'utf-8');
+      const lines: string[] = content.split(/\r?\n/);
+      for (const line of lines) {
+          console.log(line.trim());
+      }
+      vscode.window.showInformationMessage("Copilot log files refreshed.");
+      }
+      catch (error) {
+          vscode.window.showErrorMessage("Error: Copilot log files not found.");
+      }
+    });
+
 
 
 
