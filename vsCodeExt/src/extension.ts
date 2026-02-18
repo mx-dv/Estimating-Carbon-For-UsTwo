@@ -324,5 +324,5 @@ export function updateTree(call: budget.Call) {
     console.log("limit: " + cLimit);
     bar.updateBar(call.Emissions, cLimit);
     tree.addMessage("Emissions: " + call.Emissions + " - Model: " + call.Model + " - Date: " + call.DateTime);
-
+    CarbonDashboardPanel.sendData();
 }
