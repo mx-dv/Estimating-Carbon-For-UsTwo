@@ -156,19 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	let stopDisposable = vscode.commands.registerCommand('ecode.interceptorStop', async () => {
-		// stop local server
-		if (proxyServer) {
-			proxyServer.stop();
-		}
-
-		// clear VSCode proxy settings
-		// const config = vscode.workspace.getConfiguration('http');
-		// await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
-		// await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
-
-		vscode.window.showInformationMessage('Interceptor Proxy stopped. ');//Proxy settings cleared.');
-	});
+	let terminal: vscode.Terminal;
 
 	let terminalDisposable = vscode.commands.registerCommand('ecode.interceptorOpenTerminal', async () => {
 		if (!proxyServer) {
@@ -180,7 +168,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		//create a new terminal with specific Environment Vars
 
-		const terminal = vscode.window.createTerminal({
+		terminal = vscode.window.createTerminal({
 			name: "Ecode RunTime Analysis Terminal",
 			env: {
 				// proxy environment variables
@@ -205,6 +193,24 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage("Opened Terminal with Proxy Environment Vars");
 	});
 
+	let stopDisposable = vscode.commands.registerCommand('ecode.interceptorStop', async () => {
+		// stop local server
+		if (proxyServer) {
+			proxyServer.stop();
+		}
+
+		if (terminal) {
+			terminal.dispose();
+		}
+
+		// clear VSCode proxy settings
+		// const config = vscode.workspace.getConfiguration('http');
+		// await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
+		// await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
+
+		vscode.window.showInformationMessage('Interceptor Proxy stopped. ');//Proxy settings cleared.');
+	});
+
 	let runtimeDisposable = vscode.commands.registerCommand("ecode.runtimeAnalysis", async () => {
 		try {
 			await vscode.commands.executeCommand("ecode.interceptorStart");
@@ -225,6 +231,11 @@ export function activate(context: vscode.ExtensionContext) {
 				label: `$(play) Reset Stored Session`,
 				description: "Resets the current record of carbon emissions",
 				command: "ecode.clearStore"
+			},
+			{
+				label: `$(play) Stop Runtime Proxy`,
+				description: "Stops the recording of carbon emissions",
+				command: "ecode.interceptorStop"
 			}
 		];
 
