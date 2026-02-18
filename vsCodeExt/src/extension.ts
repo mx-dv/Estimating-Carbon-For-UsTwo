@@ -214,11 +214,41 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	let ecodeMenu = vscode.commands.registerCommand("ecode.menu", async () => {
+		const ecodeCommands = [
+			{
+				label: `$(play) Start Runtime Analysis`,
+				description: "Opens Ecode Terminal where files to be analysed are run",
+				command: "ecode.runtimeAnalysis"
+			},
+			{
+				label: `$(play) Reset Stored Session`,
+				description: "Resets the current record of carbon emissions",
+				command: "ecode.clearStore"
+			}
+		];
+
+		const selection = await vscode.window.showQuickPick(ecodeCommands, {
+			placeHolder: "Select an Ecode function",
+		});
+
+		if (selection) {
+			vscode.commands.executeCommand(selection.command);
+		}
+	});
+
 	const runtimeLaunchButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-	runtimeLaunchButton.text = `$(play) Start Ecode Runtime Analysis`;
-	runtimeLaunchButton.tooltip = "Click to open terminal to run file to be analysed";
-	runtimeLaunchButton.command = "ecode.runtimeAnalysis";
+	// runtimeLaunchButton.text = `$(play) Start Ecode Runtime Analysis`;
+	// runtimeLaunchButton.tooltip = "Click to open terminal to run file to be analysed";
+	// runtimeLaunchButton.command = "ecode.runtimeAnalysis";
+	// runtimeLaunchButton.show();
+	runtimeLaunchButton.text = `$(list-unordered) Ecode`;
+	runtimeLaunchButton.tooltip = "Click to see AI Analysis Options";
+	runtimeLaunchButton.command = "ecode.menu";
 	runtimeLaunchButton.show();
+
+	// TODO need to make sure that multiple interceptors can't be started at once. 
+	// This isn't handled very gracefully at the moment.
 
 
 
@@ -227,6 +257,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(stopDisposable);
 	context.subscriptions.push(runtimeDisposable);
 	context.subscriptions.push(runtimeLaunchButton);
+	context.subscriptions.push(ecodeMenu);
 	return {
 		isInterceptorRunning: () => state.runningInterceptor
 	};

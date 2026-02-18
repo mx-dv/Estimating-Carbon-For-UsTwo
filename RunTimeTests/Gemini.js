@@ -1,8 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
-// import { bootstrap } from 'global-agent';
-// bootstrap();
 
-// The client gets the API key from the environment variable `GEMINI_API_KEY`.
+
 const ai = new GoogleGenAI({});
 
 async function main() {
