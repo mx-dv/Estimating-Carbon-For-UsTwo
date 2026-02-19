@@ -6,8 +6,10 @@ We used AI throughout the project to test our extension's token tracking ability
 
 <h2>Jacob Connor</h2>
 <p>I, Jacob Connor declare that this document is accurate to my AI usage throughout the course of SEP.</p>
+<p>All models used have been  ChatGPT</p> <br>
 
 <h3>Development</h3>
+
 Research into tracking tokens used inline when programming
   this work was eventually archived
 
@@ -24,6 +26,7 @@ Research into testing Development time
 
 <h2>Iman</h2>
 <p> I, Iman Hadi declare that this document is accurate to my AI usage throughout the course of SEP</p>
+<p>All models used have been  Gemini</p> <br>
 
 <h3>Development</h3>
 Research into creating a dashboard and adding features
@@ -40,6 +43,7 @@ The error occured when I would run the webview when I was initially creating it 
 
 <h2>Max Davies</h2>
 <p> I, Max Davies, declare that this document is accurate to my AI usage throughout the course of SEP</p>
+<p>All models used have been  Gemini</p> <br>
 <h3>Development</h3>
 <h4>Test Development - trying to optimise test speed using caching</h4>
 
@@ -66,6 +70,7 @@ I don't use AI to review my code, I have only used it for small excerpts, protot
 <h2>Hao Ni</h2>
 <p> I, Hao Ni declare that this document is accurate to my AI usage throughout the course of SEP</p>
 
+<p>All models used have been  ChatGPT</p> <br>
 <h3>Development</h3>
 reseach into which papers to look into for carbon to emission formula
 
@@ -83,7 +88,7 @@ The problem occur when I finish the implementation of the mode toggle but the sw
 <h2>Morgan Parry</h2>
 
 <h3>Development</h3>
-
+<p>All models used have been  ChatGPT</p> <br>
 > Prompt used - "Give an overview of regexes and how they work, in particular how they can be formatted to exclude lines of text based on a phrase they contain."
 > Prompt used - "How can I use a regex to capture text between two characters?"
 
