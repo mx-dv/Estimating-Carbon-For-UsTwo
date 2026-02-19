@@ -31,7 +31,9 @@ export class CarbonDashboardPanel {
             'carbonDashboard',
             'Carbon Dashboard',
             column || vscode.ViewColumn.One,
-            { enableScripts: true }
+            { enableScripts: true,
+                localResourceRoots: [vscode.Uri.file(extensionUri.fsPath + '/src/webview')]
+             }
         );
 
         CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
@@ -48,6 +50,9 @@ export class CarbonDashboardPanel {
     // generates the HTML content for the webview
     // importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
     private _getWebviewContent() {
+
+        const graphPath = vscode.Uri.file(this._extensionUri.fsPath + '/src/webview/graph.js');
+        const graphUri = this._panel.webview.asWebviewUri(graphPath);   
 
         return `<!DOCTYPE html>
     <html lang="en">
@@ -152,6 +157,7 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
   <p> Carbon impact based on each file will be depicted below via pie charts</p>
 </header>
        <section class = "dashboard-grid"> 
+       <div id="branchGraph" style="width:100%; height:350px; margin:bottom:40px"></div>
        <div class="chart-wrapper">
         <h2>File by Size in Repo</h2>
         <div class="chart-container">
@@ -215,8 +221,9 @@ var data = [
 ];
 
 // wait until DOM exists
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
   JSC.chart('chartDiv1', {
+  debug: true,
     type: 'heatmap solid',
     margin: [-4, -4],
     box_fill: 'none',
@@ -319,6 +326,7 @@ window.addEventListener('load', () => {
         
          
     </script>
+    <script src="${graphUri}"></script>
     </body>
     </html>`;
     }
