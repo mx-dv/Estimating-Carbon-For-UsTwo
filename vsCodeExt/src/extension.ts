@@ -28,14 +28,15 @@ export function setDisplay(t: MyTreeDataProvider, b: statusBarManager) {
 
 let proxyServer: InterceptorProxy;
 const PROXY_PORT = 3024;
+var budg: budget.budget;
 
 export function activate(context: vscode.ExtensionContext) {
+	budg = new budget.budget(context.workspaceState);
 
 	// state.runningInterceptor = true;
 
 	var barManager = new statusBarManager();
 	const treeDataProvider = new MyTreeDataProvider();
-
 	vscode.window.registerTreeDataProvider(
 		'myPrimaryView',
 		treeDataProvider
@@ -45,8 +46,6 @@ export function activate(context: vscode.ExtensionContext) {
 		//treeDataProvider.addMessage(String(x));
 		return x;
 	}
-
-	devTok.getTextAroundCursor();
 
 	//let lastInlineState = false;
 	const disposables: vscode.Disposable[] = [];
@@ -60,13 +59,15 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 
-	budget.initStorage(context.workspaceState);
-	restoreCallHistory(treeDataProvider);
-	barManager.updateLimit(budget.updateLimit());
+	// budget.initStorage(context.workspaceState);
+	restoreCallHistory(treeDataProvider, budg);
+	barManager.updateLimit(budg.updateLimit());
 	const BarManager = vscode.window.createStatusBarItem();
 
+
 	disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
-		const tokens = Number(await devTok.change(evt));
+		const tokens = -1;
+		//Number(await devTok.change(evt));
 
 		if (tokens !== -1) {
 			var emissions = convert(tokens);
@@ -79,224 +80,232 @@ export function activate(context: vscode.ExtensionContext) {
 			var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.toLocaleString() };
 			updateTree(newCall);
 
-			const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
-
-				budget.resetBudget();
-				treeDataProvider.clearTree();
-				barManager.updateLimit(0);
-				vscode.window.showInformationMessage('Past calls cleared.');
-				// state.runningInterceptor = true;
-
-			});
-		};
+		}
 	}));
 
-	// Dashboard command 
-	const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
-		CarbonDashboardPanel.createOrShow(context.extensionUri);
-		console.log('Carbon Dashboard command registered.');
-	});
-	const refresh = vscode.commands.registerCommand('ecode.refreshLogs', () => {
-		try {
+	const newF = vscode.commands.registerCommand('ecode.newFile', async () => {
+		vscode.workspace.openTextDocument({ content: " " }).then(async doc => {
+			await vscode.window.showTextDocument(doc);
+			const position = new vscode.Position(10, 28);
+			new vscode.Selection(position, position);
+			await vscode.commands.executeCommand('type', { text: "HELLO" });
 
-			// concactenates correct file name to access Copilot logs
-			const filePath = logCap.getLogFilePath(context);
-			console.log(filePath);
-			const logUri = path.join(path.dirname(filePath), "GitHub.copilot-chat", "GitHub Copilot Chat.log");
-
-			// reads file and outputs lines to console one at a time
-			const content = fs.readFileSync(logUri, 'utf-8');
-			const lines: string[] = content.split(/\r?\n/);
-			for (const line of lines) {
-				console.log(line.trim());
-			}
-			vscode.window.showInformationMessage("Copilot log files refreshed.");
-		}
-		catch (error) {
-			vscode.window.showErrorMessage("Error: Copilot log files not found.");
-		}
-	});
-
-
-
-
-	const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {
-		//vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
-		const limit = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
-			prompt: 'Enter test call: ',
-			placeHolder: 'eg. 5',
-			ignoreFocusOut: true // keep input box open even if focus moves away from window
 		});
-		var num = Number(limit);
-		if (!Number.isNaN(num)) {
-			let date = new Date();
-			var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: date.toLocaleString() };
-			updateTree(newCall);
-		}
-		else {
-			vscode.window.showInformationMessage('Error: NaN inputted.');
-		}
-
-
-
-	});
-	context.subscriptions.push(input);
-	context.subscriptions.push(devTok.inline);
-	context.subscriptions.push(dashboardCommand);
-
-	console.log('Interceptor Proxy Server is active');
-
-	let startDisposable = vscode.commands.registerCommand('ecode.interceptorStart', async () => {
-		try {
-			// start local server
-			proxyServer = new InterceptorProxy(PROXY_PORT);
-			await proxyServer.start(context.globalStorageUri.fsPath);
-
-			// set VSCode to use local proxy
-			// const config = vscode.workspace.getConfiguration('http');
-			// await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
-
-			// //QUICK FIX TO NOT NEED SSL CERTS FOR NOW
-			// // NEED TO CHANGE FOR BETA
-			// await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
-
-
-			// const disposableAPIKEY = vscode.commands.registerCommand('ecode.setApiKey', async () => {
-			//  const apiKey = await vscode.window.showInputBox({
-			//      prompt: 'Enter your API Key',
-			//      placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-			//      ignoreFocusOut: true // keep input box open even if focus moves away from window
-
-			//  });
-			//  if (apiKey) {
-			//      await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
-
-			//      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
-			state.runningInterceptor = true;
-			// vscode.window.showInformationMessage('Interceptor Proxy started on port ' + "->" + PROXY_PORT + state.runningInterceptor + "DONE");
-			// vscode.window.showInformationMessage("Status: " + state.runningInterceptor);
-		} catch (error) {
-			vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
-		}
 	});
 
-	let terminal: vscode.Terminal;
+	const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
+		budg.resetBudget();
+		treeDataProvider.clearTree();
+		barManager.updateLimit(0);
+		vscode.window.showInformationMessage('Past calls cleared.');
+		// state.runningInterceptor = true;
 
-	let terminalDisposable = vscode.commands.registerCommand('ecode.interceptorOpenTerminal', async () => {
-		if (!proxyServer) {
-			vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `ecode.InterceptorStart`");
-			return;
-		}
-
-		const proxyUrl = `http://127.0.0.1:${PROXY_PORT}`;
-
-		//create a new terminal with specific Environment Vars
-
-		terminal = vscode.window.createTerminal({
-			name: "Ecode RunTime Analysis Terminal",
-			env: {
-				// proxy environment variables
-				"HTTP_PROXY": proxyUrl,
-				"HTTPS_PROXY": proxyUrl,
-				"http_proxy": proxyUrl,
-				"https_proxy": proxyUrl,
-
-				// python specific
-				"REQUESTS_CA_BUNDLE": proxyServer.certPath,
-
-				"SSL_CERT_FILE": proxyServer.certPath,
-
-				// nodejs specific
-				"NODE_EXTRA_CA_CERTS": proxyServer.certPath,
-				"NODE_OPTIONS": "--use-env-proxy"
-
-			}
-		});
-
-		terminal.show();
-		vscode.window.showInformationMessage("Opened Terminal with Proxy Environment Vars");
 	});
+};
+	}));
 
-	let stopDisposable = vscode.commands.registerCommand('ecode.interceptorStop', async () => {
-		// stop local server
-		if (proxyServer) {
-			proxyServer.stop();
+// Dashboard command 
+const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
+	CarbonDashboardPanel.createOrShow(context.extensionUri);
+	console.log('Carbon Dashboard command registered.');
+});
+const refresh = vscode.commands.registerCommand('ecode.refreshLogs', () => {
+	try {
+
+		// concactenates correct file name to access Copilot logs
+		const filePath = logCap.getLogFilePath(context);
+		console.log(filePath);
+		const logUri = path.join(path.dirname(filePath), "GitHub.copilot-chat", "GitHub Copilot Chat.log");
+
+		// reads file and outputs lines to console one at a time
+		const content = fs.readFileSync(logUri, 'utf-8');
+		const lines: string[] = content.split(/\r?\n/);
+		for (const line of lines) {
+			console.log(line.trim());
 		}
+		vscode.window.showInformationMessage("Copilot log files refreshed.");
+	}
+	catch (error) {
+		vscode.window.showErrorMessage("Error: Copilot log files not found.");
+	}
+});
 
-		if (terminal) {
-			terminal.dispose();
-		}
 
-		// clear VSCode proxy settings
+const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {
+	//vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
+	const limit = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
+		prompt: 'Enter test call: ',
+		placeHolder: 'eg. 5',
+		ignoreFocusOut: true // keep input box open even if focus moves away from window
+	});
+	var num = Number(limit);
+	if (!Number.isNaN(num)) {
+		let date = new Date();
+		var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: date.toLocaleString() };
+		updateTree(newCall);
+	}
+	else {
+		vscode.window.showInformationMessage('Error: NaN inputted.');
+	}
+
+});
+context.subscriptions.push(input);
+context.subscriptions.push(dashboardCommand);
+
+console.log('Interceptor Proxy Server is active');
+
+let startDisposable = vscode.commands.registerCommand('ecode.interceptorStart', async () => {
+	try {
+		// start local server
+		proxyServer = new InterceptorProxy(PROXY_PORT);
+		await proxyServer.start(context.globalStorageUri.fsPath);
+
+		// set VSCode to use local proxy
 		// const config = vscode.workspace.getConfiguration('http');
-		// await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
-		// await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
+		// await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
 
-		vscode.window.showInformationMessage('Interceptor Proxy stopped. ');//Proxy settings cleared.');
-	});
+		// //QUICK FIX TO NOT NEED SSL CERTS FOR NOW
+		// // NEED TO CHANGE FOR BETA
+		// await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
 
-	let runtimeDisposable = vscode.commands.registerCommand("ecode.runtimeAnalysis", async () => {
-		try {
-			await vscode.commands.executeCommand("ecode.interceptorStart");
-			await vscode.commands.executeCommand("ecode.interceptorOpenTerminal");
-		} catch (error) {
-			vscode.window.showErrorMessage("Failed to launch runtime analysis service");
+
+		// const disposableAPIKEY = vscode.commands.registerCommand('ecode.setApiKey', async () => {
+		//  const apiKey = await vscode.window.showInputBox({
+		//      prompt: 'Enter your API Key',
+		//      placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+		//      ignoreFocusOut: true // keep input box open even if focus moves away from window
+
+		//  });
+		//  if (apiKey) {
+		//      await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
+
+		//      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
+		state.runningInterceptor = true;
+		// vscode.window.showInformationMessage('Interceptor Proxy started on port ' + "->" + PROXY_PORT + state.runningInterceptor + "DONE");
+		// vscode.window.showInformationMessage("Status: " + state.runningInterceptor);
+	} catch (error) {
+		vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
+	}
+});
+
+let terminal: vscode.Terminal;
+
+let terminalDisposable = vscode.commands.registerCommand('ecode.interceptorOpenTerminal', async () => {
+	if (!proxyServer) {
+		vscode.window.showErrorMessage("There is no Interceptor Proxy Running. Please initiate `ecode.InterceptorStart`");
+		return;
+	}
+
+	const proxyUrl = `http://127.0.0.1:${PROXY_PORT}`;
+
+	//create a new terminal with specific Environment Vars
+
+	terminal = vscode.window.createTerminal({
+		name: "Ecode RunTime Analysis Terminal",
+		env: {
+			// proxy environment variables
+			"HTTP_PROXY": proxyUrl,
+			"HTTPS_PROXY": proxyUrl,
+			"http_proxy": proxyUrl,
+			"https_proxy": proxyUrl,
+
+			// python specific
+			"REQUESTS_CA_BUNDLE": proxyServer.certPath,
+
+			"SSL_CERT_FILE": proxyServer.certPath,
+
+			// nodejs specific
+			"NODE_EXTRA_CA_CERTS": proxyServer.certPath,
+			"NODE_OPTIONS": "--use-env-proxy"
+
 		}
 	});
 
-	let ecodeMenu = vscode.commands.registerCommand("ecode.menu", async () => {
-		const ecodeCommands = [
-			{
-				label: `$(play) Start Runtime Analysis`,
-				description: "Opens Ecode Terminal where files to be analysed are run",
-				command: "ecode.runtimeAnalysis"
-			},
-			{
-				label: `$(play) Stop Runtime Proxy`,
-				description: "Stops the recording of carbon emissions",
-				command: "ecode.interceptorStop"
-				// TODO need to have a way to keep the environment variables (gemini api key) so that it doesn't need to be input every time
-			},
-			{
-				label: `$(play) Reset Stored Session`,
-				description: "Resets the current record of carbon emissions",
-				command: "ecode.clearStore"
-			}
-		];
+	terminal.show();
+	vscode.window.showInformationMessage("Opened Terminal with Proxy Environment Vars");
+});
 
-		const selection = await vscode.window.showQuickPick(ecodeCommands, {
-			placeHolder: "Select an Ecode function",
-		});
+let stopDisposable = vscode.commands.registerCommand('ecode.interceptorStop', async () => {
+	// stop local server
+	if (proxyServer) {
+		proxyServer.stop();
+	}
 
-		if (selection) {
-			vscode.commands.executeCommand(selection.command);
+	if (terminal) {
+		terminal.dispose();
+	}
+
+	// clear VSCode proxy settings
+	// const config = vscode.workspace.getConfiguration('http');
+	// await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
+	// await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
+
+	vscode.window.showInformationMessage('Interceptor Proxy stopped. ');//Proxy settings cleared.');
+});
+
+let runtimeDisposable = vscode.commands.registerCommand("ecode.runtimeAnalysis", async () => {
+	try {
+		await vscode.commands.executeCommand("ecode.interceptorStart");
+		await vscode.commands.executeCommand("ecode.interceptorOpenTerminal");
+	} catch (error) {
+		vscode.window.showErrorMessage("Failed to launch runtime analysis service");
+	}
+});
+
+let ecodeMenu = vscode.commands.registerCommand("ecode.menu", async () => {
+	const ecodeCommands = [
+		{
+			label: `$(play) Start Runtime Analysis`,
+			description: "Opens Ecode Terminal where files to be analysed are run",
+			command: "ecode.runtimeAnalysis"
+		},
+		{
+			label: `$(play) Stop Runtime Proxy`,
+			description: "Stops the recording of carbon emissions",
+			command: "ecode.interceptorStop"
+			// TODO need to have a way to keep the environment variables (gemini api key) so that it doesn't need to be input every time
+		},
+		{
+			label: `$(play) Reset Stored Session`,
+			description: "Resets the current record of carbon emissions",
+			command: "ecode.clearStore"
 		}
+	];
+
+	const selection = await vscode.window.showQuickPick(ecodeCommands, {
+		placeHolder: "Select an Ecode function",
 	});
 
-	const runtimeLaunchButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-	// runtimeLaunchButton.text = `$(play) Start Ecode Runtime Analysis`;
-	// runtimeLaunchButton.tooltip = "Click to open terminal to run file to be analysed";
-	// runtimeLaunchButton.command = "ecode.runtimeAnalysis";
-	// runtimeLaunchButton.show();
-	runtimeLaunchButton.text = `$(list-unordered) Ecode`;
-	runtimeLaunchButton.tooltip = "Click to see AI Analysis Options";
-	runtimeLaunchButton.command = "ecode.menu";
-	runtimeLaunchButton.show();
+	if (selection) {
+		vscode.commands.executeCommand(selection.command);
+	}
+});
 
-	// TODO need to make sure that multiple interceptors can't be started at once. 
-	// This isn't handled very gracefully at the moment.
+const runtimeLaunchButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+// runtimeLaunchButton.text = `$(play) Start Ecode Runtime Analysis`;
+// runtimeLaunchButton.tooltip = "Click to open terminal to run file to be analysed";
+// runtimeLaunchButton.command = "ecode.runtimeAnalysis";
+// runtimeLaunchButton.show();
+runtimeLaunchButton.text = `$(list-unordered) Ecode`;
+runtimeLaunchButton.tooltip = "Click to see AI Analysis Options";
+runtimeLaunchButton.command = "ecode.menu";
+runtimeLaunchButton.show();
+
+// TODO need to make sure that multiple interceptors can't be started at once. 
+// This isn't handled very gracefully at the moment.
 
 
 
-	context.subscriptions.push(terminalDisposable);
-	context.subscriptions.push(startDisposable);
-	context.subscriptions.push(stopDisposable);
-	context.subscriptions.push(runtimeDisposable);
-	context.subscriptions.push(runtimeLaunchButton);
-	context.subscriptions.push(ecodeMenu);
-	return {
-		isInterceptorRunning: () => state.runningInterceptor
-	};
+context.subscriptions.push(terminalDisposable);
+context.subscriptions.push(startDisposable);
+context.subscriptions.push(stopDisposable);
+context.subscriptions.push(runtimeDisposable);
+context.subscriptions.push(runtimeLaunchButton);
+context.subscriptions.push(ecodeMenu);
+return {
+	budg,
+	isInterceptorRunning: () => state.runningInterceptor
+};
 }
 export async function deactivate() {
 	// make sure that the vscode isn't always vulnerable, disable configurations
@@ -360,11 +369,6 @@ class statusBarManager {
 		this.mainItem.text = 'Average carbon cost: g CO₂e';
 		this.mainItem.show();//displays the limit item
 
-		// for (var i:number = 0;i<10;i++){
-		//  this.loading.push(vscode.window.createStatusBarItem());
-		//  this.loading[i].text = "-"; //fills the loading array with some items
-		//  this.loading[i].show(); //displays them
-		// }
 
 	}
 
@@ -407,8 +411,8 @@ class statusBarManager {
 	}
 }
 
-function restoreCallHistory(tree: MyTreeDataProvider) { //restores past calls to sidebar
-	var pCalls = budget.getCalls();
+function restoreCallHistory(tree: MyTreeDataProvider, budg: budget.budget) { //restores past calls to sidebar
+	var pCalls = budg.getCalls();
 	console.log("CALLS:", pCalls);
 	for (let i = 0; i < pCalls.length; i++) {
 		tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + pCalls[i].DateTime);
@@ -416,10 +420,13 @@ function restoreCallHistory(tree: MyTreeDataProvider) { //restores past calls to
 }
 
 export function updateTree(call: budget.Call) {
-	budget.storeCall(call);
-	var cLimit = budget.updateLimit();
+	budg.storeCall(call);
+	var cLimit = budg.updateLimit();
 	console.log("limit: " + cLimit);
 	bar.updateBar(call.Emissions, cLimit);
 	tree.addMessage("Emissions: " + call.Emissions + " - Model: " + call.Model + " - Date: " + call.DateTime);
 
+}
+export function wrappedGetCall() {
+	return budg.getCalls();
 }
