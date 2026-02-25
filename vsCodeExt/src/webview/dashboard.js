@@ -63,7 +63,39 @@
             modelEmissionsChart.data.datasets[0].backgroundColor = generateColors(message.modelLabels.length);
             modelEmissionsChart.update();
             
+            //budget prgess bar update logic
+            // calculate total session emissions by summing the array
+            const totalEmissions = message.modelEmissions.reduce((sum, current) => sum + current, 0);
             
+            // Hardcoding a budget limit for testing  
+            
+            const SESSION_BUDGET = 0.5; 
+            
+            // calculate percentage 
+            let percentUsed = 0;
+            if (SESSION_BUDGET > 0) {
+                percentUsed = (totalEmissions / SESSION_BUDGET) * 100;
+            }
+            
+            // capping visual width at 100% for display purposes
+            const visualWidth = Math.min(percentUsed, 100);
+
+            // update the progress bar and text elements
+            const fillEl = document.getElementById('session-progress-fill');
+            const pctEl = document.getElementById('session-percent-used');
+            const rightEl = document.getElementById('session-text-right');
+            
+            fillEl.style.width = visualWidth + '%';
+            pctEl.innerText = percentUsed.toFixed(1) + '% used';
+            rightEl.innerText = totalEmissions.toFixed(5) + 'g / ' + SESSION_BUDGET + 'g CO₂e';
+            
+            // change colour to red if over 90% of budget is used
+            if (percentUsed >= 90) {
+                fillEl.classList.add('danger');
+            } else {
+                fillEl.classList.remove('danger');
+            }
+        }
     }
 });
     })();
