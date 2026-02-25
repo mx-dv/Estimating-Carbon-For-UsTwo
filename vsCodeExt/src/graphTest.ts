@@ -7,3 +7,9 @@ export function getCColor(carbon : number) : string{
     }
     return "#F44336";
 }
+
+export const carbonEmissionReferenceStrip = [
+    {label : "Low Emission" , max: 15 , color: "#4CAF50"},
+    {label : "Average Emission" , max: 40 , color: "#FFC107"},
+    {label : "High Emission" , max: Infinity , color: "#F44336"},
+];

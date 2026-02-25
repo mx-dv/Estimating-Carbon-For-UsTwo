@@ -163,8 +163,8 @@ function drawCommitDots(){
                 horizontalLine.style.position = "relative";
                 horizontalLine.appendChild(commitDot);
                 
-            })
+            });
         }
-    })
+    });
 }
 
