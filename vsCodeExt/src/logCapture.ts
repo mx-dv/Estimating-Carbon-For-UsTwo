@@ -6,7 +6,6 @@ import * as convert from './convert';
 
 
 const modelPattern = /(?<=\[info\].*copilotmd \| success \| .* \| \d+ms \| \[.*)]/g;
-///\[debug\] chat model /g;
 
 const modelPattern3 = /\s\S*$/g; //gets the purpose of the call
 const modelPattern2 = /(?<= \| success \| )\S*/g;
@@ -17,7 +16,6 @@ const testPattern = /a/g;
 
 
 //regex to capture Claude model tokens with datetime
-const claudeLine1 = / "stop_reason":null/g;
 const inlineClaudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<="stop_reason":"end_turn"(.*):{"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)/g;
 const chatClaudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<="stop_reason":"end_turn"(.*):{"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)/g;
 
