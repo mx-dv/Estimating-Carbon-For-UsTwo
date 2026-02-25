@@ -92,6 +92,8 @@ export class CarbonDashboardPanel {
         <title>Carbon Dashboard</title>
     
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@3.0.0/dist/chartjs-chart-matrix.min.js"></script>
         <link href="${styleUri}" rel="stylesheet">
 
         
@@ -105,11 +107,22 @@ export class CarbonDashboardPanel {
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>
   </button>
   <header id="header">
-            <h1>Carbon Analysis</h1>
-            <p>Click a section in 'Carbon Cost' to see budget details.</p>
+  <h1>Dash Board</h1>
+    
+   
+    
+    <div class="chartCard">
+        <div class="chartBox">
+            <canvas id="myChart"></canvas>
+            <button id="testBtn">Test</button>
+        </div>
+    </div>
         </header>
 
         <section id="main-view" class="dashboard-grid"> 
+         <div class="section-description">
+        <p>This section shows carbon cost distribution across files.</p>
+    </div>
             <div class="chart-wrapper">
                 <h2>File by Size in Repo</h2>
                 <div class="chart-container">
@@ -129,6 +142,9 @@ export class CarbonDashboardPanel {
                 </div>
                 <p id="model-empty-msg" style="text-align:center; margin-top:12px;">No calls recorded yet.</p>
             </div>
+
+           
+</div>
         </section>
 
         <section id="drilldown-view">
