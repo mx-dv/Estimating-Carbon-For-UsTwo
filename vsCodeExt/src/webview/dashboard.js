@@ -1,5 +1,17 @@
 (function(){
 
+
+// initialising vscode api so that back end can be connected
+    const vscode = acquireVsCodeApi();
+
+    // click listener so reset button can be used
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            // sending a message to extension.ts
+            vscode.postMessage({ command: 'triggerReset' });
+        });}
+
  const btn = document.getElementById('theme-switch');
             btn.addEventListener('click', () => { document.body.classList.toggle('darkmode'); });
 
@@ -19,7 +31,7 @@
             };
 
             
-            // --- Emissions by Model chart (live data from backend) ---
+            // emissions by Model chart live data from backend
             const modelEmissionsChart = new Chart(document.getElementById('modelEmissionsChart'), {
                 type: 'pie',
                 data: {
@@ -69,7 +81,7 @@
             
             // Hardcoding a budget limit for testing  
             
-            const SESSION_BUDGET = 0.5; 
+            const SESSION_BUDGET = 5; 
             
             // calculate percentage 
             let percentUsed = 0;

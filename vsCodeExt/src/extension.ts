@@ -81,6 +81,8 @@ export function activate(context: vscode.ExtensionContext) {
         budget.resetBudget();
         treeDataProvider.clearTree();
         barManager.updateLimit(0);
+
+        CarbonDashboardPanel.sendData();
         vscode.window.showInformationMessage('Past calls cleared.');
     });
 

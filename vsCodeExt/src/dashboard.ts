@@ -16,6 +16,19 @@ export class CarbonDashboardPanel {
         this._extensionUri = extensionUri;
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
         this._panel.webview.html = this._getWebviewContent(this._panel.webview);
+
+        this._panel.webview.onDidReceiveMessage(
+            message => {
+                switch (message.command) {
+                    case 'triggerReset':
+                        // When the button is clicked, run your clear command!
+                        vscode.commands.executeCommand('ecode.clearStore');
+                        return;
+                }
+            },
+            null,
+            this._disposables
+        );
     }
 
     public static createOrShow(extensionUri: vscode.Uri) {
@@ -121,6 +134,10 @@ export class CarbonDashboardPanel {
                     <span id="session-percent-used" class="budget-percent">0% used</span>
                     <span id="session-text-right" class="budget-detail">0g / 0g</span>
                 </div>
+                <div class="budget-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    
+                    <button id="reset-btn" style="padding: 5px 10px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset</button>
+            </div>
     </div>
             <div class="chart-wrapper">
                 <h2>Emissions by Model</h2>
@@ -129,6 +146,7 @@ export class CarbonDashboardPanel {
                 </div>
                 <p id="model-empty-msg" style="text-align:center; margin-top:12px;">No calls recorded yet.</p>
             </div>
+            
         </section>
 
        
