@@ -14,6 +14,42 @@ if(ref){
     container.style.color = "var(--text-color)";
 
     const title = document.createElement("h3");
+    const referenceStrip = document.createElement("div");
+    referenceStrip.style.display = "flex";
+    referenceStrip.style.gap = "16px";
+    referenceStrip.style.fontSize = "12px";
+    referenceStrip.style.alignItems = "center";
+    [
+        {label: "Low Emission" , color: "#4CAF50"},
+        {label: "Average Emission" , color: "#FFC107"},
+        {label: "High Emission" , color: "#F44336"},
+    ].forEach(strip => {
+        const reference = document.createElement("div");
+        reference.style.display = "flex";
+        reference.style.alignItems = "center";
+        reference.style.gap = "6px";
+
+        const dot = document.createElement("div");
+        dot.style.width = "10px";
+        dot.style.height = "10px";
+        dot.style.borderRadius = "50%";
+        dot.style.background = strip.color;
+
+        const heading = document.createElement("span");
+        heading.innerText = strip.label;
+        heading.style.color = "var(--text-color)";
+
+        reference.appendChild(dot);
+        reference.appendChild(heading);
+        referenceStrip.appendChild(reference);
+    });
+
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.alignItems = "center";
+    header.style.justifyContent = "space-between";
+    header.style.margin = "10px";
+
     title.innerText = "Carbon Usage Timeline (Commits per branch)";
     title.style.margin = "10px";
 
@@ -23,7 +59,10 @@ if(ref){
     mainGraphArea.style.height = "240px";
     mainGraphArea.style.position = "relative";
 
-    container.appendChild(title);
+    header.appendChild(title);
+    header.appendChild(referenceStrip);
+    container.appendChild(header);
+
     container.appendChild(mainGraphArea);
 
     ref.appendChild(container);
