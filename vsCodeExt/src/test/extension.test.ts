@@ -69,7 +69,6 @@ suite("DevTime Tests", () => {
 		var matches = text3.match(/(?<="stop_reason":"end_turn"(.*):{"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)/g);
 		var tokens:number[] = [865,8820,8,373];
 		assert.notEqual(matches,null);
-		console.log("chat"+matches);
 		assert.strictEqual(matches?.length,4);
 		for(let i=0;i<Math.max(tokens.length,matches?.length);i++){
 			assert.strictEqual(Number(matches[i]),tokens[i]);
@@ -81,7 +80,6 @@ suite("DevTime Tests", () => {
 		var tokens:number[] = [8,865,8820,373];
 
 		assert.notEqual(matches,null);
-		console.log("inline"+matches);
 		assert.strictEqual(matches?.length,4);
 		for(let i=0;i<Math.max(tokens.length-1,matches?.length-1);i++){
 			assert.strictEqual(Number(matches[i]),tokens[i]);
