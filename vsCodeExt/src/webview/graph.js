@@ -2,8 +2,9 @@ let pendingCommitDots = null;
 let cumulativeGraphButton;
 let timelineGraphButton;
 let slider;
-let graphType = "cumulative"
+let graphType = "cumulative";
 let workspaceBranches = [];
+let referenceStrip;
 
 const ref = document.getElementById("branchGraph");
 
@@ -19,7 +20,8 @@ if(ref){
     container.style.color = "var(--text-color)";
 
     const title = document.createElement("h3");
-    const referenceStrip = document.createElement("div");
+    referenceStrip = document.createElement("div");
+    referenceStrip.style.visibility = "hidden";
     referenceStrip.style.display = "flex";
     referenceStrip.style.gap = "16px";
     referenceStrip.style.fontSize = "12px";
@@ -79,7 +81,7 @@ if(ref){
     slider.style.transition = "transform 0.25s cubic-bezier(.4,0,.2,1)";
     slider.style.transform = "translateX(0%)";
     slider.style.background = "linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.05))";
-    slider.style.border = "1px solid rgba(0,0,0,0.35)"
+    slider.style.border = "1px solid rgba(0,0,0,0.35)";
     slider.style.boxShadow = `0 2px 6px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(0,0,0,0.15)`;
     slider.style.backdropFilter = "blur(4px)";
 
@@ -181,13 +183,22 @@ function drawGraphs(){
     deletePreviousGraph();
 
     if(graphType === "timeline"){
+        if(referenceStrip){
+            referenceStrip.style.visibility = "visible";
+        }
+
         if(workspaceBranches.length === 0){
             return;
         }
+
         buildGraph();
         drawCommitDots();
     }
     else{
+        if(referenceStrip){
+            referenceStrip.style.visibility = "hidden";
+        }
+
         deleteBranches();
         drawCumulativeGraph();
     }
@@ -210,7 +221,7 @@ function getCumulativeGraphData(){
             return{
                 time: commit.xAxis,
                 netCarbon: netTotal
-            }
+            };
         });
     });
     return cumulativeGraphData;
