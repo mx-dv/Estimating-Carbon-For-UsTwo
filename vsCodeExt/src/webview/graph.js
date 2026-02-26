@@ -115,7 +115,7 @@ window.addEventListener("message", event => {
     const message = event.data;
     if(message.command === "commitDots"){
         pendingCommitDots = message.data;
-        drawCommitDots();
+        drawGraphs();
     }
 
     if(message.command === "workspaceBranches"){
@@ -158,7 +158,7 @@ window.addEventListener("message", event => {
 
         mainGraphArea.appendChild(horizontalLineWrapper);
 
-        drawCommitDots();
+        drawGraphs();
     }
 });
 
@@ -181,7 +181,7 @@ function getCumulativeGraphData(){
     Object.keys(pendingCommitDots).forEach(branch => {
         let netTotal = 0;
 
-        cumulativeGraphData[branch] = pendingCommitDots[branch]
+        cumulativeGraphData[branch] = [...pendingCommitDots[branch]]
         .sort((a, b) => a.xAxis - b.xAxis)
         .map(commit => {
             netTotal += commit.carbon;
@@ -195,6 +195,56 @@ function getCumulativeGraphData(){
 
 }
 
+function drawCumulativeGraph(){
+    const cumulativeGraphData = getCumulativeGraphData();
+    const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area > div > div");
+
+    if(horizontalPaths.length === 0){
+        return;
+    }
+
+    horizontalPaths.forEach(horizontalPath => {
+        const branchName = horizontalPath.querySelector("span").innerText;
+        const horizontalLine = horizontalPath.querySelector("div");
+
+        const prevGraph = horizontalLine.querySelector("svg");
+        if(prevGraph){
+            prevGraph.remove();
+        }
+
+        const branchData = cumulativeGraphData[branchName];
+        if(!branchData){
+            return;
+        }
+
+        const cumulativeGraph = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        cumulativeGraph.style.position = "absolute";
+        cumulativeGraph.style.left = "0";
+        cumulativeGraph.style.top = "-60px";
+        cumulativeGraph.style.width = "100%";
+        cumulativeGraph.style.height = "120px";
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+
+        let graphPoints = "";
+
+        branchData.forEach(graphPoint => {
+            const xAxis = graphPoint.time;
+            const yAxis = 120 - (graphPoint.netCarbon / 5);
+
+            graphPoints += `${xAxis},${yAxis} `;
+        });
+
+        path.setAttribute("points" , graphPoints);
+        path.setAttribute("fill" , "none");
+        path.setAttribute("stroke" , "var(--primary-color)");
+        path.setAttribute("stroke-width" , "2");
+
+        cumulativeGraph.appendChild(path);
+        horizontalLine.appendChild(cumulativeGraph);
+    });
+}
+
 function getCColor(carbon){
     if(carbon < 15){
         return "var(--low-carbon)";
@@ -206,41 +256,47 @@ function getCColor(carbon){
 }
 
 function drawCommitDots(){
-    if (!pendingCommitDots){
-        return;
-    } 
+    if (graphType === "timeline"){
 
-    const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area > div > div");
+        if (!pendingCommitDots){
+            return;
+        } 
 
-    if (horizontalPaths.length === 0){
-        return;
-    } 
+        const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area > div > div");
 
-    horizontalPaths.forEach(horizontalPath => {
-        const branchName = horizontalPath.querySelector("span").innerText;
-        const horizontalLine = horizontalPath.querySelector("div");
+        if (horizontalPaths.length === 0){
+            return;
+        } 
 
-        horizontalLine.querySelectorAll(".commit-dot").forEach(dot => dot.remove());
+        horizontalPaths.forEach(horizontalPath => {
+            const branchName = horizontalPath.querySelector("span").innerText;
+            const horizontalLine = horizontalPath.querySelector("div");
 
-        const commitDots = pendingCommitDots[branchName];
+            horizontalLine.querySelectorAll(".commit-dot").forEach(dot => dot.remove());
 
-        if(commitDots){
-            commitDots.forEach(commit => {
-                const commitDot = document.createElement("div");
-                commitDot.classList.add("commit-dot");
-                commitDot.style.width = "10px";
-                commitDot.style.height = "10px";
-                commitDot.style.borderRadius = "50%";
-                commitDot.style.position = "absolute";
-                commitDot.style.left = commit.xAxis + "px";
-                commitDot.style.background = getCColor(commit.carbon);
-                commitDot.style.transform = "translateY(-4px)";
+            const commitDots = pendingCommitDots[branchName];
 
-                horizontalLine.appendChild(commitDot);
-                
-            });
-        }
-    });
+            if(commitDots){
+                commitDots.forEach(commit => {
+                    const commitDot = document.createElement("div");
+                    commitDot.classList.add("commit-dot");
+                    commitDot.style.width = "10px";
+                    commitDot.style.height = "10px";
+                    commitDot.style.borderRadius = "50%";
+                    commitDot.style.position = "absolute";
+                    commitDot.style.left = commit.xAxis + "px";
+                    commitDot.style.background = getCColor(commit.carbon);
+                    commitDot.style.transform = "translateY(-4px)";
+
+                    horizontalLine.appendChild(commitDot);
+                    
+                });
+            }
+        });
+    }
+    if (graphType === "cumulative"){
+        drawCumulativeGraph();
+    }
 }
 
 function makeButtons(text, id){
