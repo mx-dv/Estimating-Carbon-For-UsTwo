@@ -2,6 +2,7 @@ let pendingCommitDots = null;
 let cumulativeGraphButton;
 let timelineGraphButton;
 let slider;
+let graphType = "cumulative"
 
 const ref = document.getElementById("branchGraph");
 
@@ -161,6 +162,39 @@ window.addEventListener("message", event => {
     }
 });
 
+function drawGraphs(){
+    if(graphType === "timeline"){
+        drawCommitDots();
+    }
+    else{
+        drawCumulativeGraph();
+    }
+}
+
+function getCumulativeGraphData(){
+    if(!pendingCommitDots){
+        return{};
+    } 
+
+    const cumulativeGraphData = {};
+
+    Object.keys(pendingCommitDots).forEach(branch => {
+        let netTotal = 0;
+
+        cumulativeGraphData[branch] = pendingCommitDots[branch]
+        .sort((a, b) => a.xAxis - b.xAxis)
+        .map(commit => {
+            netTotal += commit.carbon;
+            return{
+                time: commit.xAxis,
+                netCarbon: netTotal
+            }
+        });
+    });
+    return cumulativeGraphData;
+
+}
+
 function getCColor(carbon){
     if(carbon < 15){
         return "var(--low-carbon)";
@@ -219,6 +253,7 @@ function makeButtons(text, id){
 }
 
 cumulativeGraphButton.addEventListener("click", () => {
+    graphType = "cumulative";
     slider.style.transform = "translateX(0%)";
 
     cumulativeGraphButton.classList.add("toggle-active");
@@ -227,10 +262,11 @@ cumulativeGraphButton.addEventListener("click", () => {
     timelineGraphButton.classList.add("toggle-inactive");
     timelineGraphButton.classList.remove("toggle-active");
 
-    drawCommitDots();
+    drawGraphs();
 });
 
 timelineGraphButton.addEventListener("click", () => {
+    graphType = "timeline";
     slider.style.transform = "translateX(calc(100% + 3px))";
 
     timelineGraphButton.classList.add("toggle-active");
@@ -239,5 +275,5 @@ timelineGraphButton.addEventListener("click", () => {
     cumulativeGraphButton.classList.add("toggle-inactive");
     cumulativeGraphButton.classList.remove("toggle-active");
 
-    drawCommitDots();
+    drawGraphs();
 });
