@@ -320,7 +320,7 @@ function restoreCallHistory(tree: MyTreeDataProvider) { //restores past calls to
     var pCalls = budget.getCalls();
     console.log("CALLS:", pCalls);
     for (let i = 0; i < pCalls.length; i++) {
-        tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + pCalls[i].DateTime);
+        tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + new Date(pCalls[i].DateTime).toLocaleString());
     }
 }
 
