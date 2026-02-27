@@ -34,10 +34,10 @@ export class CarbonDashboardPanel {
             this._panel.webview.postMessage({
                 command: "commitDots",
                 data: {
-                    main: [{xAxis : 30 , carbon : 35} , {xAxis : 55 , carbon : 10} , {xAxis : 95 , carbon : 110}],
-                    "customer/sign-up": [{xAxis : 110 , carbon : 229}, {xAxis : 175 , carbon : 23}],
-                    "customer/favourites": [{xAxis : 210 , carbon : 57}, {xAxis : 245 , carbon : 3}],
-                    "component/footer": [{xAxis : 270 , carbon : 313}]
+                    main: [{ xAxis: 30, carbon: 35 }, { xAxis: 55, carbon: 10 }, { xAxis: 95, carbon: 110 }],
+                    "customer/sign-up": [{ xAxis: 110, carbon: 229 }, { xAxis: 175, carbon: 23 }],
+                    "customer/favourites": [{ xAxis: 210, carbon: 57 }, { xAxis: 245, carbon: 3 }],
+                    "component/footer": [{ xAxis: 270, carbon: 313 }]
                 }
             });
         }, 500);
@@ -73,9 +73,10 @@ export class CarbonDashboardPanel {
             'carbonDashboard',
             'Carbon Dashboard',
             column || vscode.ViewColumn.One,
-            { enableScripts: true,
+            {
+                enableScripts: true,
                 localResourceRoots: [vscode.Uri.file(extensionUri.fsPath + '/src/webview')]
-             }
+            }
         );
 
         CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
@@ -115,17 +116,17 @@ export class CarbonDashboardPanel {
             if (x) { x.dispose(); }
         }
     }
-// generates the HTML content for the webview
-// importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
+    // generates the HTML content for the webview
+    // importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
     private _getWebviewContent(webview: vscode.Webview = this._panel.webview): string {
         const stylePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css');
         const scriptPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js');
         const graphPath = vscode.Uri.file(this._extensionUri.fsPath + '/src/webview/graph.js');
-        const graphUri = this._panel.webview.asWebviewUri(graphPath);   
-        
-        
+        const graphUri = this._panel.webview.asWebviewUri(graphPath);
+
+
         const styleUri = webview.asWebviewUri(vscode.Uri.file(stylePath));
-        const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));  
+        const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));
         return `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -201,12 +202,12 @@ export class CarbonDashboardPanel {
             
         </section>
 
-       
+    
 
         <script src="${scriptUri}"></script>
         <script src="${graphUri}"></script>
     
-       
+    
     </body>
     </html>`;
     }
