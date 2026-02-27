@@ -1,7 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
-import * as budget from './budget';
-
 
 
 export class CarbonDashboardPanel {
@@ -15,7 +12,31 @@ export class CarbonDashboardPanel {
         this._panel = panel;
         this._extensionUri = extensionUri;
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-        this._panel.webview.html = this._getWebviewContent(this._panel.webview);
+        this._panel.webview.html = this._getWebviewContent();
+
+        setTimeout(() => {
+            this._panel.webview.postMessage({
+                command: "workspaceBranches",
+                data: [
+                    "main",
+                    "customer/sign-up",
+                    "customer/favourites",
+                    "component/footer"
+                ]
+            });
+        }, 300);
+
+        setTimeout(() => {
+            this._panel.webview.postMessage({
+                command: "commitDots",
+                data: {
+                    main: [{xAxis : 30 , carbon : 35} , {xAxis : 55 , carbon : 10} , {xAxis : 95 , carbon : 110}],
+                    "customer/sign-up": [{xAxis : 110 , carbon : 229}, {xAxis : 175 , carbon : 23}],
+                    "customer/favourites": [{xAxis : 210 , carbon : 57}, {xAxis : 245 , carbon : 3}],
+                    "component/footer": [{xAxis : 270 , carbon : 313}]
+                }
+            });
+        }, 500);
     }
 
     public static createOrShow(extensionUri: vscode.Uri) {
@@ -26,7 +47,6 @@ export class CarbonDashboardPanel {
         // already have a panel
         if (CarbonDashboardPanel.currentPanel) {
             CarbonDashboardPanel.currentPanel._panel.reveal(column);
-            CarbonDashboardPanel.currentPanel._sendData();
             return;
         }
 
@@ -35,36 +55,12 @@ export class CarbonDashboardPanel {
             'carbonDashboard',
             'Carbon Dashboard',
             column || vscode.ViewColumn.One,
-            { enableScripts: true }
+            { enableScripts: true,
+                localResourceRoots: [vscode.Uri.file(extensionUri.fsPath + '/src/webview')]
+             }
         );
 
         CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
-        CarbonDashboardPanel.currentPanel._sendData();
-    }
-
-    // Call this from extension whenever a new call is recorded to keep the chart live
-    public static sendData() {
-        if (CarbonDashboardPanel.currentPanel) {
-            CarbonDashboardPanel.currentPanel._sendData();
-        }
-    }
-
-    private _sendData() {
-        // Aggregate emissions by model from stored calls
-        const calls = budget.getCalls();
-        const modelMap: Record<string, number> = {};
-        for (const call of calls) {
-            const model = call.Model || 'Unknown';
-            modelMap[model] = (modelMap[model] || 0) + call.Emissions;
-        }
-        const modelLabels = Object.keys(modelMap);
-        const modelEmissions = modelLabels.map(k => modelMap[k]);
-
-        this._panel.webview.postMessage({
-            command: 'updateData',
-            modelLabels,
-            modelEmissions
-        });
     }
 
     public dispose() {
@@ -75,22 +71,13 @@ export class CarbonDashboardPanel {
             if (x) { x.dispose(); }
         }
     }
-<<<<<<< HEAD
     // generates the HTML content for the webview
     // importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
     private _getWebviewContent() {
 
-=======
-// generates the HTML content for the webview
-// importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
-    private _getWebviewContent(webview: vscode.Webview = this._panel.webview): string {
-        const stylePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css');
-        const scriptPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js');
-        
-        
-        const styleUri = webview.asWebviewUri(vscode.Uri.file(stylePath));
-        const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));  
->>>>>>> ConnectDashBoardFiles
+        const graphPath = vscode.Uri.file(this._extensionUri.fsPath + '/src/webview/graph.js');
+        const graphUri = this._panel.webview.asWebviewUri(graphPath);   
+
         return `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -99,7 +86,6 @@ export class CarbonDashboardPanel {
         <title>Carbon Dashboard</title>
     
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<<<<<<< HEAD
         <style>
        /* day mode color setting */
 
@@ -109,6 +95,10 @@ export class CarbonDashboardPanel {
   --text-color: #111528;
   --secondary-text: #232738;
   --primary-color: #3a435d;
+  --commit-dot-color: #3a435d;
+  --low-carbon: #2e7d32;
+  --avg-carbon: #ef6c00;
+  --high-carbon: #c62828;
 }
 
 /* night mode color setting */
@@ -119,6 +109,19 @@ body.darkmode{
     --text-color:#ffffff;
     --secondary-text: #a4a5b8;
     --primary-color: #3a435d;
+    --commit-dot-color: #BDD5EA;
+    --low-carbon: #66bb6a;
+    --avg-carbon: #ffca28;
+    --high-carbon: #ef5350;
+}
+.commit-dot{
+    background: var(--commit-dot-color);
+}
+.toggle-active{
+    color: var(--base-variant);
+}
+.toggle-inactive{
+    color: var(--text-color);
 }
 
 /* basic browser setting, and font */
@@ -177,9 +180,6 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
             }
                 h2 { text-align: center; font-weight: normal; margin-bottom: 10px;}
         </style>
-=======
-        <link href="${styleUri}" rel="stylesheet">
->>>>>>> ConnectDashBoardFiles
 
         
     
@@ -191,38 +191,14 @@ body.darkmode #theme-switch svg:last-child{ display: block; }
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>
   </button>
-  <header id="header">
-            <h1>Carbon Analysis</h1>
-            <p>Click a section in 'Carbon Cost' to see budget details.</p>
-        </header>
+  <header>
 
-        <section id="main-view" class="dashboard-grid"> 
-            <div class="chart-wrapper">
-                <h2>File by Size in Repo</h2>
-                <div class="chart-container">
-                    <canvas id="emissionChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-wrapper">
-                <h2>Carbon Cost in Repo by File</h2>
-                <div class="chart-container">
-                    <canvas id="carbonCostChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-wrapper">
-                <h2>Emissions by Model</h2>
-                <div class="chart-container">
-                    <canvas id="modelEmissionsChart"></canvas>
-                </div>
-                <p id="model-empty-msg" style="text-align:center; margin-top:12px;">No calls recorded yet.</p>
-            </div>
-        </section>
 
-<<<<<<< HEAD
   <h1>Carbon Analysis</h1>
-  <p> Carbon impact based on each file will be depicted below via pie charts</p>
+  <p> Carbon impact based on each file will be depicted below: </p>
 </header>
        <section class = "dashboard-grid"> 
+       <div id="branchGraph" style="width:100%; height:350px; margin:bottom:40px"></div>
        <div class="chart-wrapper">
         <h2>File by Size in Repo</h2>
         <div class="chart-container">
@@ -286,8 +262,9 @@ var data = [
 ];
 
 // wait until DOM exists
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
   JSC.chart('chartDiv1', {
+  debug: true,
     type: 'heatmap solid',
     margin: [-4, -4],
     box_fill: 'none',
@@ -390,26 +367,10 @@ window.addEventListener('load', () => {
         
          
     </script>
+    <script src="${graphUri}"></script>
     </body>
     </html>`;
     }
 }
 
 
-=======
-        <section id="drilldown-view">
-            <button class="back-btn" id="back-btn">← Back to Overview</button>
-            <h2 id="drilldown-title">File vs Budget</h2>
-            <div class="chart-container" style="max-width: 500px; margin: 0 auto;">
-                <canvas id="budgetChart"></canvas>
-            </div>
-        </section>
-
-        <script src="${scriptUri}"></script>
-    
-       
-    </body>
-    </html>`;
-    }
-}
->>>>>>> ConnectDashBoardFiles
