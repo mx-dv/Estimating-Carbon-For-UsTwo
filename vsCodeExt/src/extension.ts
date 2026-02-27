@@ -43,11 +43,6 @@ export function activate(context: vscode.ExtensionContext) {
         treeDataProvider
     );
 
-    function convert(x: any) {
-        //treeDataProvider.addMessage(String(x));
-        return x;
-    }
-
     devTok.getTextAroundCursor();
 
     //let lastInlineState = false;
@@ -339,20 +334,31 @@ export async function getLogs(context: vscode.ExtensionContext) {
         const filePath = logCap.getLogFilePath(context);
         console.log(filePath);
         const logUri = path.join(path.dirname(filePath), "GitHub.copilot-chat", "GitHub Copilot Chat.log");
-
+        
         // reads file and outputs lines to console one at a time
         const content = fs.readFileSync(logUri, 'utf-8');
-        const models: budget.Call[] = await logCap.identifyModel(content);
+        const lDate = new Date(lastAccess);
+
+        const regex : RegExp = new RegExp(lDate.toString());
+        const splitting = content.split(regex);
+        var input:string;
+        if (splitting.length !== 2){
+            input = content;
+        }
+        else{
+            input = splitting[1];
+        }
+        const models: budget.Call[] = await logCap.identifyModel(input);
         console.log("CALLS: ", models);
         for (let index = 0; index < models.length; index++) {
 
             if (models[index].DateTime > lastAccess){
                 updateTree(models[index]);
+                lastAccess = models[index].DateTime;
             }
         }
         vscode.window.showInformationMessage("Copilot log files refreshed.");
-        lastAccess = new Date().getTime();
-        }
+         }
         catch (error) {
             vscode.window.showErrorMessage("Error: Copilot log files not found.");
         }

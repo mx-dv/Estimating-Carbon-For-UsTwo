@@ -16,7 +16,8 @@ const testPattern = /a/g;
 
 
 //regex to capture Claude model tokens with datetime
-const inlineClaudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<="stop_reason":"end_turn"(.*):{"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)/g;
+const dateRegex = /\d*-\d*-\d* \d*:\d*:\d*.\d*/g;
+const inlineClaudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<="stop_reason":null(.*):{"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)|(?<=stop_reason":"end_turn",(.*))}}/g;
 const chatClaudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<="stop_reason":"end_turn"(.*):{"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)/g;
 
 export function getLogFilePath(context: vscode.ExtensionContext) {
@@ -30,15 +31,21 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     var activeCall: budget.Call = { Emissions: 0, Model: "TEST", DateTime: 0 };
     //var models = rawLog.match(modelPattern);
     //console.log(rawLog+"\n\n\n\n");
-    const chunks:string[] = rawLog.split(modelPattern);
-    if (chunks===null){
-        console.log("No chunks have been made");
-    }
+
+    //replace with the entire log file since last use
+    //but make sure calls are separated maybe with timestamp?
+    //also just use the inline chat regex
+
+    // const chunks:string[] = rawLog.split(modelPattern);
+    // if (chunks===null){
+    //     console.log("No chunks have been made");
+    // }
     //console.log(chunks[1]+"\n\n\n\n------------");
-    for (var i = 0; i<chunks.length; i++){
-        var models = chunks[i].match(modelPattern2);
-        if (models!==null){
-            var model = models[0]; 
+// for (var i = 0; i<chunks.length; i++){
+    var models = rawLog.match(modelPattern2);
+    if (models!==null){
+        for(var i = 0;i< models.length;i++){
+            var model = models[i];
             console.log("model:"+model); //rn its getting the wrong model (well not wrong its getting too much of the model)
             switch (model) {
                 case 'claude-haiku-4.5':
@@ -68,13 +75,17 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                 default:
                     console.log("Functionality coming soon!");
                     break;
+            
             }
         }
-        if (claudeFlag){
-            const [time, result] = findClaude(chunks[i],chunks.slice(0,i-1));
-            if (result !== -1) { 
-                activeCall.Emissions = Number(convert.calculateEmission(activeCall.Model, result).toFixed(4));
-                activeCall.DateTime = time;
+    }
+    if (claudeFlag){
+        const [times, results] = findClaude(rawLog);
+        for(var i = 0; i<results.length;i++){
+            if (results[i] !== -1) { 
+                activeCall.Emissions = results[i];
+                //Number(convert.calculateEmission(activeCall.Model, result).toFixed(4));
+                activeCall.DateTime = times[i];
                 claudeFlag = false;
                 matches.push(activeCall);
                 var activeCall: budget.Call = { Emissions: 0, Model: "TEST", DateTime: 0 };
@@ -86,41 +97,68 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     return matches;
 }
 
-function findClaude(line: string,priorChunks: string[]): [number, number] {
-    const purpose = line.match(modelPattern3);
-    var match = line.match(chatClaudePattern); 
+function findClaude(log: string): [number[], number[]] {
+    const purpose = log.match(modelPattern3);
+    var match = log.match(inlineClaudePattern); 
     var timeIndex:number = 0; 
-    if (purpose !== null) {
-        if (purpose[0] === ' [inline/generate'){ //this doesn't 
-            console.log("INLINE CALL MADEEEEEEEE");
-            timeIndex = 1;
-            var chunk = line;
-            for (let i = priorChunks.length-1; i>=0; --i){
-                var matches = priorChunks[i].match(inlineClaudePattern);
-                if (matches!==null){
-                    if (matches.length === 1){
-                        // console.log("added orther section -----------------------------------------------------");
-                        // console.log(matches);
-                        chunk.concat(priorChunks[i]);
-                        break;
+    // if (purpose !== null) {
+    //     if (purpose[0] === ' [inline/generate'){ //this doesn't 
+    //         console.log("CALL MADEEEEEEEE");
+    //         timeIndex = 1;
+    //         var chunk = line;
+    //         for (let i = priorChunks.length-1; i>=0; --i){
+    //             var matches = priorChunks[i].match(inlineClaudePattern);
+    //             if (matches!==null){
+    //                 if (matches.length === 1){
+    //                     // console.log("added orther section -----------------------------------------------------");
+    //                     // console.log(matches);
+    //                     chunk.concat(priorChunks[i]);
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //         match = chunk.match(inlineClaudePattern);
+    //     }
+    if (match!==null){
+        var result:number[] = [];
+        var timestamp:number[] = [];
+        var j = 0;
+        var flag:boolean = false;
+        console.log(match);
+        for (let i = 0; i < match.length; i++) {
+            console.log("match ",i,match[i]);
+            if (match[i] === '}}'){
+                j++;
+                flag = false;
+            }
+            else{
+                console.log("not }}");
+                if (match[i].match(dateRegex) !== null){
+                    timestamp.push(new Date(match[i]).getTime());
+                    if (match[timeIndex] === '0') {timestamp .push(new Date().getTime());}
+                    console.log("Timestamp: ", timestamp);
+                } 
+                else{  
+                    console.log("not date");           
+                    if (!flag){
+                        console.log("Added new numer");
+                        result.push(Number(match[i]));
+                        flag = true;
                     }
+                    else{
+                        console.log("UPDATED result");
+                        result[j] += Number(match[i]);
+                        }
                 }
-            }
-            match = chunk.match(inlineClaudePattern);
         }
-        if (match!==null){
-            var result:number = Number(match[Number(!timeIndex)]);
-            for (let i = 2; i < match.length; i++) {
-                result += Number(match[i]);
-            }
-            console.log("C L A U D E T O K E N S !!");
-            var timestamp: number = new Date(match[timeIndex]).getTime();
-            if (match[timeIndex] === '0') {timestamp = new Date().getTime();}
-            console.log("Timestamp: ", timestamp);
-            console.log(match);
-            console.log("TOKENSSSSSSSSSS"+result);
-            return [timestamp, result];
+
         }
+        console.log("C L A U D E T O K E N S !!");
+
+        console.log(result);
+
+        return [timestamp, result];
     }
-    return [0, -1];
+
+    return [[0], [-1]];
     }
