@@ -377,7 +377,7 @@ function restoreCallHistory(tree: MyTreeDataProvider, budg: budget.budget) { //r
 	var pCalls = budg.getCalls();
 	console.log("CALLS:", pCalls);
 	for (let i = 0; i < pCalls.length; i++) {
-		tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + new Date(pCalls[i].DateTime).toLocaleString());
+		tree.addMessage("Emissions: " + pCalls[i].Emissions + "g CO₂e - Model: " + pCalls[i].Model + " - Date: " + new Date(pCalls[i].DateTime).toLocaleString());
 	}
 }
 
