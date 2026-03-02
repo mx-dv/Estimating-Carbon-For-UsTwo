@@ -6,129 +6,129 @@ import * as extension from './extension';
 
 
 export class CarbonDashboardPanel {
-    public static currentPanel: CarbonDashboardPanel | undefined;
-    private readonly _panel: vscode.WebviewPanel;
-    private _disposables: vscode.Disposable[] = [];
-    private readonly _extensionUri: vscode.Uri;
+  public static currentPanel: CarbonDashboardPanel | undefined;
+  private readonly _panel: vscode.WebviewPanel;
+  private _disposables: vscode.Disposable[] = [];
+  private readonly _extensionUri: vscode.Uri;
 
 
-    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-        this._panel = panel;
-        this._extensionUri = extensionUri;
-        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-        this._panel.webview.html = this._getWebviewContent();
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+    this._panel = panel;
+    this._extensionUri = extensionUri;
+    this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+    this._panel.webview.html = this._getWebviewContent();
 
-        setTimeout(() => {
-            this._panel.webview.postMessage({
-                command: "workspaceBranches",
-                data: [
-                    "main",
-                    "customer/sign-up",
-                    "customer/favourites",
-                    "component/footer"
-                ]
-            });
-        }, 300);
+    setTimeout(() => {
+      this._panel.webview.postMessage({
+        command: "workspaceBranches",
+        data: [
+          "main",
+          "customer/sign-up",
+          "customer/favourites",
+          "component/footer"
+        ]
+      });
+    }, 300);
 
-        setTimeout(() => {
-            this._panel.webview.postMessage({
-                command: "commitDots",
-                data: {
-                    main: [{ xAxis: 30, carbon: 35 }, { xAxis: 55, carbon: 10 }, { xAxis: 95, carbon: 110 }],
-                    "customer/sign-up": [{ xAxis: 110, carbon: 229 }, { xAxis: 175, carbon: 23 }],
-                    "customer/favourites": [{ xAxis: 210, carbon: 57 }, { xAxis: 245, carbon: 3 }],
-                    "component/footer": [{ xAxis: 270, carbon: 313 }]
-                }
-            });
-        }, 500);
+    setTimeout(() => {
+      this._panel.webview.postMessage({
+        command: "commitDots",
+        data: {
+          main: [{ xAxis: 30, carbon: 35 }, { xAxis: 55, carbon: 10 }, { xAxis: 95, carbon: 110 }],
+          "customer/sign-up": [{ xAxis: 110, carbon: 229 }, { xAxis: 175, carbon: 23 }],
+          "customer/favourites": [{ xAxis: 210, carbon: 57 }, { xAxis: 245, carbon: 3 }],
+          "component/footer": [{ xAxis: 270, carbon: 313 }]
+        }
+      });
+    }, 500);
 
-        this._panel.webview.onDidReceiveMessage(
-            message => {
-                switch (message.command) {
-                    case 'triggerReset':
-                        // When the button is clicked, run your clear command!
-                        vscode.commands.executeCommand('ecode.clearStore');
-                        return;
-                }
-            },
-            null,
-            this._disposables
-        );
-    }
-
-    public static createOrShow(extensionUri: vscode.Uri) {
-        const column = vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.viewColumn
-            : undefined;
-
-        // already have a panel
-        if (CarbonDashboardPanel.currentPanel) {
-            CarbonDashboardPanel.currentPanel._panel.reveal(column);
+    this._panel.webview.onDidReceiveMessage(
+      message => {
+        switch (message.command) {
+          case 'triggerReset':
+            // When the button is clicked, run your clear command!
+            vscode.commands.executeCommand('ecode.clearStore');
             return;
         }
+      },
+      null,
+      this._disposables
+    );
+  }
 
-        // create a new panel
-        const panel = vscode.window.createWebviewPanel(
-            'carbonDashboard',
-            'Carbon Dashboard',
-            column || vscode.ViewColumn.One,
-            {
-                enableScripts: true,
-                localResourceRoots: [vscode.Uri.file(extensionUri.fsPath + '/src/webview')]
-            }
-        );
+  public static createOrShow(extensionUri: vscode.Uri) {
+    const column = vscode.window.activeTextEditor
+      ? vscode.window.activeTextEditor.viewColumn
+      : undefined;
 
-        CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
-        CarbonDashboardPanel.currentPanel._sendData();
+    // already have a panel
+    if (CarbonDashboardPanel.currentPanel) {
+      CarbonDashboardPanel.currentPanel._panel.reveal(column);
+      return;
     }
 
-    // Call this from extension whenever a new call is recorded to keep the chart live
-    public static sendData() {
-        if (CarbonDashboardPanel.currentPanel) {
-            CarbonDashboardPanel.currentPanel._sendData();
-        }
+    // create a new panel
+    const panel = vscode.window.createWebviewPanel(
+      'carbonDashboard',
+      'Carbon Dashboard',
+      column || vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        localResourceRoots: [vscode.Uri.file(extensionUri.fsPath + '/src/webview')]
+      }
+    );
+
+    CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
+    CarbonDashboardPanel.currentPanel._sendData();
+  }
+
+  // Call this from extension whenever a new call is recorded to keep the chart live
+  public static sendData() {
+    if (CarbonDashboardPanel.currentPanel) {
+      CarbonDashboardPanel.currentPanel._sendData();
     }
+  }
 
-    private _sendData() {
-        // Aggregate emissions by model from stored calls
-        const calls = require('./extension').wrappedGetCall();
-        const modelMap: Record<string, number> = {};
-        for (const call of calls) {
-            const model = call.Model || 'Unknown';
-            modelMap[model] = (modelMap[model] || 0) + call.Emissions;
-        }
-        const modelLabels = Object.keys(modelMap);
-        const modelEmissions = modelLabels.map(k => modelMap[k]);
-
-        this._panel.webview.postMessage({
-            command: 'updateData',
-            modelLabels,
-            modelEmissions
-        });
+  private _sendData() {
+    // Aggregate emissions by model from stored calls
+    const calls = require('./extension').wrappedGetCall();
+    const modelMap: Record<string, number> = {};
+    for (const call of calls) {
+      const model = call.Model || 'Unknown';
+      modelMap[model] = (modelMap[model] || 0) + call.Emissions;
     }
+    const modelLabels = Object.keys(modelMap);
+    const modelEmissions = modelLabels.map(k => modelMap[k]);
 
-    public dispose() {
-        CarbonDashboardPanel.currentPanel = undefined;
-        this._panel.dispose();
-        while (this._disposables.length) {
-            const x = this._disposables.pop();
-            if (x) { x.dispose(); }
-        }
+    this._panel.webview.postMessage({
+      command: 'updateData',
+      modelLabels,
+      modelEmissions
+    });
+  }
+
+  public dispose() {
+    CarbonDashboardPanel.currentPanel = undefined;
+    this._panel.dispose();
+    while (this._disposables.length) {
+      const x = this._disposables.pop();
+      if (x) { x.dispose(); }
     }
-    // generates the HTML content for the webview
-    // importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
-    private _getWebviewContent(webview: vscode.Webview = this._panel.webview): string {
-        const stylePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css');
-        const scriptPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js');
-        const graphPath = vscode.Uri.file(this._extensionUri.fsPath + '/src/webview/graph.js');
-        const graphUri = this._panel.webview.asWebviewUri(graphPath);
-        const darkModePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'darkmode.js');
-        const darkModeUri = webview.asWebviewUri(vscode.Uri.file(darkModePath));
+  }
+  // generates the HTML content for the webview
+  // importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
+  private _getWebviewContent(webview: vscode.Webview = this._panel.webview): string {
+    const stylePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css');
+    const scriptPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js');
+    const graphPath = vscode.Uri.file(this._extensionUri.fsPath + '/src/webview/graph.js');
+    const graphUri = this._panel.webview.asWebviewUri(graphPath);
+    const darkModePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'darkmode.js');
+    const darkModeUri = webview.asWebviewUri(vscode.Uri.file(darkModePath));
 
 
-        const styleUri = webview.asWebviewUri(vscode.Uri.file(stylePath));
-        const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));
-        return `<!DOCTYPE html>
+    const styleUri = webview.asWebviewUri(vscode.Uri.file(stylePath));
+    const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));
+    return `<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -151,7 +151,7 @@ export class CarbonDashboardPanel {
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>
   </button>
   <header id="header">
-  <h1>Dash Board</h1>
+  <h1>Carbon Analysis Dashboard</h1>
   <p> Carbon impact based on each file will be depicted below: </p>
   </header>
 
@@ -211,5 +211,5 @@ export class CarbonDashboardPanel {
     
     </body>
     </html>`;
-    }
+  }
 }
