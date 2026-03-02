@@ -210,14 +210,21 @@ export function activate(context: vscode.ExtensionContext) {
                 "http_proxy": proxyUrl,
                 "https_proxy": proxyUrl,
 
-                // python specific
+                // supports Python, Ruby, Go, Rust
                 "REQUESTS_CA_BUNDLE": proxyServer.certPath,
-
                 "SSL_CERT_FILE": proxyServer.certPath,
+
+                // cURL, PHP, and many C/C++ based tools
+                "CURL_CA_BUNDLE": proxyServer.certPath,
+
+                "AWS_CA_BUNDLE": proxyServer.certPath,
 
                 // nodejs specific
                 "NODE_EXTRA_CA_CERTS": proxyServer.certPath,
-                "NODE_OPTIONS": "--use-env-proxy"
+                "NODE_OPTIONS": "--use-env-proxy",
+
+                // java specific
+                "JAVA_TOOL_OPTIONS": `-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=${PROXY_PORT} -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=${PROXY_PORT}`
 
             }
         });
