@@ -53,8 +53,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // state.runningInterceptor = true;
 
-
-
     var barManager = new statusBarManager();
     const treeDataProvider = new MyTreeDataProvider();
     lastAccess = 0;
@@ -65,6 +63,10 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 
     devTok.getTextAroundCursor();
+    function convert(x: any) {
+        //treeDataProvider.addMessage(String(x));
+        return x;
+    }
 
     //let lastInlineState = false;
     const disposables: vscode.Disposable[] = [];
@@ -122,7 +124,7 @@ export async function activate(context: vscode.ExtensionContext) {
         var num = Number(limit);
         if (!Number.isNaN(num)) {
             let date = new Date();
-            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: date.getTime() };
+            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: date.toLocaleString() };
             updateTree(newCall);
         }
         else {
@@ -133,7 +135,6 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(input);
     context.subscriptions.push(dashboardCommand);
 
-    console.log('Interceptor Proxy Server is active');
 
     let startDisposable = vscode.commands.registerCommand('ecode.interceptorStart', async () => {
         try {
@@ -141,29 +142,9 @@ export async function activate(context: vscode.ExtensionContext) {
             proxyServer = new InterceptorProxy(PROXY_PORT);
             await proxyServer.start(context.globalStorageUri.fsPath);
 
-            // set VSCode to use local proxy
-            // const config = vscode.workspace.getConfiguration('http');
-            // await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
-
-            // //QUICK FIX TO NOT NEED SSL CERTS FOR NOW
-            // // NEED TO CHANGE FOR BETA
-            // await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
-
-
-            // const disposableAPIKEY = vscode.commands.registerCommand('ecode.setApiKey', async () => {
-            //  const apiKey = await vscode.window.showInputBox({
-            //      prompt: 'Enter your API Key',
-            //      placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            //      ignoreFocusOut: true // keep input box open even if focus moves away from window
-
-            //  });
-            //  if (apiKey) {
-            //      await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
-
-            //      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
             state.runningInterceptor = true;
-            // vscode.window.showInformationMessage('Interceptor Proxy started on port ' + "->" + PROXY_PORT + state.runningInterceptor + "DONE");
-            // vscode.window.showInformationMessage("Status: " + state.runningInterceptor);
+            console.log('Interceptor Proxy Server is active');
+
         } catch (error) {
             vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
         }
@@ -216,10 +197,6 @@ export async function activate(context: vscode.ExtensionContext) {
             terminal.dispose();
         }
 
-        // clear VSCode proxy settings
-        // const config = vscode.workspace.getConfiguration('http');
-        // await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
-        // await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
 
         vscode.window.showInformationMessage('Interceptor Proxy stopped. ');//Proxy settings cleared.');
     });
@@ -298,7 +275,9 @@ export async function deactivate() {
     if (proxyServer) {
         await vscode.commands.executeCommand('ecode.interceptorStop');
     }
-
+    // const config = vscode.workspace.getConfiguration('http');
+    // await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
+    // await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
 }
 
 
@@ -399,7 +378,7 @@ function restoreCallHistory(tree: MyTreeDataProvider, budg: budget.budget) { //r
     var pCalls = budg.getCalls();
     console.log("CALLS:", pCalls);
     for (let i = 0; i < pCalls.length; i++) {
-        tree.addMessage("Emissions: " + pCalls[i].Emissions + "g CO₂e - Model: " + pCalls[i].Model + " - Date: " + new Date(pCalls[i].DateTime).toLocaleString());
+        tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + pCalls[i].DateTime);
     }
 }
 
@@ -408,7 +387,7 @@ export function updateTree(call: budget.Call) {
     var cLimit = budg.updateLimit();
     console.log("limit: " + cLimit);
     bar.updateBar(call.Emissions, cLimit);
-    tree.addMessage("Emissions: " + call.Emissions + "g CO₂e - Model: " + call.Model + " - Date: " + new Date(call.DateTime).toLocaleString());
+    tree.addMessage("Emissions: " + call.Emissions + " - Model: " + call.Model + " - Date: " + call.DateTime);
 
 }
 

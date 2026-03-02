@@ -20,13 +20,12 @@
     "onCommand:ecode.setApiKey",
     "onCommand:ecode.openDashboard",
     "onCommand:ecode.refreshLogs",
-    "onView:myPrimaryView"
+    "onView:myPrimaryView",
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "keybindings": [
-
-    ],
+    "keybindings": [],
     "viewsContainers": {
       "activitybar": [
         {
