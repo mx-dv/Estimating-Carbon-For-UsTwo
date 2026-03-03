@@ -430,7 +430,12 @@ function restoreCallHistory(tree: MyTreeDataProvider, budg: budget.budget) { //r
 
 export function getCurrentBranch(): string {
     try {
-        const branch = child_process.execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            return "Unknown Branch";
+        }
+        const cwd = workspaceFolders[0].uri.fsPath;
+        const branch = child_process.execSync("git rev-parse --abbrev-ref HEAD", { cwd, encoding: 'utf8' }).trim();
         return branch || "Unknown Branch"; // defaults to unknown branch
     } catch (error) {
         console.error("Error getting git branch:", error);
