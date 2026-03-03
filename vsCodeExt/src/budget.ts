@@ -19,11 +19,20 @@ export class budget {
     storeKey: string = "storeKey";
     calls: Call[] = [];
 
+
     constructor(memento: Memento) {
         this.callStore = memento;
     }
     async resetBudget(): Promise<void> {
         await this.callStore.update(this.storeKey, undefined);
+    }
+
+    getBudget(): number {
+        return this.callStore.get<number>("budget", 5);
+    }
+
+    async setBudget(newBudget: number): Promise<void> {
+        await this.callStore.update("budget", newBudget);
     }
 
     updateLimit(): number { // returns the median average of emissions from calls made thus far

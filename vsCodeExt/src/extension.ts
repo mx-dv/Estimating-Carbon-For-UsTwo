@@ -32,7 +32,7 @@ const PROXY_PORT = 3024;
 var budg: budget.budget;
 
 export function activate(context: vscode.ExtensionContext) {
-    budg = new budget.budget(context.workspaceState);
+    budg = new budget.budget(context.globalState);
 
     // state.runningInterceptor = true;
 
@@ -461,4 +461,12 @@ export function updateTree(call: budget.Call) {
 
 export function wrappedGetCall() {
     return budg.getCalls();
+}
+
+export function wrappedGetBudget(): number {
+    return budg.getBudget();
+}
+
+export function wrappedSetBudget(newBudget: number): void {
+    budg.setBudget(newBudget);
 }

@@ -13,6 +13,13 @@
         });
     }
 
+    const setBudgetBtn = document.getElementById('set-budget-btn');
+    if (setBudgetBtn) {
+        setBudgetBtn.addEventListener('click', () => {
+            vscode.postMessage({ command: 'setBudget' });
+        });
+    }
+
     const btn = document.getElementById('theme-switch');
     btn.addEventListener('click', () => { document.body.classList.toggle('darkmode'); });
 
@@ -280,7 +287,7 @@
 
                 // Hardcoding a budget limit for testing  
 
-                const SESSION_BUDGET = 5;
+                const SESSION_BUDGET = message.sessionBudget !== undefined ? message.sessionBudget : 5;
 
                 // calculate percentage 
                 let percentUsed = 0;

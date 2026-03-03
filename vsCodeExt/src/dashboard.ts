@@ -53,6 +53,17 @@ export class CarbonDashboardPanel {
                         // When the button is clicked, run your clear command!
                         vscode.commands.executeCommand('ecode.clearStore');
                         return;
+                    case 'setBudget':
+                        vscode.window.showInputBox({
+                            prompt: "Enter new session budget in grams of CO2 (gCO2e)",
+                            placeHolder: "e.g. 15",
+                        }).then(value => {
+                            if (value && !isNaN(Number(value))) {
+                                require('./extension').wrappedSetBudget(Number(value));
+                                this._sendData(); // Update the dashboard with the new budget
+                            }
+                        });
+                        return;
                 }
             },
             null,
@@ -95,6 +106,7 @@ export class CarbonDashboardPanel {
 
     private _sendData() {
         // Aggregate emissions by model from stored calls
+        const sessionBudget = require('./extension').wrappedGetBudget();
         const calls = require('./extension').wrappedGetCall();
         const modelMap: Record<string, number> = {};
         for (const call of calls) {
@@ -153,7 +165,8 @@ export class CarbonDashboardPanel {
             command: 'updateData',
             modelLabels,
             modelEmissions,
-            heatMapData
+            heatMapData,
+            sessionBudget
         });
 
         const branchMap: Record<string, any[]> = {};
@@ -274,6 +287,7 @@ export class CarbonDashboardPanel {
                 </div>
                 <div class="budget-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     
+                    <button id="set-budget-btn" style="padding: 5px 10px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 10px;">Set Budget</button>
                     <button id="reset-btn" style="padding: 5px 10px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset</button>
             </div>
     </div>
