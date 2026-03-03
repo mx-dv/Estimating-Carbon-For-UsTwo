@@ -8,20 +8,21 @@ export interface Call {
     //OutputTokens: number;
     //TotalTokens: number;
     Emissions: number;
+    Branch?: string;
 }
 
 var callStore: Memento;
 let dateTime = new Date();
 
-export class budget{
+export class budget {
     callStore: Memento;
     storeKey: string = "storeKey";
     calls: Call[] = [];
 
-    constructor(memento:Memento){
+    constructor(memento: Memento) {
         this.callStore = memento;
     }
-    async resetBudget(): Promise<void>{
+    async resetBudget(): Promise<void> {
         await this.callStore.update(this.storeKey, undefined);
     }
 
@@ -58,7 +59,7 @@ export class budget{
             ems.push(pCalls[i].Emissions);
         }
         return ems;
-}
+    }
 
 }
 

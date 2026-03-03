@@ -156,23 +156,39 @@ export class CarbonDashboardPanel {
             heatMapData
         });
 
-        const currentBranch = "MUST REPLACE";
-        const commitData = calls.map((call: any, index: number) => ({
-            xAxis: index * 30 + 10,
-            carbon: call.Emissions
-        }));
+        const branchMap: Record<string, any[]> = {};
+        const branchCounts: Record<string, number> = {};
+
+        for (const call of calls) {
+            const branch = call.Branch || "Unknown Branch";
+            if (!branchMap[branch]) {
+                branchMap[branch] = [];
+                branchCounts[branch] = 0;
+            }
+            branchMap[branch].push(
+                {
+                    xAxis: branchCounts[branch] * 30 + 10,
+                    carbon: call.Emissions
+                });
+
+            branchCounts[branch]++;
+        }
+
+        const workspaceBranches = Object.keys(branchMap);
 
         this._panel.webview.postMessage({
             command: "workspaceBranches",
-            data: [currentBranch]
+            data: workspaceBranches.length > 0 ? workspaceBranches : ["Unknown Branch"]
         });
 
         this._panel.webview.postMessage({
             command: "commitDots",
-            data: { [currentBranch]: commitData }
+            data: Object.keys(branchMap).length > 0 ? branchMap : { "Unknown Branch": [] }
         });
-
     }
+
+
+
 
     public dispose() {
         CarbonDashboardPanel.currentPanel = undefined;

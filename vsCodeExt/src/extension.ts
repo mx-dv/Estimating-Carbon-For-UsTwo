@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Memento } from 'vscode';
 import { stringify } from 'querystring';
+import * as child_process from 'child_process';
 
 import { CarbonDashboardPanel } from './dashboard';
 import { state } from './state';
@@ -427,7 +428,20 @@ function restoreCallHistory(tree: MyTreeDataProvider, budg: budget.budget) { //r
     }
 }
 
+export function getCurrentBranch(): string {
+    try {
+        const branch = child_process.execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
+        return branch || "Unknown Branch"; // defaults to unknown branch
+    } catch (error) {
+        console.error("Error getting git branch:", error);
+        return "Unknown Branch";
+    }
+}
+
 export function updateTree(call: budget.Call) {
+    if (!call.Branch) {
+        call.Branch = getCurrentBranch();
+    }
     budg.storeCall(call);
     var cLimit = budg.updateLimit();
     console.log("limit: " + cLimit);
