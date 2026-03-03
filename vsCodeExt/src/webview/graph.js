@@ -10,7 +10,7 @@ let container;
 
 const ref = document.getElementById("branchGraph");
 
-if(ref){
+if (ref) {
     container = document.createElement("div");
     container.id = "carbon-graph-wrapper";
     container.style.width = "100%";
@@ -29,9 +29,9 @@ if(ref){
     referenceStrip.style.fontSize = "12px";
     referenceStrip.style.alignItems = "center";
     [
-        {label: "Low Emission" , color: "var(--low-carbon)"},
-        {label: "Average Emission" , color: "var(--avg-carbon)"},
-        {label: "High Emission" , color: "var(--high-carbon)"},
+        { label: "Low Emission", color: "var(--low-carbon)" },
+        { label: "Average Emission", color: "var(--avg-carbon)" },
+        { label: "High Emission", color: "var(--high-carbon)" },
     ].forEach(strip => {
         const reference = document.createElement("div");
         reference.style.display = "flex";
@@ -135,85 +135,85 @@ if(ref){
 
 window.addEventListener("message", event => {
     const message = event.data;
-    if(message.command === "commitDots"){
+    if (message.command === "commitDots") {
         pendingCommitDots = message.data;
         drawGraphs();
     }
 
-    if(message.command === "workspaceBranches"){
+    if (message.command === "workspaceBranches") {
         workspaceBranches = message.data;
         drawGraphs();
     }
 });
 
-function deletePreviousGraph(){
+function deletePreviousGraph() {
 
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
     mainGraphArea.innerHTML = "";
 }
 
-function buildGraph(){
+function buildGraph() {
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
-        mainGraphArea.innerHTML = "";
+    mainGraphArea.innerHTML = "";
 
-        const horizontalLineWrapper = document.createElement("div");
-        horizontalLineWrapper.style.display = "flex";
-        horizontalLineWrapper.style.flexDirection = "column";
-        horizontalLineWrapper.style.height = "100%";
-        horizontalLineWrapper.style.justifyContent = "space-evenly";
+    const horizontalLineWrapper = document.createElement("div");
+    horizontalLineWrapper.style.display = "flex";
+    horizontalLineWrapper.style.flexDirection = "column";
+    horizontalLineWrapper.style.height = "100%";
+    horizontalLineWrapper.style.justifyContent = "space-evenly";
 
-        workspaceBranches.forEach(branch => {
+    workspaceBranches.forEach(branch => {
 
-            const horizontalPath = document.createElement("div");
-            horizontalPath.style.display = "flex";
-            horizontalPath.style.alignItems = "center";
-            horizontalPath.style.paddingLeft = "12px";
+        const horizontalPath = document.createElement("div");
+        horizontalPath.style.display = "flex";
+        horizontalPath.style.alignItems = "center";
+        horizontalPath.style.paddingLeft = "12px";
 
-            const graphHeading = document.createElement("span");
-            graphHeading.innerText = branch;
-            graphHeading.style.width = "150px";
-            graphHeading.style.color = "var(--text-color)";
-            graphHeading.style.fontSize = "14px";
-            graphHeading.style.fontWeight = "500";
+        const graphHeading = document.createElement("span");
+        graphHeading.innerText = branch;
+        graphHeading.style.width = "150px";
+        graphHeading.style.color = "var(--text-color)";
+        graphHeading.style.fontSize = "14px";
+        graphHeading.style.fontWeight = "500";
 
-            const horizontalLine = document.createElement("div");
-            horizontalLine.style.position = "relative";
-            horizontalLine.style.flex = "1";
-            horizontalLine.style.height = "2px";
-            horizontalLine.style.background = "var(--secondary-text)";
-            horizontalLine.style.marginLeft = "10px";
+        const horizontalLine = document.createElement("div");
+        horizontalLine.style.position = "relative";
+        horizontalLine.style.flex = "1";
+        horizontalLine.style.height = "2px";
+        horizontalLine.style.background = "var(--secondary-text)";
+        horizontalLine.style.marginLeft = "10px";
 
-            horizontalPath.appendChild(graphHeading);
-            horizontalPath.appendChild(horizontalLine);
-            horizontalLineWrapper.appendChild(horizontalPath);
-        });
+        horizontalPath.appendChild(graphHeading);
+        horizontalPath.appendChild(horizontalLine);
+        horizontalLineWrapper.appendChild(horizontalPath);
+    });
 
-        mainGraphArea.appendChild(horizontalLineWrapper);
+    mainGraphArea.appendChild(horizontalLineWrapper);
 }
 
-function deleteBranches(){
+function deleteBranches() {
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
     mainGraphArea.innerHTML = "";
 }
 
-function drawGraphs(){
+function drawGraphs() {
 
     deletePreviousGraph();
 
-    if(graphType === "timeline"){
-        if(referenceStrip){
+    if (graphType === "timeline") {
+        if (referenceStrip) {
             referenceStrip.style.visibility = "visible";
         }
 
-        if(workspaceBranches.length === 0){
+        if (workspaceBranches.length === 0) {
             return;
         }
 
         buildGraph();
         drawCommitDots();
     }
-    else{
-        if(referenceStrip){
+    else {
+        if (referenceStrip) {
             referenceStrip.style.visibility = "hidden";
         }
 
@@ -222,10 +222,10 @@ function drawGraphs(){
     }
 }
 
-function getCumulativeGraphData(){
-    if(!pendingCommitDots){
-        return{};
-    } 
+function getCumulativeGraphData() {
+    if (!pendingCommitDots) {
+        return {};
+    }
 
     const cumulativeGraphData = {};
 
@@ -233,46 +233,46 @@ function getCumulativeGraphData(){
         let netTotal = 0;
 
         cumulativeGraphData[branch] = [...pendingCommitDots[branch]]
-        .sort((a, b) => a.xAxis - b.xAxis)
-        .map(commit => {
-            netTotal += commit.carbon;
-            return{
-                time: commit.xAxis,
-                netCarbon: netTotal
-            };
-        });
+            .sort((a, b) => a.xAxis - b.xAxis)
+            .map(commit => {
+                netTotal += commit.carbon;
+                return {
+                    time: commit.xAxis,
+                    netCarbon: netTotal
+                };
+            });
     });
     return cumulativeGraphData;
 
 }
 
-function drawCumulativeGraph(){
+function drawCumulativeGraph() {
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     const height = mainGraphArea.clientHeight;
-    const margin = {top:20, right:40, bottom: 40, left: 60};
+    const margin = { top: 20, right: 40, bottom: 40, left: 60 };
     let maxTime = 0;
     let maxCarbon = 0;
     const timeScale = 5;
 
     const cumulativeGraphData = getCumulativeGraphData();
-    
+
 
     Object.values(cumulativeGraphData).forEach(branch => {
         branch.forEach(graphPoint => {
-            if(graphPoint.time > maxTime){
+            if (graphPoint.time > maxTime) {
                 maxTime = graphPoint.time;
             }
-            if(graphPoint.netCarbon > maxCarbon){
+            if (graphPoint.netCarbon > maxCarbon) {
                 maxCarbon = graphPoint.netCarbon;
             }
         });
     });
 
-    if(maxTime === 0){
+    if (maxTime === 0) {
         maxTime = 1;
     }
-    if(maxCarbon === 0){
+    if (maxCarbon === 0) {
         maxCarbon = 1;
     }
 
@@ -295,19 +295,19 @@ function drawCumulativeGraph(){
             const yAxis = margin.top + graphHeight - (graphPoint.netCarbon / maxCarbon) * graphHeight;
 
             graphPoints += `${xAxis},${yAxis} `;
-            endPoint = { x:xAxis, y:yAxis};
+            endPoint = { x: xAxis, y: yAxis };
         });
 
         const path = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
 
-        path.setAttribute("points" , graphPoints);
-        path.setAttribute("fill" , "none");
-        path.setAttribute("stroke" , "var(--text-color)");
-        path.setAttribute("stroke-width" , "2");
+        path.setAttribute("points", graphPoints);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "var(--text-color)");
+        path.setAttribute("stroke-width", "2");
 
         svg.appendChild(path);
 
-        if(endPoint){
+        if (endPoint) {
             const branchHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
             branchHeading.setAttribute("x", endPoint.x + 4);
             branchHeading.setAttribute("y", endPoint.y - 6);
@@ -336,14 +336,14 @@ function drawCumulativeGraph(){
 
     const yAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
     yAxisHeading.setAttribute("x", 15);
-    yAxisHeading.setAttribute("y", height/2);
+    yAxisHeading.setAttribute("y", height / 2);
     yAxisHeading.setAttribute("fill", "var(--text-color)");
-    yAxisHeading.setAttribute("transform", `rotate(-90 15 ${height/2})`);
+    yAxisHeading.setAttribute("transform", `rotate(-90 15 ${height / 2})`);
     yAxisHeading.textContent = "Carbon";
     svg.appendChild(yAxisHeading);
 
     const xAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    xAxisHeading.setAttribute("x", width/2);
+    xAxisHeading.setAttribute("x", width / 2);
     xAxisHeading.setAttribute("y", height - 5);
     xAxisHeading.setAttribute("fill", "var(--text-color)");
     xAxisHeading.setAttribute("text-anchor", "middle");
@@ -365,28 +365,28 @@ function drawCumulativeGraph(){
     mainGraphArea.appendChild(horizontalScrollContainer);
 }
 
-function getCColor(carbon){
-    if(carbon < 15){
+function getCColor(carbon) {
+    if (carbon < 0.5) {
         return "var(--low-carbon)";
     }
-    if(carbon < 40){
+    if (carbon < 4.5) {
         return "var(--avg-carbon)";
     }
     return "var(--high-carbon)";
 }
 
-function drawCommitDots(){
-    if (graphType === "timeline"){
+function drawCommitDots() {
+    if (graphType === "timeline") {
 
-        if (!pendingCommitDots){
+        if (!pendingCommitDots) {
             return;
-        } 
+        }
 
         const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area > div > div");
 
-        if (horizontalPaths.length === 0){
+        if (horizontalPaths.length === 0) {
             return;
-        } 
+        }
 
         horizontalPaths.forEach(horizontalPath => {
             const branchName = horizontalPath.querySelector("span").innerText;
@@ -396,7 +396,7 @@ function drawCommitDots(){
 
             const commitDots = pendingCommitDots[branchName];
 
-            if(commitDots){
+            if (commitDots) {
                 commitDots.forEach(commit => {
                     const commitDot = document.createElement("div");
                     commitDot.classList.add("commit-dot");
@@ -426,14 +426,14 @@ function drawCommitDots(){
                     });
 
                     horizontalLine.appendChild(commitDot);
-                    
+
                 });
             }
         });
     }
 }
 
-function makeButtons(text, id){
+function makeButtons(text, id) {
     const button = document.createElement("div");
     button.innerText = text;
     button.id = id;

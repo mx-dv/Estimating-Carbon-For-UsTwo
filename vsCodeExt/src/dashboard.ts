@@ -2,133 +2,205 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as budget from './budget';
 import * as extension from './extension';
+import { domainToASCII } from 'url';
 
 
 
 export class CarbonDashboardPanel {
-  public static currentPanel: CarbonDashboardPanel | undefined;
-  private readonly _panel: vscode.WebviewPanel;
-  private _disposables: vscode.Disposable[] = [];
-  private readonly _extensionUri: vscode.Uri;
+    public static currentPanel: CarbonDashboardPanel | undefined;
+    private readonly _panel: vscode.WebviewPanel;
+    private _disposables: vscode.Disposable[] = [];
+    private readonly _extensionUri: vscode.Uri;
 
 
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
-    this._panel = panel;
-    this._extensionUri = extensionUri;
-    this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-    this._panel.webview.html = this._getWebviewContent();
+    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+        this._panel = panel;
+        this._extensionUri = extensionUri;
+        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+        this._panel.webview.html = this._getWebviewContent();
 
-    setTimeout(() => {
-      this._panel.webview.postMessage({
-        command: "workspaceBranches",
-        data: [
-          "main",
-          "customer/sign-up",
-          "customer/favourites",
-          "component/footer"
-        ]
-      });
-    }, 300);
+        // setTimeout(() => {
+        //   this._panel.webview.postMessage({
+        //     command: "workspaceBranches",
+        //     data: [
+        //       "main",
+        //       "customer/sign-up",
+        //       "customer/favourites",
+        //       "component/footer"
+        //     ]
+        //   });
+        // }, 300);
 
-    setTimeout(() => {
-      this._panel.webview.postMessage({
-        command: "commitDots",
-        data: {
-          main: [{ xAxis: 30, carbon: 35 }, { xAxis: 55, carbon: 10 }, { xAxis: 95, carbon: 110 }],
-          "customer/sign-up": [{ xAxis: 110, carbon: 229 }, { xAxis: 175, carbon: 23 }],
-          "customer/favourites": [{ xAxis: 210, carbon: 57 }, { xAxis: 245, carbon: 3 }],
-          "component/footer": [{ xAxis: 270, carbon: 313 }]
-        }
-      });
-    }, 500);
+        // setTimeout(() => {
+        //   this._panel.webview.postMessage({
+        //     command: "commitDots",
+        //     data: {
+        //       main: [{ xAxis: 30, carbon: 35 }, { xAxis: 55, carbon: 10 }, { xAxis: 95, carbon: 110 }],
+        //       "customer/sign-up": [{ xAxis: 110, carbon: 229 }, { xAxis: 175, carbon: 23 }],
+        //       "customer/favourites": [{ xAxis: 210, carbon: 57 }, { xAxis: 245, carbon: 3 }],
+        //       "component/footer": [{ xAxis: 270, carbon: 313 }]
+        //     }
+        //   });
+        // }, 500);
 
-    this._panel.webview.onDidReceiveMessage(
-      message => {
-        switch (message.command) {
-          case 'triggerReset':
-            // When the button is clicked, run your clear command!
-            vscode.commands.executeCommand('ecode.clearStore');
+        this._panel.webview.onDidReceiveMessage(
+            message => {
+                switch (message.command) {
+                    case 'frontEndReady':
+                        this._sendData();
+                        return;
+                    case 'triggerReset':
+                        // When the button is clicked, run your clear command!
+                        vscode.commands.executeCommand('ecode.clearStore');
+                        return;
+                }
+            },
+            null,
+            this._disposables
+        );
+    }
+
+    public static createOrShow(extensionUri: vscode.Uri) {
+        const column = vscode.window.activeTextEditor
+            ? vscode.window.activeTextEditor.viewColumn
+            : undefined;
+
+        // already have a panel
+        if (CarbonDashboardPanel.currentPanel) {
+            CarbonDashboardPanel.currentPanel._panel.reveal(column);
             return;
         }
-      },
-      null,
-      this._disposables
-    );
-  }
 
-  public static createOrShow(extensionUri: vscode.Uri) {
-    const column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+        // create a new panel
+        const panel = vscode.window.createWebviewPanel(
+            'carbonDashboard',
+            'Carbon Dashboard',
+            column || vscode.ViewColumn.One,
+            {
+                enableScripts: true,
+                localResourceRoots: [vscode.Uri.file(path.join(extensionUri.fsPath, 'src', 'webview'))]
+            }
+        );
 
-    // already have a panel
-    if (CarbonDashboardPanel.currentPanel) {
-      CarbonDashboardPanel.currentPanel._panel.reveal(column);
-      return;
+        CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
+        // CarbonDashboardPanel.currentPanel._sendData();
     }
 
-    // create a new panel
-    const panel = vscode.window.createWebviewPanel(
-      'carbonDashboard',
-      'Carbon Dashboard',
-      column || vscode.ViewColumn.One,
-      {
-        enableScripts: true,
-        localResourceRoots: [vscode.Uri.file(extensionUri.fsPath + '/src/webview')]
-      }
-    );
-
-    CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
-    CarbonDashboardPanel.currentPanel._sendData();
-  }
-
-  // Call this from extension whenever a new call is recorded to keep the chart live
-  public static sendData() {
-    if (CarbonDashboardPanel.currentPanel) {
-      CarbonDashboardPanel.currentPanel._sendData();
+    // Call this from extension whenever a new call is recorded to keep the chart live
+    public static sendData() {
+        if (CarbonDashboardPanel.currentPanel) {
+            CarbonDashboardPanel.currentPanel._sendData();
+        }
     }
-  }
 
-  private _sendData() {
-    // Aggregate emissions by model from stored calls
-    const calls = require('./extension').wrappedGetCall();
-    const modelMap: Record<string, number> = {};
-    for (const call of calls) {
-      const model = call.Model || 'Unknown';
-      modelMap[model] = (modelMap[model] || 0) + call.Emissions;
+    private _sendData() {
+        // Aggregate emissions by model from stored calls
+        const calls = require('./extension').wrappedGetCall();
+        const modelMap: Record<string, number> = {};
+        for (const call of calls) {
+            const model = call.Model || 'Unknown';
+            modelMap[model] = (modelMap[model] || 0) + call.Emissions;
+        }
+        const modelLabels = Object.keys(modelMap);
+        const modelEmissions = modelLabels.map(k => modelMap[k]);
+
+        const dailyEmissions: Record<string, number> = {};
+        for (const call of calls) {
+            let subDate = "";
+
+            let callDate = new Date(call.DateTime);
+            if (isNaN(callDate.getTime()) && typeof call.DateTime === 'string') {
+                const parts = call.DateTime.split(/[,\s/:]+/);
+                if (parts.length >= 3) {
+                    const day = parseInt(parts[0], 10);
+                    const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed
+                    const year = parseInt(parts[2], 10);
+                    callDate = new Date(year, month, day);
+                }
+            }
+
+            if (!isNaN(callDate.getTime())) {
+                subDate = callDate.toISOString().substring(0, 10);
+            } else {
+                subDate = new Date().toISOString().substring(0, 10);
+            }
+            dailyEmissions[subDate] = (dailyEmissions[subDate] || 0) + call.Emissions;
+        }
+
+
+        const heatMapData = [];
+        const endToday = new Date();
+        let myDateTime = new Date(new Date().setDate(endToday.getDate() - 365));
+
+        while (myDateTime <= endToday) {
+            const subDate = myDateTime.toISOString().substring(0, 10);
+            let weekday = myDateTime.getDay();
+            weekday = (weekday + 6) % 7 + 1; // start the week from monday (why does anyone ever start it on a sunday????)
+
+            heatMapData.push({
+                x: subDate,
+                y: weekday.toString(),
+                d: subDate,
+                v: dailyEmissions[subDate] || 0 // default to 0 if no emission calls
+            });
+            myDateTime = new Date(myDateTime.setDate(myDateTime.getDate() + 1));
+        }
+
+        console.log("BACKEND: Sending updateData command.");
+        console.log("BACKEND: HeatMap payload length:", heatMapData.length, "Sample:", heatMapData[heatMapData.length - 1]);
+
+        this._panel.webview.postMessage({
+            command: 'updateData',
+            modelLabels,
+            modelEmissions,
+            heatMapData
+        });
+
+        const currentBranch = "MUST REPLACE";
+        const commitData = calls.map((call: any, index: number) => ({
+            xAxis: index * 30 + 10,
+            carbon: call.Emissions
+        }));
+
+        this._panel.webview.postMessage({
+            command: "workspaceBranches",
+            data: [currentBranch]
+        });
+
+        this._panel.webview.postMessage({
+            command: "commitDots",
+            data: { [currentBranch]: commitData }
+        });
+
     }
-    const modelLabels = Object.keys(modelMap);
-    const modelEmissions = modelLabels.map(k => modelMap[k]);
 
-    this._panel.webview.postMessage({
-      command: 'updateData',
-      modelLabels,
-      modelEmissions
-    });
-  }
-
-  public dispose() {
-    CarbonDashboardPanel.currentPanel = undefined;
-    this._panel.dispose();
-    while (this._disposables.length) {
-      const x = this._disposables.pop();
-      if (x) { x.dispose(); }
+    public dispose() {
+        CarbonDashboardPanel.currentPanel = undefined;
+        this._panel.dispose();
+        while (this._disposables.length) {
+            const x = this._disposables.pop();
+            if (x) { x.dispose(); }
+        }
     }
-  }
-  // generates the HTML content for the webview
-  // importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
-  private _getWebviewContent(webview: vscode.Webview = this._panel.webview): string {
-    const stylePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css');
-    const scriptPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js');
-    const graphPath = vscode.Uri.file(this._extensionUri.fsPath + '/src/webview/graph.js');
-    const graphUri = this._panel.webview.asWebviewUri(graphPath);
-    const darkModePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'darkmode.js');
-    const darkModeUri = webview.asWebviewUri(vscode.Uri.file(darkModePath));
+    // generates the HTML content for the webview
+    // importing chart.js for that charts can be drawn and its libraries will handle the math and drawing
+    private _getWebviewContent(webview: vscode.Webview = this._panel.webview): string {
+        // const stylePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css');
+        // const scriptPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js');
+        // const graphPath = vscode.Uri.file(this._extensionUri.fsPath + '/src/webview/graph.js');
+        // const graphUri = this._panel.webview.asWebviewUri(graphPath);
+        // const darkModePath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'darkmode.js');
+        // const darkModeUri = webview.asWebviewUri(vscode.Uri.file(darkModePath));
 
 
-    const styleUri = webview.asWebviewUri(vscode.Uri.file(stylePath));
-    const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));
-    return `<!DOCTYPE html>
+        // const styleUri = webview.asWebviewUri(vscode.Uri.file(stylePath));
+        // const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));
+
+        const styleUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css')));
+        const scriptUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js')));
+        const graphUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'graph.js')));
+        const darkModeUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'darkmode.js')));
+        return `<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -211,5 +283,5 @@ export class CarbonDashboardPanel {
     
     </body>
     </html>`;
-  }
+    }
 }
