@@ -378,8 +378,8 @@ class statusBarManager {
     updateBar(input: number, limit: number) {
 
         if (input) {
-            this.mainItem.text = 'Average carbon cost: ' + limit + ' g CO₂e';
-            if (input >= 3 * limit) { //currently 8 represents the limit 
+            this.mainItem.text = 'Average carbon cost: ' + limit.toFixed(4) + ' g CO₂e';
+            if (input >= 3 * limit) { 
                 this.newColour = "statusBarItem.errorBackground"; //if well beyond the limit the loading bar goes red
                 vscode.window.showInformationMessage('VERY high carbon AI call made (check pane for details)');
             }
@@ -413,7 +413,7 @@ function restoreCallHistory(tree: MyTreeDataProvider, budg: budget.budget) { //r
     var pCalls = budg.getCalls();
     console.log("CALLS:", pCalls);
     for (let i = 0; i < pCalls.length; i++) {
-        tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + pCalls[i].DateTime);
+        tree.addMessage("Emissions: " + pCalls[i].Emissions + "g CO₂e - Model: " + pCalls[i].Model + " - Date: " + new Date(pCalls[i].DateTime).toLocaleString());
     }
 }
 
@@ -440,7 +440,7 @@ export function updateTree(call: budget.Call) {
     var cLimit = budg.updateLimit();
     console.log("limit: " + cLimit);
     bar.updateBar(call.Emissions, cLimit);
-    tree.addMessage("Emissions: " + call.Emissions + " - Model: " + call.Model + " - Date: " + call.DateTime);
+    tree.addMessage("Emissions: " + call.Emissions + "g CO₂e - Model: " + call.Model + " - Date: " + new Date(call.DateTime).toLocaleString());
 
     CarbonDashboardPanel.sendData();
 
