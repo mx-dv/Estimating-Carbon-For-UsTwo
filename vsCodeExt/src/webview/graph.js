@@ -152,8 +152,11 @@ function deletePreviousGraph() {
     mainGraphArea.innerHTML = "";
 }
 
+
 function buildGraph() {
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
+    if (!mainGraphArea) return;
+
     mainGraphArea.innerHTML = "";
 
     const horizontalLineWrapper = document.createElement("div");
@@ -161,18 +164,23 @@ function buildGraph() {
     horizontalLineWrapper.style.flexDirection = "column";
     horizontalLineWrapper.style.height = "100%";
     horizontalLineWrapper.style.justifyContent = "space-evenly";
+    horizontalLineWrapper.style.width = "100%";
 
-    workspaceBranches.forEach(branch => {
+    workspaceBranches.forEach((branch, index) => {
+        const hue = Math.floor((index * 137.5 + 150) % 360);
+        const branchColor = `hsl(${hue}, 70%, 80%)`;
 
         const horizontalPath = document.createElement("div");
         horizontalPath.style.display = "flex";
         horizontalPath.style.alignItems = "center";
         horizontalPath.style.paddingLeft = "12px";
+        horizontalPath.style.width = "100%";
 
         const graphHeading = document.createElement("span");
         graphHeading.innerText = branch;
         graphHeading.style.width = "150px";
-        graphHeading.style.color = "var(--text-color)";
+        graphHeading.style.minWidth = "150px";
+        graphHeading.style.color = branchColor;
         graphHeading.style.fontSize = "14px";
         graphHeading.style.fontWeight = "500";
 
@@ -180,7 +188,7 @@ function buildGraph() {
         horizontalLine.style.position = "relative";
         horizontalLine.style.flex = "1";
         horizontalLine.style.height = "2px";
-        horizontalLine.style.background = "var(--secondary-text)";
+        horizontalLine.style.background = branchColor;
         horizontalLine.style.marginLeft = "10px";
 
         horizontalPath.appendChild(graphHeading);
@@ -287,6 +295,10 @@ function drawCumulativeGraph() {
 
     Object.keys(cumulativeGraphData).forEach(branch => {
 
+        const branchIndex = workspaceBranches.indexOf(branch);
+        const hue = Math.floor((branchIndex * 137.5 + 150) % 360);
+        const branchColour = branchIndex != -1 ? `hsl(${hue}, 70%, 80%)` : "var(--text-color)";
+
         let graphPoints = "";
         let endPoint = null;
 
@@ -302,7 +314,7 @@ function drawCumulativeGraph() {
 
         path.setAttribute("points", graphPoints);
         path.setAttribute("fill", "none");
-        path.setAttribute("stroke", "var(--text-color)");
+        path.setAttribute("stroke", branchColour);
         path.setAttribute("stroke-width", "2");
 
         svg.appendChild(path);
@@ -311,7 +323,7 @@ function drawCumulativeGraph() {
             const branchHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
             branchHeading.setAttribute("x", endPoint.x + 4);
             branchHeading.setAttribute("y", endPoint.y - 6);
-            branchHeading.setAttribute("fill", "var(--text-color)");
+            branchHeading.setAttribute("fill", branchColour);
             branchHeading.setAttribute("font-size", "11");
             branchHeading.textContent = branch;
             svg.appendChild(branchHeading);
