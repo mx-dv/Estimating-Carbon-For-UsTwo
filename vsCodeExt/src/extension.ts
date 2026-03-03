@@ -17,9 +17,11 @@ import { state } from './state';
 
 import { InterceptorProxy } from './proxyServer';
 import { privateEncrypt } from 'crypto';
+import { getSystemErrorMap } from 'util';
 
 export let tree: MyTreeDataProvider;
 export let bar: statusBarManager;
+export let lastAccess: number;
 
 export function setDisplay(t: MyTreeDataProvider, b: statusBarManager) {
     tree = t;
@@ -31,18 +33,37 @@ let proxyServer: InterceptorProxy;
 const PROXY_PORT = 3024;
 var budg: budget.budget;
 
-export function activate(context: vscode.ExtensionContext) {
-    budg = new budget.budget(context.globalState);
+export async function activate(context: vscode.ExtensionContext) {
+
+    const copilotChat = vscode.extensions.getExtension('github.copilot-chat');
+    if (!copilotChat) {
+        vscode.window.showWarningMessage('GitHub Copilot Chat is not installed. Carbon emissions will not be tracked during development time!');
+    }
+    else {
+        if (!copilotChat.isActive) {
+            await copilotChat.activate();
+        }
+        vscode.commands.executeCommand('workbench.action.setLogLevel');
+        // get current log level settings
+        vscode.window.showInformationMessage('Please Select "Github Copilot Chat" then "Trace" in the above command window');
+
+    }
+
+
+    budg = new budget.budget(context.workspaceState);
 
     // state.runningInterceptor = true;
 
     var barManager = new statusBarManager();
     const treeDataProvider = new MyTreeDataProvider();
+    lastAccess = 0;
+
     vscode.window.registerTreeDataProvider(
         'myPrimaryView',
         treeDataProvider
     );
 
+    
     function convert(x: any) {
         //treeDataProvider.addMessage(String(x));
         return x;
@@ -66,33 +87,12 @@ export function activate(context: vscode.ExtensionContext) {
     const BarManager = vscode.window.createStatusBarItem();
 
 
-    disposables.push(vscode.workspace.onDidChangeTextDocument(async evt => {
-        const tokens = -1;
-        //Number(await devTok.change(evt));
 
-        if (tokens !== -1) {
-            var emissions = convert(tokens);
-
-
-            treeDataProvider.addMessage("Call ID: xxxx - Emissions: " + emissions + ' g CO₂e');
-
-
-            let date = new Date();
-            var newCall: budget.Call = { Emissions: emissions, Model: "TEST", DateTime: date.toLocaleString() };
-            updateTree(newCall);
-
-        }
+    disposables.push(vscode.workspace.onDidSaveTextDocument(async evt => {
+        console.log("Updating logs..........");
+        getLogs(context);
     }));
 
-    const newF = vscode.commands.registerCommand('ecode.newFile', async () => {
-        vscode.workspace.openTextDocument({ content: " " }).then(async doc => {
-            await vscode.window.showTextDocument(doc);
-            const position = new vscode.Position(10, 28);
-            new vscode.Selection(position, position);
-            await vscode.commands.executeCommand('type', { text: "HELLO" });
-
-        });
-    });
 
     const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
         budg.resetBudget();
@@ -111,25 +111,9 @@ export function activate(context: vscode.ExtensionContext) {
         CarbonDashboardPanel.createOrShow(context.extensionUri);
         console.log('Carbon Dashboard command registered.');
     });
-    const refresh = vscode.commands.registerCommand('ecode.refreshLogs', () => {
-        try {
 
-            // concactenates correct file name to access Copilot logs
-            const filePath = logCap.getLogFilePath(context);
-            console.log(filePath);
-            const logUri = path.join(path.dirname(filePath), "GitHub.copilot-chat", "GitHub Copilot Chat.log");
-
-            // reads file and outputs lines to console one at a time
-            const content = fs.readFileSync(logUri, 'utf-8');
-            const lines: string[] = content.split(/\r?\n/);
-            for (const line of lines) {
-                console.log(line.trim());
-            }
-            vscode.window.showInformationMessage("Copilot log files refreshed.");
-        }
-        catch (error) {
-            vscode.window.showErrorMessage("Error: Copilot log files not found.");
-        }
+    const refresh = vscode.commands.registerCommand('ecode.refreshLogs', async () => {
+        getLogs(context);
     });
 
 
@@ -143,7 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
         var num = Number(limit);
         if (!Number.isNaN(num)) {
             let date = new Date();
-            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: date.toLocaleString() };
+            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(date.toLocaleDateString()) };
             updateTree(newCall);
         }
         else {
@@ -278,6 +262,11 @@ export function activate(context: vscode.ExtensionContext) {
                 label: `$(play) Reset Stored Session`,
                 description: "Resets the current record of carbon emissions",
                 command: "ecode.clearStore"
+            },
+            {
+                label: `$(play) Open Dashboard`,
+                description: "Displays information on Carbon emissions and usage",
+                command: "ecode.openDashboard"
             }
         ];
 
@@ -389,8 +378,8 @@ class statusBarManager {
     updateBar(input: number, limit: number) {
 
         if (input) {
-            this.mainItem.text = 'Average carbon cost: ' + limit + ' g CO₂e';
-            if (input >= 3 * limit) { //currently 8 represents the limit 
+            this.mainItem.text = 'Average carbon cost: ' + limit.toFixed(4) + ' g CO₂e';
+            if (input >= 3 * limit) { 
                 this.newColour = "statusBarItem.errorBackground"; //if well beyond the limit the loading bar goes red
                 vscode.window.showInformationMessage('VERY high carbon AI call made (check pane for details)');
             }
@@ -424,7 +413,7 @@ function restoreCallHistory(tree: MyTreeDataProvider, budg: budget.budget) { //r
     var pCalls = budg.getCalls();
     console.log("CALLS:", pCalls);
     for (let i = 0; i < pCalls.length; i++) {
-        tree.addMessage("Emissions: " + pCalls[i].Emissions + " - Model: " + pCalls[i].Model + " - Date: " + pCalls[i].DateTime);
+        tree.addMessage("Emissions: " + pCalls[i].Emissions + "g CO₂e - Model: " + pCalls[i].Model + " - Date: " + new Date(pCalls[i].DateTime).toLocaleString());
     }
 }
 
@@ -451,12 +440,42 @@ export function updateTree(call: budget.Call) {
     var cLimit = budg.updateLimit();
     console.log("limit: " + cLimit);
     bar.updateBar(call.Emissions, cLimit);
-    tree.addMessage("Emissions: " + call.Emissions + " - Model: " + call.Model + " - Date: " + call.DateTime);
+    tree.addMessage("Emissions: " + call.Emissions + "g CO₂e - Model: " + call.Model + " - Date: " + new Date(call.DateTime).toLocaleString());
 
     CarbonDashboardPanel.sendData();
 
+}
 
+export async function getLogs(context: vscode.ExtensionContext) {
+    try {
+        // concactenates correct file name to access Copilot logs
+        const filePath = logCap.getLogFilePath(context);
+        console.log(filePath);
+        const logUri = path.join(path.dirname(filePath), "GitHub.copilot-chat", "GitHub Copilot Chat.log");
 
+        // reads file and outputs lines to console one at a time
+        const content = fs.readFileSync(logUri, 'utf-8');
+        const lDate = new Date(lastAccess);
+
+        const regex: RegExp = new RegExp(lDate.toLocaleString());
+        const splitting = content.split(regex);
+        var input: string = content;
+
+        const models: budget.Call[] = await logCap.identifyModel(input);
+        console.log("CALLS: ", models);
+        for (let index = 0; index < models.length; index++) {
+
+            if (models[index].DateTime > lastAccess) {
+                updateTree(models[index]);
+            }
+        }
+        lastAccess = new Date().getTime();
+
+        vscode.window.showInformationMessage("Copilot log files refreshed.");
+    }
+    catch (error) {
+        vscode.window.showErrorMessage("Error: Copilot log files not found.");
+    }
 }
 
 export function wrappedGetCall() {

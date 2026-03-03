@@ -20,13 +20,12 @@
     "onCommand:ecode.setApiKey",
     "onCommand:ecode.openDashboard",
     "onCommand:ecode.refreshLogs",
-    "onView:myPrimaryView"
+    "onView:myPrimaryView",
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "keybindings": [
-
-    ],
+    "keybindings": [],
     "viewsContainers": {
       "activitybar": [
         {
@@ -48,7 +47,7 @@
     "commands": [
       {
         "command": "ecode.openDashboard",
-        "title": "Open Carbon Dashboard"
+        "title": "Ecode: Open Carbon Dashboard"
       },
       {
         "command": "ecode.testInput",
@@ -56,40 +55,30 @@
       },
       {
         "command": "ecode.clearStore",
-        "title": "Clear stored calls"
+        "title": "Ecode: Clear stored calls"
       },
       {
         "command": "ecode.inputdisplay",
-        "title": "Input Display"
-      },
-
-      {
-        "command": "ecode.newFile",
-        "title": "Open New File"
-      },
-
-      {
-        "command": "ecode.setApiKey",
-        "title": "Set Api Key"
+        "title": "Ecode: Input Display"
       },
       {
         "command": "ecode.refreshLogs",
-        "title": "Refresh carbon data",
+        "title": "Ecode: Refresh carbon data",
         "category": "Logging"
       },
       {
         "command": "ecode.interceptorStart",
-        "title": "Start Proxy Interceptor",
+        "title": "Ecode: Start Proxy Interceptor",
         "category": "Interceptor"
       },
       {
         "command": "ecode.interceptorStop",
-        "title": "Stop Proxy Interceptor",
+        "title": "Ecode: Stop Proxy Interceptor",
         "category": "Interceptor"
       },
       {
         "command": "ecode.interceptorOpenTerminal",
-        "title": "Open Runtime Terminal",
+        "title": "Ecode: Open Runtime Terminal",
         "category": "Interceptor"
       },
       {
@@ -125,7 +114,7 @@
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.27.3",
-    "eslint": "^10.0.0",
+    "eslint": "^10.0.2",
     "npm-run-all": "^4.1.5",
     "sinon": "^21.0.1",
     "typescript": "^5.9.3",

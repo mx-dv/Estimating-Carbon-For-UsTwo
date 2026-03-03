@@ -29,7 +29,9 @@ export class TieredModel extends LLMModel {
         //     water : waterRate * tokens{}};
     };
 }
-const veryLarge = 99999999999999999999999999999999999999999999999999999999999999;
+
+const veryLarge = Number.MAX_SAFE_INTEGER;
+//99999999999999999999999999999999999999999999999999999999999999;
 export const modelRegistry: Record<string, TieredModel> = {
     "gpt-4o-mini": new TieredModel("GPT4oMini", [{ limit: 400, carbonPerToken: 0.00923 }, { limit: 2000, carbonPerToken: 0.00369 }, { limit: 11500, carbonPerToken: 0.0006293 }]),
     // "gpt-4-turbo": new TieredModel("GPT4Turbo", [{ limit: 300, carbonPerToken: 2 }]),
