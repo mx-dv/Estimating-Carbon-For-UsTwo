@@ -90,10 +90,18 @@ Initial release of ecode, supports all Claude models.
 
 ### 0.0.2
 
-Updated support for generic models, and updated release readme.md
+Updated support for generic models
 Fixed issue with dashboard not loading correctly
 
 
+### 0.0.3
+Updated release readme.md to provide more comprehensive usage instructions
+
+
+
+## In case of error!
+
+This is still a project in development, and we encourage the discovery of issues, errors, and requests for improvements. Please reach out using the Bristol University x Ustwo Slack channel or by emailing cg24012@bristol.ac.uk . Thank you!
 
 <!-- ## Following extension guidelines
 
