@@ -1,13 +1,13 @@
 {
   "name": "ecode",
-  "displayName": "EstimatingCarbon",
+  "displayName": "Ecode",
   "publisher": "development",
   "repository": {
     "type": "git",
     "url": "https://github.com/spe-uob/2025-EstimatingCarbon.git"
   },
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.109.0"
   },
