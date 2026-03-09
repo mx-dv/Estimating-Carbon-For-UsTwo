@@ -469,8 +469,7 @@ export async function getLogs(context: vscode.ExtensionContext) {
                 updateTree(models[index]);//updates side bar with all calls returned
             }
         }
-        lastAccess = new Date().getTime(); //plan to only give identify model and such the log file after the last access
-        //to make it quicker
+        lastAccess = new Date().getTime(); //plan to only give identify model and such the log file after the last access to make it quicker
 
     }
     catch (error) {

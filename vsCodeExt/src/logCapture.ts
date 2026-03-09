@@ -7,12 +7,11 @@ import * as convert from './convert';
 
 const splitPattern= /(?<=\[info\].*copilotmd \| success \| .* \| \d+ms \| \[.*)]/g;
 //was used to split the log file at the point of new model
-//this is outdated and not used by may be valuble later
+// this is outdated and not used but may be valuable later
 
 const purposePattern = /(?<= \| success \| .* \| \d*ms \| \[)[^\]]*/g; //gets the purpose of the call
 const modelPattern = /(?<= \| success \| )\S*/g; //gets all the models used in the log file
 
-const testPattern = /a/g;
 
 
 
@@ -24,7 +23,7 @@ const claudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn
 
 export function getLogFilePath(context: vscode.ExtensionContext) {
     return context.logUri.fsPath;
-}
+} // function to get log file location
 
 export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     var matches: budget.Call[] = [];
@@ -75,7 +74,7 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
             if (results[i] !== -1) { 
                 activeCall.Model = claudes[i];
                 activeCall.Emissions = Number(convert.calculateEmission(activeCall.Model, results[i]).toFixed(4));
-                //converts to emissions based on the model in the claudes array of same position
+                // converts current call's token count to emissions 
                 activeCall.DateTime = times[i]; //apply appropriate time stamp
                 claudeFlag = false; //resets flags
                 matches.push(activeCall);
@@ -97,7 +96,7 @@ function findClaude(log: string): [number[], number[]] {
         var j = 0;
         var flag:boolean = false;
         for (let i = 0; i < match.length; i++) { //loops through all the matches (all types of tokens and appropriate time stamps)
-            if (match[i] === '}}'){ //built into the regex to grab this at the end of every claude call so multiple calls dont get merged into one
+            if (match[i] === '}}'){ //built into the regex to grab this at the end of every claude call so multiple calls don't get merged into one
                 j++;
                 flag = false;
             }
