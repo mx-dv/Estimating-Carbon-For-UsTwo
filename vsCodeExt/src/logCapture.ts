@@ -75,7 +75,7 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
             if (results[i] !== -1) { 
                 activeCall.Model = claudes[i];
                 activeCall.Emissions = Number(convert.calculateEmission(activeCall.Model, results[i]).toFixed(4));
-                //converts to emissions based on the model in the claudes array of same position
+                // converts current call's token count to emissions 
                 activeCall.DateTime = times[i]; //apply appropriate time stamp
                 claudeFlag = false; //resets flags
                 matches.push(activeCall);
