@@ -97,7 +97,7 @@ function findClaude(log: string): [number[], number[]] {
         var j = 0;
         var flag:boolean = false;
         for (let i = 0; i < match.length; i++) { //loops through all the matches (all types of tokens and appropriate time stamps)
-            if (match[i] === '}}'){ //built into the regex to grab this at the end of every claude call so multiple calls dont get merged into one
+            if (match[i] === '}}'){ //built into the regex to grab this at the end of every claude call so multiple calls don't get merged into one
                 j++;
                 flag = false;
             }
