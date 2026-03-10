@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
   workflow_dispatch:
 jobs:
   
@@ -41,4 +42,4 @@ jobs:
     - run: npm test
       if: runner.os != 'Linux'
     
-    - run: npm release
+    - run: npm run release
