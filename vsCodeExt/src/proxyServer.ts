@@ -14,7 +14,7 @@ export class InterceptorProxy {
 
     constructor(port: number) {
         this.port = port;
-        
+
         this.logger = vscode.window.createOutputChannel("Interceptor");
     }
 
@@ -27,7 +27,8 @@ export class InterceptorProxy {
             const workerPath = path.join(__dirname, 'serverWorker.js');
 
             this.child = cp.fork(workerPath, [], {
-                env: { ...process.env }
+                env: { ...process.env },
+                execArgv: []
             });
 
             this.child.on('message', (msg: any) => {
@@ -70,6 +71,13 @@ export class InterceptorProxy {
 
             this.child.on('error', (err) => {
                 reject(err);
+            });
+
+            this.child.on('exit', (code) => {
+                if (code !== 0) {
+                    reject(new Error(`Worker exited with code ${code}`))
+                    console.log(`Worker exited with code ${code}`);
+                };
             });
 
             // start server
