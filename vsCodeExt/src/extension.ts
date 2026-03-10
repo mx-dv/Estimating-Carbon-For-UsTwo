@@ -28,12 +28,6 @@ export function setDisplay(t: MyTreeDataProvider, b: statusBarManager) {
     bar = b;
 }
 
-let n = 0;
-
-
-
-
-
 let proxyServer: InterceptorProxy;
 const PROXY_PORT = 3024;
 var budg: budget.budget;

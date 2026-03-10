@@ -27,16 +27,11 @@ suite('CommandTests', () => {
 			for (const command of myExtensionCommands) {
 				console.log(`Running: ${command}`);
 				if (command === "ecode.interceptorStart") {
-					console.log("0");
 					await vscode.commands.executeCommand(command);
-					console.log("1");
 					await new Promise(res => setTimeout(res, 500));
-					console.log("2");
 
 					const status = dynamics.isInterceptorRunning();
-					console.log("3");
 					assert.strictEqual(status, true, "Interceptor Not Running Correctly");
-					console.log("4");
 
 				} else { await vscode.commands.executeCommand(command); }
 				console.log(`Successfully Ran Test ${command}`);
