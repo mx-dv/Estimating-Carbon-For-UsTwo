@@ -89,7 +89,7 @@ export class CarbonDashboardPanel {
             column || vscode.ViewColumn.One,
             {
                 enableScripts: true,
-                localResourceRoots: [vscode.Uri.file(path.join(extensionUri.fsPath, 'src', 'webview'))]
+                localResourceRoots: [vscode.Uri.file(path.join(extensionUri.fsPath, 'webview'))]
             }
         );
 
@@ -225,10 +225,10 @@ export class CarbonDashboardPanel {
         // const styleUri = webview.asWebviewUri(vscode.Uri.file(stylePath));
         // const scriptUri = webview.asWebviewUri(vscode.Uri.file(scriptPath));
 
-        const styleUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'style.css')));
-        const scriptUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'dashboard.js')));
-        const graphUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'graph.js')));
-        const darkModeUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'darkmode.js')));
+        const styleUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'style.css')));
+        const scriptUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'dashboard.js')));
+        const graphUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'graph.js')));
+        const darkModeUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'darkmode.js')));
         return `<!DOCTYPE html>
     <html lang="en">
     <head>
