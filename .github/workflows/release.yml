@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - ReleaseYMLFix
   workflow_dispatch:
 jobs:
   
@@ -22,7 +23,7 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18.x
+        node-version: 22.x
         cache: npm
         cache-dependency-path: ./vsCodeExt/package-lock.json
     - name: Cache VS Code Test instance
@@ -54,7 +55,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x  
+          node-version: 22.x  
           cache: npm
           cache-dependency-path: ./vsCodeExt/package-lock.json
       - run: npm ci
