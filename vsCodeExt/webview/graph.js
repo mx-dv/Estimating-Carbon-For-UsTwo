@@ -7,6 +7,8 @@ let workspaceBranches = [];
 let referenceStrip;
 let hoverFunctionality;
 let container;
+let branchSelector;
+let selectedBranch = "all";
 
 const ref = document.getElementById("branchGraph");
 
@@ -120,6 +122,19 @@ if (ref) {
     toggleButtonContainer.appendChild(timelineGraphButton);
 
     references.appendChild(title);
+    branchSelector = document.createElement("select");
+    branchSelector.style.padding = "4px 8px";
+    branchSelector.style.borderRadius = "6px";
+    branchSelector.style.background = "var(--base-variant)";
+    branchSelector.style.color = "var(--text-color)";
+    branchSelector.style.border = "1px solid var(--secondary-text)";
+    branchSelector.style.fontSize = "12px";
+
+    branchSelector.addEventListener("change", () => {
+        selectedBranch = branchSelector.value;
+        drawGraphs();
+    });
+    references.appendChild(branchSelector);
     references.appendChild(toggleButtonContainer);
 
     header.appendChild(references);
@@ -142,7 +157,18 @@ window.addEventListener("message", event => {
 
     if (message.command === "workspaceBranches") {
         workspaceBranches = message.data;
-        drawGraphs();
+        branchSelector.innerHTML = "";
+        const allBranchesOption = document.createElement("option");
+        allBranchesOption.value = "all";
+        allBranchesOption.textContent = "All Branches";
+        branchSelector.appendChild(allBranchesOption);
+
+        workspaceBranches.forEach(branch => {
+            const option = document.createElement("option");
+            option.value = branch;
+            option.textContent = branch;
+            branchSelector.appendChild(option);
+        });
     }
 });
 
@@ -166,7 +192,7 @@ function buildGraph() {
     horizontalLineWrapper.style.justifyContent = "space-evenly";
     horizontalLineWrapper.style.width = "100%";
 
-    workspaceBranches.forEach((branch, index) => {
+    workspaceBranches.filter(branch => selectedBranch === "all" || branch === selectedBranch).forEach((branch, index) => {
         const hue = Math.floor((index * 137.5 + 150) % 360);
         const branchColor = `hsl(${hue}, 70%, 80%)`;
 
@@ -176,22 +202,13 @@ function buildGraph() {
         horizontalPath.style.paddingLeft = "12px";
         horizontalPath.style.width = "100%";
 
-        const graphHeading = document.createElement("span");
-        graphHeading.innerText = branch;
-        graphHeading.style.width = "150px";
-        graphHeading.style.minWidth = "150px";
-        graphHeading.style.color = branchColor;
-        graphHeading.style.fontSize = "14px";
-        graphHeading.style.fontWeight = "500";
-
         const horizontalLine = document.createElement("div");
         horizontalLine.style.position = "relative";
+        horizontalLine.dataset.branch = branch;
         horizontalLine.style.flex = "1";
         horizontalLine.style.height = "2px";
         horizontalLine.style.background = branchColor;
-        horizontalLine.style.marginLeft = "10px";
 
-        horizontalPath.appendChild(graphHeading);
         horizontalPath.appendChild(horizontalLine);
         horizontalLineWrapper.appendChild(horizontalPath);
     });
@@ -408,16 +425,18 @@ function drawCommitDots() {
 
         const allTimeStamps = [];
 
-        const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area > div > div > span");
+        const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area [data-branch]");
 
         if (horizontalPaths.length === 0) {
             return;
         }
 
         horizontalPaths.forEach(span => {
-            const horizontalPath = span.parentElement;
-            const branchName = span.innerText;
-            const horizontalLine = horizontalPath.querySelector("div");
+            const horizontalLine = span;
+            const branchName = horizontalLine.dataset.branch;
+            if(selectedBranch !== "all" && branchName !== selectedBranch) {
+                return;
+            }
 
             horizontalLine.querySelectorAll(".commit-dot").forEach(dot => dot.remove());
 
@@ -465,7 +484,7 @@ function drawCommitDots() {
             xAxisTimeStamp.innerHTML = "";
             const displayedTimeStamps = new Set();
             horizontalPaths.forEach(span => {
-                const branchName = span.innerText;
+                const branchName = span.dataset.branch;
                 const commitDots = pendingCommitDots[branchName];
                 if (commitDots) {
                     commitDots.forEach(commit => {
