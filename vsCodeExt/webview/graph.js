@@ -242,12 +242,10 @@ function drawGraphs() {
             referenceStrip.style.visibility = "visible";
         }
 
-        if (workspaceBranches.length === 0) {
-            return;
+        if (workspaceBranches.length > 0) {
+            drawCandleStickTimelineGraph();
         }
 
-        buildGraph();
-        drawCommitDots();
     }
     else {
         if (referenceStrip) {
@@ -271,10 +269,10 @@ function getCumulativeGraphData() {
 
         cumulativeGraphData[branch] = [...pendingCommitDots[branch]]
             .sort((a, b) => a.xAxis - b.xAxis)
-            .map(commit => {
+            .map((commit, index) => {
                 netTotal += commit.carbon;
                 return {
-                    time: commit.xAxis,
+                    time: index,
                     netCarbon: netTotal
                 };
             });
@@ -416,99 +414,6 @@ function getCColor(carbon) {
     return "var(--high-carbon)";
 }
 
-function drawCommitDots() {
-    if (graphType === "timeline") {
-
-        if (!pendingCommitDots) {
-            return;
-        }
-
-        const allTimeStamps = [];
-
-        const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area [data-branch]");
-
-        if (horizontalPaths.length === 0) {
-            return;
-        }
-
-        horizontalPaths.forEach(span => {
-            const horizontalLine = span;
-            const branchName = horizontalLine.dataset.branch;
-            if(selectedBranch !== "all" && branchName !== selectedBranch) {
-                return;
-            }
-
-            horizontalLine.querySelectorAll(".commit-dot").forEach(dot => dot.remove());
-
-            const commitDots = pendingCommitDots[branchName];
-
-            if (commitDots) {
-                commitDots.forEach(commit => {
-                    allTimeStamps.push(commit.timeStamp);
-                    const commitDot = document.createElement("div");
-                    commitDot.classList.add("commit-dot");
-                    commitDot.style.width = "10px";
-                    commitDot.style.height = "10px";
-                    commitDot.style.borderRadius = "50%";
-                    commitDot.style.position = "absolute";
-                    commitDot.style.left = commit.xAxis + "px";
-                    commitDot.style.background = getCColor(commit.carbon);
-                    commitDot.style.transform = "translateY(-4px)";
-                    commitDot.style.cursor = "pointer";
-
-                    commitDot.addEventListener("mouseenter", (e) => {
-                        const timeStamp = new Date(commit.timeStamp).toLocaleString();
-                        hoverFunctionality.innerHTML = `<strong>${branchName}</strong><br/>
-                                                        Time: ${timeStamp}<br/>
-                                                        Carbon: ${commit.carbon}g CO2`;
-                        hoverFunctionality.style.opacity = "1";
-                    });
-
-                    commitDot.addEventListener("mousemove", (e) => {
-                        const position = container.getBoundingClientRect();
-                        hoverFunctionality.style.left = (e.clientX - position.left + 12) + "px";
-                        hoverFunctionality.style.top = (e.clientY - position.top - 20) + "px";
-                    });
-
-                    commitDot.addEventListener("mouseleave", () => {
-                        hoverFunctionality.style.opacity = "0";
-                    });
-
-                    horizontalLine.appendChild(commitDot);
-
-                });
-            }
-        });
-        const xAxisTimeStamp = document.getElementById("timestamp-on-x-axis");
-        if (xAxisTimeStamp){
-            xAxisTimeStamp.innerHTML = "";
-            const displayedTimeStamps = new Set();
-            horizontalPaths.forEach(span => {
-                const branchName = span.dataset.branch;
-                const commitDots = pendingCommitDots[branchName];
-                if (commitDots) {
-                    commitDots.forEach(commit => {
-                        if (displayedTimeStamps.has(commit.timeStamp)) {
-                            return;
-                        }
-                        displayedTimeStamps.add(commit.timeStamp);
-
-                        const heading = document.createElement("span");
-                        heading.innerText = new Date(commit.timeStamp).toLocaleTimeString();
-                        heading.style.position = "absolute";
-                        heading.style.left = (commit.xAxis) + "px";
-                        heading.style.transform = "translateX(-50%)";
-                        heading.style.whiteSpace = "nowrap";
-                        heading.style.fontSize = "10px";
-
-                        xAxisTimeStamp.appendChild(heading);
-                    });
-                }
-            });
-        }
-    }
-}
-
 function makeButtons(text, id) {
     const button = document.createElement("div");
     button.innerText = text;
@@ -543,3 +448,31 @@ timelineGraphButton.addEventListener("click", () => {
 
     drawGraphs();
 });
+
+
+function drawCandleStickTimelineGraph(){
+    const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
+    
+    if (!mainGraphArea || !pendingCommitDots) return;
+    mainGraphArea.innerHTML = "";
+    
+    const allCommits = [];
+
+    Object.keys(pendingCommitDots).forEach(branch => {
+
+        if (selectedBranch !== "all" && branch !== selectedBranch) return;
+
+        pendingCommitDots[branch].forEach(commit => {
+            commits.push({
+                branch: branch,
+                carbon: commit.carbon,
+                time: new Date(commit.timeStamp).getTime(),
+                timeStamp: commit.timeStamp
+            });
+        });
+
+    });
+    if (commits.length === 0) return;
+    
+    commits.sort((a,b) => a.time - b.time);
+}
