@@ -99,8 +99,6 @@ export async function activate(context: vscode.ExtensionContext) {
         getLogs(context);
     }));
 
-
-
     const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
         budg.resetBudget();
         treeDataProvider.clearTree();

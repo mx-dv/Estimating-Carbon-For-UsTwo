@@ -16,7 +16,10 @@ const modelPattern = /(?<= \| success \| )\S*/g; //gets all the models used in t
 //regex to capture Claude model tokens with datetime
 const dateRegex = /\d*-\d*-\d* \d*:\d*:\d*.\d*/g; //returns all the dates
 const claudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<=stop_reason":null(.*)"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)|(?<=stop_reason":"end_turn",(.*))}}/g;
-const GPTPattern = /(?<="usage":.*tokens":)\d*/g;
+const GPTPattern = /(?<=usage":{.*tokens":)\d*|shouldContinue=false|\d*-\d*-\d* \d*:\d*:\d*.\d*(?= \[info\] \[ToolCallingLoop\] Stop hook result: shouldContinue=false)/g;
+//ToolCallingLoop] Stop hook result: shouldContinue=false, reasons=undefined
+//this may be a better ending bit for the call
+
 //gets the tokens used in claude calls
 //this is the same no matter the purpose
 
@@ -36,35 +39,38 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     if (models!==null){
         for(var i = 0;i< models.length;i++){
             var model = models[i]; 
+            console.log("testing testing ",model);
             switch (model) {
                 case 'claude-haiku-4.5': //adds the specifc claude model to an array of claude models
+                    console.log("claude model found");
                     claudes.push(model);
                     claudeFlag = true;
-                    break;
+                    
                 case 'claude-opus-4.5':
                     claudes.push(model);
                     claudeFlag = true;
-                    break;
+                    
                 case 'claude-opus-4.6':
                     claudes.push(model);
                     claudeFlag = true;
-                    break;
+                 
                 case 'claude-sonnet-4':
                     claudes.push(model);
                     claudeFlag = true;
-                    break;
+           
                 case 'claude-sonnet-4.5':
                     claudes.push(model);
                     claudeFlag = true;
-                    break;
+         
                 case 'claude-sonnet-4.6':
                     claudes.push(model);
                     claudeFlag = true;
-                    break;
-                case 'gpt-5.3-codex':
+         
+                case 'gpt-5.2-codex':
+                    console.log("caught GPT model");
                     newGPTFlag = true;
                     GPTs.push(model);
-                    break;
+                  
                 default:
                     console.log("Functionality coming soon!");
                     break;
@@ -73,26 +79,47 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
         }
         
     }
-    if (claudeFlag){
-        const [times, results] = findClaude(rawLog);//returns an array of time stamps and total tokens for all claude models
+    if (claudeFlag || newGPTFlag){
+        var times:number[] = [];
+        var results:number[] = [];
+        var allModels:string[] = claudes.concat(GPTs);
+        if (claudeFlag){
+            console.log("claude Flag");
+            const [timesC, resultsC] = findModel(rawLog,claudePattern,"}}");//returns an array of time stamps and total tokens for all claude models
+            results = results.concat(resultsC);
+            times = times.concat(timesC);
+            console.log("Claude Results: ",resultsC);
+        }
+        if(newGPTFlag){
+            const [timesG,resultsG] = findModel(rawLog,GPTPattern,"shouldContinue=false");
+            results = results.concat(resultsG);
+            times = times.concat(timesG);
+        }
+        //var totalResults = [resultsC,resultsG];
+        
+        //for (const results of totalResults)
+        console.log("results: ",results);
         for(var i = 0; i<results.length;i++){
             if (results[i] !== -1) { 
-                activeCall.Model = claudes[i];
+                activeCall.Model = allModels[i];
                 activeCall.Emissions = Number(convert.calculateEmission(activeCall.Model, results[i]).toFixed(4));
                 // converts current call's token count to emissions 
                 activeCall.DateTime = times[i]; //apply appropriate time stamp
                 claudeFlag = false; //resets flags
+
                 matches.push(activeCall);
                 var activeCall: budget.Call = { Emissions: 0, Model: "TEST", DateTime: 0 };//resets the call
-            }
-        }
+            }  
+    }      
+    
     }
 
     return matches;
 }
 
-function findClaude(log: string): [number[], number[]] {
-    var match = log.match(claudePattern); //matches the claude regex to the log file
+
+function findModel(log: string,pattern : RegExp,splitString : String): [number[], number[]] {
+    var match = log.match(pattern); //matches the claude regex to the log file
     var timeIndex:number = 0; 
  
     if (match!==null){
@@ -101,7 +128,7 @@ function findClaude(log: string): [number[], number[]] {
         var j = 0;
         var flag:boolean = false;
         for (let i = 0; i < match.length; i++) { //loops through all the matches (all types of tokens and appropriate time stamps)
-            if (match[i] === '}}'){ //built into the regex to grab this at the end of every claude call so multiple calls don't get merged into one
+            if (match[i] === splitString){ //built into the regex to grab this at the end of every claude call so multiple calls don't get merged into one
                 j++;
                 flag = false;
             }
@@ -112,10 +139,12 @@ function findClaude(log: string): [number[], number[]] {
                 } 
                 else{          
                     if (!flag){ //if its the first token in the match set add a new value to the results array
+                        console.log("new call starting with this number:",Number(match[i]));
                         result.push(Number(match[i]));
                         flag = true;
                     }
                     else{//otherwise update the result we are looking at
+                        console.log("adding this number to the call",Number(match[i]));
                         result[j] += Number(match[i]);
                         }
                 }
