@@ -280,9 +280,9 @@ export class CarbonDashboardPanel {
     
 
         <section id="main-view"> 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto;">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
                 
-                <div class="budget-tracker-container" style="max-width: 100%; margin: 0;">
+                <div class="budget-tracker-container">
                     <div class="budget-header">
                         <h2>Session Budget</h2>
                     </div>
@@ -299,11 +299,11 @@ export class CarbonDashboardPanel {
                     </div>
                 </div>
 
-                <div class="budget-tracker-container" style="max-width: 100%; margin: 0; display: flex; flex-direction: column; justify-content: center;">
+                <div class="budget-tracker-container">
                     <div class="budget-header">
                         <h2>Average Request Cost</h2>
                     </div>
-                    <div style="text-align: center; margin-top: 10px;">
+                    <div style="text-align: center; margin-top: 20px;">
                         <span id="average-cost-display" style="font-size: 2.2rem; font-weight: bold; color: var(--text-color);">0.0000 g</span>
                         <span style="color: var(--secondary-text); font-size: 1.2rem;"> CO₂e</span>
                     </div>

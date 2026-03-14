@@ -313,6 +313,15 @@
                 } else {
                     fillEl.classList.remove('danger');
                 }
+                
+                // Update average emission display if data is available
+                if (message.averageEmission !== undefined) {
+                    const avgEl = document.getElementById('average-cost-display');
+                    if (avgEl) {
+                        avgEl.innerText = message.averageEmission.toFixed(4) + ' g';
+                    }
+                }
+
             }
         }
     });
