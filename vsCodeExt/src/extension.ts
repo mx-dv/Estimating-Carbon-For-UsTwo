@@ -488,11 +488,12 @@ export async function getLogs(context: vscode.ExtensionContext) {
         for (let index = 0; index < models.length; index++) {
 
             if (models[index].DateTime > lastAccess) {
-                updateTree(models[index]);//updates side bar with all calls returned
+                updateTree(models[index]);
             }
         }
-        lastAccess = new Date().getTime(); //plan to only give identify model and such the log file after the last access to make it quicker
+        lastAccess = new Date().getTime();
 
+        //vscode.window.showInformationMessage("Copilot log files refreshed.");
     }
     catch (error) {
         vscode.window.showErrorMessage("Error: Copilot log files not found.");

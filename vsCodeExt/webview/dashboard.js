@@ -32,38 +32,43 @@
 
     };
 
-    function generateEmptyData() {
-        const d = new Date();
-        const today = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-        const data2 = [];
-        const end = today;
-        let dt = new Date(new Date().setDate(end.getDate() - 365));
-        while (dt <= end) {
-            const iso = dt.toISOString().substring(0, 10);
-            data2.push({
-                x: iso,
-                y: isoDayOfWeek(dt),
-                d: iso,
-                v: 0
-            });
-            dt = new Date(dt.setDate(dt.getDate() + 1));
-        }
-        // console.log(data2);
-        return data2;
-    }
+   function generateEmptyData() {
+    const today = new Date();
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const start = new Date(end);
+    start.setDate(start.getDate() - 365);
 
+    const data2 = [];
+    let dt = new Date(start);
+
+    while (dt <= end) {
+        const iso = dt.toISOString().substring(0, 10);
+
+        data2.push({
+            // Change x to the ISO date string so the time scale can read it
+            x: iso, 
+            y: isoDayOfWeek(dt),
+            d: iso,
+            v: 0
+        });
+
+        dt.setDate(dt.getDate() + 1);
+    }
+    return data2;
+}
     //setup block
 
     const data = {
         datasets: [{
             label: 'Heat Map',
             data: generateEmptyData(),
+            anchor: 'start',
             backgroundColor(c) {
                 if (!c.dataset.data[c.dataIndex]) { return 'rgba(200, 200, 200, 0.1)'; }
                 const value = c.dataset.data[c.dataIndex].v;
                 if (value === 0) { return 'rgba(200, 200, 200, 0.1)'; }
                 const alpha = Math.min(1, (10 + (value * 0.2)) / 60);
-                return `rgba(0, 200, 0, ${alpha})`;
+                return `rgba(0, 255, 150, ${alpha})`;
             },
             borderColor: `green`,
             borderRadius: 1,
@@ -72,11 +77,12 @@
             hoverBorderColor: `rgba(54, 162, 235, 1)`,
             width(c) {
                 const a = c.chart.chartArea || {};
-                return (a.right - a.left) / 53 - 1;
+                const cols = 53;
+                return (a.right - a.left) / cols -3 ;
             },
             height(c) {
                 const a = c.chart.chartArea || {};
-                return (a.bottom - a.top) / 7 - 1;
+                return (a.bottom - a.top) / 7-3 ;
             },
 
         }]
@@ -106,30 +112,27 @@
                 tickLength: 0
             }
         },
-        x: {
-            type: 'time',
-            position: 'bottom',
-            offset: true,
-            time: {
-                unit: 'week',
-                isoWeekDay: 1,
-                displayFormats: {
-                    week: 'MMM dd'
-                }
-            },
-            ticks: {
-                maxRotation: 0,
-                autoSkip: true,
-                font: {
-                    size: 9
-                }
-            },
-            grid: {
-                display: false,
-                drawBorder: false,
-                tickLength: 0,
-            }
+       x: {
+    type: 'time',
+    position: 'bottom',
+    offset: true, // This stops the skewing by giving columns room
+    bounds: 'ticks', // This stops the blocks from vanishing
+    time: {
+        unit: 'week',
+        isoWeekDay: 1,
+        displayFormats: {
+            week: 'MMM dd'
         }
+    },
+    ticks: {
+        source: 'auto', 
+        maxRotation: 45,
+        minRotation: 45,
+        autoSkip: true,
+        font: { size: 8 }
+    },
+    grid: { display: false }
+}
     };
 
     // config
@@ -138,9 +141,17 @@
         data,
         options: {
             maintainAspectRatio: false,
+            layout:{
+                padding:{
+                    top: 10,
+                }
+            },
             scales: scales,
 
             plugins: {
+                legend: {
+            display: false
+        },
                 tooltip: {
                     callbacks: {
                         title: function (context) {
