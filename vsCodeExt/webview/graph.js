@@ -10,6 +10,7 @@ let container;
 let branchSelector;
 let selectedBranch = "all";
 let dynamicSizeChanger;
+const branchSelectorTool = document.getElementById("branch-selector-tool");
 
 const ref = document.getElementById("branchGraph");
 
@@ -137,10 +138,17 @@ if (ref) {
     branchSelector.style.minWidth = "160px";
     branchSelector.style.boxShadow = `0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.55), inset 0 -1px 2px rgba(0, 0, 0, 0.2)`;
     branchSelector.style.backdropFilter = "blur(4px)";
+    branchSelector.style.backgroundColor = "var(--base-variant)";
+    branchSelector.style.color = "var(--text-color)";
     
 
     branchSelector.addEventListener("change", () => {
         selectedBranch = branchSelector.value;
+
+        document.dispatchEvent(new CustomEvent("branchChangeEvent", {
+            detail: {branch: selectedBranch}
+        }));
+
         drawGraphs();
     });
 
@@ -177,10 +185,20 @@ if (ref) {
     dropDownArrow.style.fontSize = "12px";
     dropDownArrow.style.color = "var(--text-color)";
 
+    const branchSelectorToolText = document.createElement("span");
+    branchSelectorToolText.textContent = "Select branch to analyze:";
+    branchSelectorToolText.style.marginRight = "10px";
+    branchSelectorToolText.style.color = "var(--text-color)";
+
+    branchSelectorWrapper.appendChild(branchSelectorToolText);
     branchSelectorWrapper.appendChild(branchSelector);
     branchSelectorWrapper.appendChild(dropDownArrow);
 
-    references.appendChild(branchSelectorWrapper);
+    if (branchSelectorTool) {
+        branchSelectorTool.appendChild(branchSelectorWrapper);
+    }
+
+    references.appendChild(title);
     references.appendChild(toggleButtonContainer);
 
     header.appendChild(references);
@@ -516,10 +534,14 @@ function drawCandleStickTimelineGraph(){
 
         if (selectedBranch !== "all" && branch !== selectedBranch) return;
 
+        let cumulativeTotal = 0;
+
         pendingCommitDots[branch].forEach(commit => {
+            cumulativeTotal = cumulativeTotal + commit.carbon;
             allCommits.push({
                 branch: branch,
                 carbon: commit.carbon,
+                cumulative: cumulativeTotal,
                 time: new Date(commit.timeStamp).getTime(),
                 timeStamp: commit.timeStamp
             });
@@ -587,7 +609,8 @@ function drawCandleStickTimelineGraph(){
         line.addEventListener("mouseenter", () => {
             const timeStamp = new Date(commit.timeStamp).toLocaleString();
             hoverFunctionality.innerHTML = `<strong>Branch:</strong> ${commit.branch}<br>
-                                        <strong>Carbon Emitted:</strong> ${commit.carbon.toFixed(2)} g CO₂<br>
+                                        <strong>Carbon emitted by this commit:</strong> ${commit.carbon.toFixed(2)} g CO₂<br>
+                                        <strong>Carbon emitted so far:</strong> ${commit.cumulative.toFixed(2)} g CO₂<br>
                                         <strong>Time:</strong> ${timeStamp}`;
             hoverFunctionality.style.opacity = "1";
         });
