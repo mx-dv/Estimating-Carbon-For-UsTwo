@@ -89,7 +89,12 @@ export async function activate(context: vscode.ExtensionContext) {
     // budget.initStorage(context.workspaceState);
     restoreCallHistory(treeDataProvider, budg);
     barManager.updateLimit(budg.updateLimit());
-    const BarManager = vscode.window.createStatusBarItem();
+    const pastCalls = budg.getCalls();
+    if (pastCalls.length > 0) {
+        barManager.updateBar(pastCalls[pastCalls.length - 1].Emissions);
+    } else {
+        barManager.updateBar(0);
+    }
 
 
 
@@ -404,6 +409,10 @@ class statusBarManager {
             }
             else if (input >= 15) {
                 this.newColour = "statusBarItem.warningBackground"; // Average Emission
+            }
+
+            else if (input > 0) {
+                this.newColour = "statusBarItem.background"; // Low Emission (keeping for now if there is a way to make it green)
             }
             else {
                 this.newColour = "statusBarItem.activeBackground"; // Low Emission
