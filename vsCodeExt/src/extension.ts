@@ -137,10 +137,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
         var num = Number(limit);
         if (!Number.isNaN(num)) {
-            let date = new Date();
-            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(date.toLocaleDateString()) };
+            let now = new Date();
+            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(now.getTime()) };
             updateTree(newCall);
+        vscode.window.showInformationMessage(`Added ${num}g CO2e for today.`);
         }
+        
         else {
             vscode.window.showInformationMessage('Error: NaN inputted.');
         }

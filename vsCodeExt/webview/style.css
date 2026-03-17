@@ -88,6 +88,15 @@ p{
 .darkmode #theme-switch svg:last-child{
   display: block;
 }
+
+.chart-container {
+    background-color: var(--base-color); 
+    padding: 15px;
+    border-radius: 8px;
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
 .chart-container {
                 position: relative;
                 height: 300px;
