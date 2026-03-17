@@ -131,13 +131,28 @@ if (ref) {
     branchSelector.style.minWidth = "180px";
 
     const dropdownButton = document.createElement("div");
-    dropdownButton.innerText = "Select branches to analyze";
+    dropdownButton.textContent = "Select branches to analyze";
     dropdownButton.style.padding = "6px 14px";
     dropdownButton.style.borderRadius = "999px";
-    dropdownButton.style.border = "1px solid rgba(0,0,0,0.45)";
+    dropdownButton.style.border = "1px solid var(--secondary-text)";
     dropdownButton.style.cursor = "pointer";
     dropdownButton.style.background = "var(--base-variant)";
     dropdownButton.style.color = "var(--text-color)";
+    dropdownButton.style.fontSize = "13px";
+    dropdownButton.style.minWidth = "220px";
+    dropdownButton.style.transition = "all 0.2s ease";
+    dropdownButton.style.display = "flex";
+    dropdownButton.style.alignItems = "center";
+    dropdownButton.style.justifyContent = "space-between";   
+    dropdownButton.style.gap = "8px"; 
+
+    const dropDownArrow = document.createElement("span");
+    dropDownArrow.innerHTML = "&#x25BC;";
+    dropDownArrow.style.fontSize = "10px";
+    dropDownArrow.style.opacity = "0.7";
+
+    dropdownButton.appendChild(dropDownArrow);
+
 
     dropDownTool = document.createElement("div");
     dropDownTool.style.position = "absolute";
@@ -153,7 +168,15 @@ if (ref) {
     dropDownTool.style.overflowY = "auto";
     
     dropdownButton.addEventListener("click", () => {
-        dropDown.style.display = dropDown.style.display === "none" ? "block" : "none";
+        dropDownTool.style.display = dropDownTool.style.display === "none" ? "block" : "none";
+    });
+
+    dropdownButton.addEventListener("mouseenter", () => {
+        dropdownButton.style.borderColor = "var(--text-color)";
+    });
+
+    dropdownButton.addEventListener("mouseleave", () => {
+        dropdownButton.style.borderColor = "var(--secondary-text)";
     });
 
     branchSelector.appendChild(dropdownButton);
@@ -181,25 +204,17 @@ if (ref) {
 
     const branchSelectorWrapper = document.createElement("div");
     branchSelectorWrapper.style.position = "relative";
-    branchSelectorWrapper.style.display = "inline-flex";
+    branchSelectorWrapper.style.display = "flex";
     branchSelectorWrapper.style.alignItems = "center";
-
-    const dropDownArrow = document.createElement("div");
-    dropDownArrow.innerHTML = "&#x25BC;";
-    dropDownArrow.style.position = "absolute";
-    dropDownArrow.style.right = "10px";
-    dropDownArrow.style.pointerEvents = "none";
-    dropDownArrow.style.fontSize = "12px";
-    dropDownArrow.style.color = "var(--text-color)";
+    branchSelectorWrapper.style.gap = "12px";
 
     const branchSelectorToolText = document.createElement("span");
-    branchSelectorToolText.textContent = "Select branch to analyze:";
+    branchSelectorToolText.textContent = "Select branches to analyze:";
     branchSelectorToolText.style.marginRight = "10px";
     branchSelectorToolText.style.color = "var(--text-color)";
 
     branchSelectorWrapper.appendChild(branchSelectorToolText);
     branchSelectorWrapper.appendChild(branchSelector);
-    branchSelectorWrapper.appendChild(dropDownArrow);
 
     if (branchSelectorTool) {
         branchSelectorTool.appendChild(branchSelectorWrapper);
@@ -229,6 +244,8 @@ window.addEventListener("message", event => {
     if (message.command === "workspaceBranches") {
         workspaceBranches = message.data;
         dropDownTool.innerHTML = "";
+
+        selectedBranches.clear();
 
         workspaceBranches.forEach(branch => {
             const heading = document.createElement("label");
@@ -286,7 +303,7 @@ function buildGraph() {
     horizontalLineWrapper.style.justifyContent = "space-evenly";
     horizontalLineWrapper.style.width = "100%";
 
-    workspaceBranches.filter(branch => selectedBranches.size === 0 || selectedBranches.has(branch)).forEach((branch, index) => {
+    workspaceBranches.filter(branch => selectedBranches.has(branch)).forEach((branch, index) => {
         const hue = Math.floor((index * 137.5 + 150) % 360);
         const branchColor = `hsl(${hue}, 70%, 80%)`;
 
@@ -420,7 +437,7 @@ function drawCumulativeGraph() {
 
     Object.keys(cumulativeGraphData).forEach(branch => {
 
-        if(selectedBranches.size > 0 && !selectedBranches.has(branch)){
+        if(!selectedBranches.has(branch)){
             return;
         }
 
@@ -553,6 +570,9 @@ timelineGraphButton.addEventListener("click", () => {
 
 
 function drawCandleStickTimelineGraph(){
+    if (selectedBranches.size === 0) {
+        return;
+    }
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
     
     if (!mainGraphArea || !pendingCommitDots) return;
@@ -562,7 +582,7 @@ function drawCandleStickTimelineGraph(){
 
     Object.keys(pendingCommitDots).forEach(branch => {
 
-        if(selectedBranches.size > 0 && !selectedBranches.has(branch)) {
+        if(!selectedBranches.has(branch)) {
             return;
         }
 
