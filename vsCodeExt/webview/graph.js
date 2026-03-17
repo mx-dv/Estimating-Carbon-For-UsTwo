@@ -8,9 +8,10 @@ let referenceStrip;
 let hoverFunctionality;
 let container;
 let branchSelector;
-let selectedBranch = "all";
+let selectedBranches = new Set();
 let dynamicSizeChanger;
 const branchSelectorTool = document.getElementById("branch-selector-tool");
+let dropDownTool;
 
 const ref = document.getElementById("branchGraph");
 
@@ -124,33 +125,39 @@ if (ref) {
     toggleButtonContainer.appendChild(cumulativeGraphButton);
 
     references.appendChild(title);
-    branchSelector = document.createElement("select");
-    branchSelector.style.padding = "6px 34px 6px 14px";
-    branchSelector.style.borderRadius = "999px";
-    branchSelector.style.background = "linear-gradient(to bottom, rgba(255,255,255,0.18), rgba(255,255,255,0.05))";
-    branchSelector.style.color = "var(--text-color)";
-    branchSelector.style.border = "1px solid rgba(0,0,0,0.45)";
-    branchSelector.style.fontSize = "13px";
-    branchSelector.style.fontWeight = "500";
-    branchSelector.style.cursor = "pointer";
-    branchSelector.style.appearance = "none";
-    branchSelector.style.transition = "all 0.2s ease";
-    branchSelector.style.minWidth = "160px";
-    branchSelector.style.boxShadow = `0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.55), inset 0 -1px 2px rgba(0, 0, 0, 0.2)`;
-    branchSelector.style.backdropFilter = "blur(4px)";
-    branchSelector.style.backgroundColor = "var(--base-variant)";
-    branchSelector.style.color = "var(--text-color)";
+
+    branchSelector = document.createElement("div");
+    branchSelector.style.position = "relative";
+    branchSelector.style.minWidth = "180px";
+
+    const dropdownButton = document.createElement("div");
+    dropdownButton.innerText = "Select branches to analyze";
+    dropdownButton.style.padding = "6px 14px";
+    dropdownButton.style.borderRadius = "999px";
+    dropdownButton.style.border = "1px solid rgba(0,0,0,0.45)";
+    dropdownButton.style.cursor = "pointer";
+    dropdownButton.style.background = "var(--base-variant)";
+    dropdownButton.style.color = "var(--text-color)";
+
+    dropDownTool = document.createElement("div");
+    dropDownTool.style.position = "absolute";
+    dropDownTool.style.top = "110%";
+    dropDownTool.style.left = "0";
+    dropDownTool.style.background = "var(--base-variant)";
+    dropDownTool.style.border = "1px solid var(--secondary-text)";
+    dropDownTool.style.borderRadius = "8px";
+    dropDownTool.style.padding = "8px";
+    dropDownTool.style.display = "none";    
+    dropDownTool.style.zIndex = "1000";
+    dropDownTool.style.maxHeight = "200px";
+    dropDownTool.style.overflowY = "auto";
     
-
-    branchSelector.addEventListener("change", () => {
-        selectedBranch = branchSelector.value;
-
-        document.dispatchEvent(new CustomEvent("branchChangeEvent", {
-            detail: {branch: selectedBranch}
-        }));
-
-        drawGraphs();
+    dropdownButton.addEventListener("click", () => {
+        dropDown.style.display = dropDown.style.display === "none" ? "block" : "none";
     });
+
+    branchSelector.appendChild(dropdownButton);
+    branchSelector.appendChild(dropDownTool);
 
     branchSelector.addEventListener("mouseenter", () => {
         branchSelector.style.boxShadow = `0 3px 8px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 2px rgba(0, 0, 0, 0.25)`;
@@ -221,18 +228,41 @@ window.addEventListener("message", event => {
 
     if (message.command === "workspaceBranches") {
         workspaceBranches = message.data;
-        branchSelector.innerHTML = "";
-        const allBranchesOption = document.createElement("option");
-        allBranchesOption.value = "all";
-        allBranchesOption.textContent = "All Branches";
-        branchSelector.appendChild(allBranchesOption);
+        dropDownTool.innerHTML = "";
 
         workspaceBranches.forEach(branch => {
-            const option = document.createElement("option");
-            option.value = branch;
-            option.textContent = branch;
-            branchSelector.appendChild(option);
+            const heading = document.createElement("label");
+            heading.style.display = "flex";
+            heading.style.alignItems = "center";
+            heading.style.gap = "8px";
+            heading.style.cursor = "pointer";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = true;
+
+            selectedBranches.add(branch);
+
+            checkbox.addEventListener("change", () => {
+                if (checkbox.checked) {
+                    selectedBranches.add(branch);
+                }
+                else {
+                    selectedBranches.delete(branch);
+                }
+                drawGraphs();
+            });
+
+            const branchName = document.createElement("span");
+            branchName.innerText = branch;
+
+            heading.appendChild(checkbox);
+            heading.appendChild(branchName);
+
+            dropDownTool.appendChild(heading);
+
         });
+        
     }
 });
 
@@ -256,7 +286,7 @@ function buildGraph() {
     horizontalLineWrapper.style.justifyContent = "space-evenly";
     horizontalLineWrapper.style.width = "100%";
 
-    workspaceBranches.filter(branch => selectedBranch === "all" || branch === selectedBranch).forEach((branch, index) => {
+    workspaceBranches.filter(branch => selectedBranches.size === 0 || selectedBranches.has(branch)).forEach((branch, index) => {
         const hue = Math.floor((index * 137.5 + 150) % 360);
         const branchColor = `hsl(${hue}, 70%, 80%)`;
 
@@ -390,7 +420,7 @@ function drawCumulativeGraph() {
 
     Object.keys(cumulativeGraphData).forEach(branch => {
 
-        if(selectedBranch !== "all" && branch !== selectedBranch){
+        if(selectedBranches.size > 0 && !selectedBranches.has(branch)){
             return;
         }
 
@@ -532,7 +562,9 @@ function drawCandleStickTimelineGraph(){
 
     Object.keys(pendingCommitDots).forEach(branch => {
 
-        if (selectedBranch !== "all" && branch !== selectedBranch) return;
+        if(selectedBranches.size > 0 && !selectedBranches.has(branch)) {
+            return;
+        }
 
         let cumulativeTotal = 0;
 
