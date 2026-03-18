@@ -44,17 +44,19 @@ if (ref) {
         reference.style.alignItems = "center";
         reference.style.gap = "6px";
 
-        const dot = document.createElement("div");
-        dot.style.width = "10px";
-        dot.style.height = "10px";
-        dot.style.borderRadius = "50%";
-        dot.style.background = strip.color;
+        const verticalRectangle = document.createElement("div");
+        verticalRectangle.style.width = "5.5px";
+        verticalRectangle.style.height = "16px";
+        verticalRectangle.style.borderRadius = "2px";
+        verticalRectangle.style.background = strip.color;
+        verticalRectangle.style.display = "inline-block";
+        verticalRectangle.style.boxShadow = "inset 0 0 1px rgba(0, 0, 0, 0.2)";
 
         const heading = document.createElement("span");
         heading.innerText = strip.label;
         heading.style.color = "var(--text-color)";
 
-        reference.appendChild(dot);
+        reference.appendChild(verticalRectangle);
         reference.appendChild(heading);
         referenceStrip.appendChild(reference);
     });
