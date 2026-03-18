@@ -163,7 +163,7 @@ function getJsonTokenCount(body: string) {
     let imageSize = "No size";
     let imageNumber = 0;
     let imageQuality = "No Quality";
-    let imageCost = 0
+    let imageCost = 0;
 
     // OpenAI and claude use this format in response
     if (
@@ -185,7 +185,7 @@ function getJsonTokenCount(body: string) {
         imageNumber = jsonBody.n;
         imageQuality = jsonBody.quality;
         totalTokens = jsonBody.usage.total_tokens;
-        if (imageSize != "No size" && totalTokens == 0 && modelName != "Unknown Model" && imageQuality != "No Quality" && imageNumber != 0) {
+        if (imageSize !== "No size" && totalTokens === 0 && modelName !== "Unknown Model" && imageQuality !== "No Quality" && imageNumber !== 0) {
             sendLog("Image detected!");
             sendLog(`Model: ${modelName}`);
             sendLog(`Size: ${imageSize}`);
