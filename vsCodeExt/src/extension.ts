@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Memento } from 'vscode';
 import { stringify } from 'querystring';
-import * as child_process from 'child_process';
+import * as childProcess from 'child_process';
 
 import { CarbonDashboardPanel } from './dashboard';
 import { state } from './state';
@@ -65,10 +65,6 @@ export async function activate(context: vscode.ExtensionContext) {
     );
 
 
-    function convert(x: any) {
-        //treeDataProvider.addMessage(String(x));
-        return x;
-    }
 
 
     //let lastInlineState = false;
@@ -103,8 +99,6 @@ export async function activate(context: vscode.ExtensionContext) {
         console.log("Updating logs..........");
         getLogs(context);
     }));
-
-
 
     const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
         budg.resetBudget();
@@ -455,7 +449,7 @@ export function getCurrentBranch(): string {
             return "Unknown Branch";
         }
         const cwd = workspaceFolders[0].uri.fsPath;
-        const branch = child_process.execSync("git rev-parse --abbrev-ref HEAD", { cwd, encoding: 'utf8' }).trim();
+        const branch = childProcess.execSync("git rev-parse --abbrev-ref HEAD", { cwd, encoding: 'utf8' }).trim();
         return branch || "Unknown Branch"; // defaults to unknown branch
     } catch (error) {
         console.error("Error getting git branch:", error);
@@ -503,6 +497,7 @@ export async function getLogs(context: vscode.ExtensionContext) {
 
     }
     catch (error) {
+        console.log(error);
         vscode.window.showErrorMessage("Error: Copilot log files not found.");
     }
 }

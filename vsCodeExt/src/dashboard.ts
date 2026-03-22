@@ -273,6 +273,10 @@ export class CarbonDashboardPanel {
   <header id="header">
   <h1>Carbon Analysis Dashboard</h1>
   <p> Carbon impact based on each file will be depicted below: </p>
+  <div id="dashboard-preferences-selector">
+  <h3> Preferences: </h3>
+  <div id = "branch-selector-tool"></div>
+  </div>
   </header>
 
         <div id="branchGraph" style="width:100%; height:350px;"></div>

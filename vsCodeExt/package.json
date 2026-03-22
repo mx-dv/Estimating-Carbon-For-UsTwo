@@ -14,6 +14,10 @@
       {
         "name": "dev",
         "prerelease": true
+      },
+      {
+        "name": "ReleaseYMLFix",
+        "prerelease": true
       }
     ],
     "plugins": [
@@ -91,7 +95,6 @@
         "command": "ecode.openDashboard",
         "title": "Ecode: Open Carbon Dashboard"
       },
-
       {
         "command": "ecode.clearStore",
         "title": "Ecode: Clear stored calls"
@@ -146,6 +149,7 @@
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/http-proxy": "^1.17.17",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.2.3",

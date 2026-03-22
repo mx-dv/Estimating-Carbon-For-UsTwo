@@ -75,7 +75,7 @@ export class InterceptorProxy {
 
             this.child.on('exit', (code) => {
                 if (code !== 0) {
-                    reject(new Error(`Worker exited with code ${code}`))
+                    reject(new Error(`Worker exited with code ${code}`));
                     console.log(`Worker exited with code ${code}`);
                 };
             });
