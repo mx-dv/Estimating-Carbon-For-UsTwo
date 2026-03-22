@@ -2,11 +2,17 @@ let pendingCommitDots = null;
 let cumulativeGraphButton;
 let timelineGraphButton;
 let slider;
-let graphType = "cumulative";
+let graphType = "timeline";
 let workspaceBranches = [];
 let referenceStrip;
 let hoverFunctionality;
 let container;
+let branchSelector;
+let selectedBranches = new Set();
+let dynamicSizeChanger;
+const branchSelectorTool = document.getElementById("branch-selector-tool");
+let dropDownTool;
+let displaySelectedBranchesCount;
 
 const ref = document.getElementById("branchGraph");
 
@@ -38,17 +44,19 @@ if (ref) {
         reference.style.alignItems = "center";
         reference.style.gap = "6px";
 
-        const dot = document.createElement("div");
-        dot.style.width = "10px";
-        dot.style.height = "10px";
-        dot.style.borderRadius = "50%";
-        dot.style.background = strip.color;
+        const verticalRectangle = document.createElement("div");
+        verticalRectangle.style.width = "5.5px";
+        verticalRectangle.style.height = "16px";
+        verticalRectangle.style.borderRadius = "2px";
+        verticalRectangle.style.background = strip.color;
+        verticalRectangle.style.display = "inline-block";
+        verticalRectangle.style.boxShadow = "inset 0 0 1px rgba(0, 0, 0, 0.2)";
 
         const heading = document.createElement("span");
         heading.innerText = strip.label;
         heading.style.color = "var(--text-color)";
 
-        reference.appendChild(dot);
+        reference.appendChild(verticalRectangle);
         reference.appendChild(heading);
         referenceStrip.appendChild(reference);
     });
@@ -78,7 +86,7 @@ if (ref) {
     slider = document.createElement("div");
     slider.style.position = "absolute";
     slider.style.inset = "3px";
-    slider.style.width = "calc(50% - 3px)";
+    slider.style.width = "calc(50% - 6px)";
     slider.style.borderRadius = "999px";
     slider.style.transition = "transform 0.25s cubic-bezier(.4,0,.2,1)";
     slider.style.transform = "translateX(0%)";
@@ -87,11 +95,11 @@ if (ref) {
     slider.style.boxShadow = `0 2px 6px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -1px 2px rgba(0,0,0,0.15)`;
     slider.style.backdropFilter = "blur(4px)";
 
-    cumulativeGraphButton = makeButtons("Cumulative Graph", "cumulative-button");
     timelineGraphButton = makeButtons("Timeline Graph", "timeline-button");
+    cumulativeGraphButton = makeButtons("Cumulative Graph", "cumulative-button");
 
-    cumulativeGraphButton.classList.add("toggle-active");
-    timelineGraphButton.classList.add("toggle-inactive");
+    timelineGraphButton.classList.add("toggle-active");
+    cumulativeGraphButton.classList.add("toggle-inactive");
 
     const mainGraphArea = document.createElement("div");
     mainGraphArea.id = "carbon-usage-graph-main-area";
@@ -116,10 +124,103 @@ if (ref) {
     container.appendChild(hoverFunctionality);
 
     toggleButtonContainer.appendChild(slider);
-    toggleButtonContainer.appendChild(cumulativeGraphButton);
     toggleButtonContainer.appendChild(timelineGraphButton);
+    toggleButtonContainer.appendChild(cumulativeGraphButton);
 
     references.appendChild(title);
+
+    branchSelector = document.createElement("div");
+    branchSelector.style.position = "relative";
+    branchSelector.style.minWidth = "180px";
+
+    const dropdownButton = document.createElement("div");
+    dropdownButton.textContent = "Select branches to analyze";
+    dropdownButton.style.padding = "6px 14px";
+    dropdownButton.style.borderRadius = "999px";
+    dropdownButton.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+    dropdownButton.style.cursor = "pointer";
+    dropdownButton.style.background = "rgba(255, 255, 255, 0.05)";
+    dropdownButton.style.backdropFilter = "blur(8px)";
+    dropdownButton.style.color = "var(--text-color)";
+    dropdownButton.style.fontSize = "13px";
+    dropdownButton.style.minWidth = "220px";
+    dropdownButton.style.transition = "all 0.25s ease";
+    dropdownButton.style.display = "flex";
+    dropdownButton.style.alignItems = "center";
+    dropdownButton.style.justifyContent = "space-between";   
+    dropdownButton.style.gap = "8px"; 
+    dropdownButton.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.25)";
+
+    displaySelectedBranchesCount = document.createElement("span");
+    displaySelectedBranchesCount.style.fontSize = "11px";
+    displaySelectedBranchesCount.style.fontWeight = "500";
+    displaySelectedBranchesCount.style.opacity = "0.75";
+    displaySelectedBranchesCount.style.whiteSpace = "nowrap";
+    displaySelectedBranchesCount.style.color = "var(--text-color)";
+    displaySelectedBranchesCount.style.padding = "4px 10px";
+    displaySelectedBranchesCount.style.borderRadius = "999px";
+    displaySelectedBranchesCount.style.background = "rgba(255, 255, 255, 0.08)";
+    displaySelectedBranchesCount.style.border = "1px solid var(--secondary-text)";
+
+    const dropDownArrow = document.createElement("span");
+    dropDownArrow.innerHTML = "&#x25BC;";
+    dropDownArrow.style.fontSize = "10px";
+    dropDownArrow.style.opacity = "0.7";
+
+    dropdownButton.appendChild(dropDownArrow);
+
+
+    dropDownTool = document.createElement("div");
+    dropDownTool.style.position = "absolute";
+    dropDownTool.style.top = "110%";
+    dropDownTool.style.left = "0";
+    dropDownTool.style.background = "var(--base-variant)";
+    dropDownTool.style.backdropFilter = "blur(10px)";
+    dropDownTool.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+    dropDownTool.style.borderRadius = "8px";
+    dropDownTool.style.padding = "8px";
+    dropDownTool.style.display = "none";    
+    dropDownTool.style.zIndex = "1000";
+    dropDownTool.style.maxHeight = "200px";
+    dropDownTool.style.overflowY = "auto";
+    dropDownTool.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.4)";
+    dropDownTool.style.animation = "fadeIn 0.2s ease";
+    
+    dropdownButton.addEventListener("click", () => {
+        dropDownTool.style.display = dropDownTool.style.display === "none" ? "block" : "none";
+    });
+
+    dropdownButton.addEventListener("mouseenter", () => {
+        dropdownButton.style.transform = "translateY(-1px)";
+        dropdownButton.style.boxShadow = "0 6px 18px rgba(0, 0, 0, 0.35)";
+    });
+
+    dropdownButton.addEventListener("mouseleave", () => {
+        dropdownButton.style.transform = "translateY(0)";
+        dropdownButton.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.25)";
+    });
+
+    branchSelector.appendChild(dropdownButton);
+    branchSelector.appendChild(dropDownTool);
+
+    const branchSelectorWrapper = document.createElement("div");
+    branchSelectorWrapper.style.position = "relative";
+    branchSelectorWrapper.style.display = "flex";
+    branchSelectorWrapper.style.alignItems = "center";
+    branchSelectorWrapper.style.gap = "10px";
+
+    const branchSelectorToolText = document.createElement("span");
+    branchSelectorToolText.textContent = "Branch Selection:";
+    branchSelectorToolText.style.color = "var(--text-color)";
+
+    branchSelectorWrapper.appendChild(branchSelectorToolText);
+    branchSelectorWrapper.appendChild(branchSelector);
+    branchSelectorWrapper.appendChild(displaySelectedBranchesCount);
+
+    if (branchSelectorTool) {
+        branchSelectorTool.appendChild(branchSelectorWrapper);
+    }
+
     references.appendChild(toggleButtonContainer);
 
     header.appendChild(references);
@@ -142,7 +243,57 @@ window.addEventListener("message", event => {
 
     if (message.command === "workspaceBranches") {
         workspaceBranches = message.data;
-        drawGraphs();
+        dropDownTool.innerHTML = "";
+
+        selectedBranches.clear();
+
+        workspaceBranches.forEach(branch => {
+            const heading = document.createElement("label");
+            heading.style.display = "flex";
+            heading.style.alignItems = "center";
+            heading.style.gap = "8px";
+            heading.style.cursor = "pointer";
+
+            heading.addEventListener("mouseenter", () => {
+                heading.style.background = "rgba(255, 255, 255, 0.05)";
+                heading.style.borderRadius = "6px";
+            });
+
+            heading.addEventListener("mouseleave", () => {
+                heading.style.background = "transparent";
+            });
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = true;
+            checkbox.style.accentColor = "#4ade80";
+            checkbox.style.cursor = "pointer";
+
+            selectedBranches.add(branch);
+
+            checkbox.addEventListener("change", () => {
+                if (checkbox.checked) {
+                    selectedBranches.add(branch);
+                }
+                else {
+                    selectedBranches.delete(branch);
+                }
+                updateSelectedBranchesCount();
+                drawGraphs();
+            });
+
+            const branchName = document.createElement("span");
+            branchName.innerText = branch;
+
+            heading.appendChild(checkbox);
+            heading.appendChild(branchName);
+
+            dropDownTool.appendChild(heading);
+
+        });
+
+        updateSelectedBranchesCount();
+        
     }
 });
 
@@ -152,80 +303,27 @@ function deletePreviousGraph() {
     mainGraphArea.innerHTML = "";
 }
 
-
-function buildGraph() {
-    const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
-    if (!mainGraphArea) return;
-
-    mainGraphArea.innerHTML = "";
-
-    const horizontalLineWrapper = document.createElement("div");
-    horizontalLineWrapper.style.display = "flex";
-    horizontalLineWrapper.style.flexDirection = "column";
-    horizontalLineWrapper.style.height = "100%";
-    horizontalLineWrapper.style.justifyContent = "space-evenly";
-    horizontalLineWrapper.style.width = "100%";
-
-    workspaceBranches.forEach((branch, index) => {
-        const hue = Math.floor((index * 137.5 + 150) % 360);
-        const branchColor = `hsl(${hue}, 70%, 80%)`;
-
-        const horizontalPath = document.createElement("div");
-        horizontalPath.style.display = "flex";
-        horizontalPath.style.alignItems = "center";
-        horizontalPath.style.paddingLeft = "12px";
-        horizontalPath.style.width = "100%";
-
-        const graphHeading = document.createElement("span");
-        graphHeading.innerText = branch;
-        graphHeading.style.width = "150px";
-        graphHeading.style.minWidth = "150px";
-        graphHeading.style.color = branchColor;
-        graphHeading.style.fontSize = "14px";
-        graphHeading.style.fontWeight = "500";
-
-        const horizontalLine = document.createElement("div");
-        horizontalLine.style.position = "relative";
-        horizontalLine.style.flex = "1";
-        horizontalLine.style.height = "2px";
-        horizontalLine.style.background = branchColor;
-        horizontalLine.style.marginLeft = "10px";
-
-        horizontalPath.appendChild(graphHeading);
-        horizontalPath.appendChild(horizontalLine);
-        horizontalLineWrapper.appendChild(horizontalPath);
-    });
-
-    mainGraphArea.appendChild(horizontalLineWrapper);
-}
-
-function deleteBranches() {
-    const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
-    mainGraphArea.innerHTML = "";
-}
-
 function drawGraphs() {
 
     deletePreviousGraph();
+
+    if(!dynamicSizeChanger){
+        enableDynamicSizeChanger();
+    }
 
     if (graphType === "timeline") {
         if (referenceStrip) {
             referenceStrip.style.visibility = "visible";
         }
 
-        if (workspaceBranches.length === 0) {
-            return;
-        }
+        drawCandleStickTimelineGraph();
 
-        buildGraph();
-        drawCommitDots();
     }
     else {
         if (referenceStrip) {
             referenceStrip.style.visibility = "hidden";
         }
 
-        deleteBranches();
         drawCumulativeGraph();
     }
 }
@@ -242,10 +340,10 @@ function getCumulativeGraphData() {
 
         cumulativeGraphData[branch] = [...pendingCommitDots[branch]]
             .sort((a, b) => a.xAxis - b.xAxis)
-            .map(commit => {
+            .map((commit, index) => {
                 netTotal += commit.carbon;
                 return {
-                    time: commit.xAxis,
+                    time: index,
                     netCarbon: netTotal
                 };
             });
@@ -261,7 +359,7 @@ function drawCumulativeGraph() {
     const margin = { top: 20, right: 40, bottom: 40, left: 60 };
     let maxTime = 0;
     let maxCarbon = 0;
-    const timeScale = 5;
+    const timeScale = 40;
 
     const cumulativeGraphData = getCumulativeGraphData();
 
@@ -285,7 +383,7 @@ function drawCumulativeGraph() {
     }
 
     const oldWidth = mainGraphArea.clientWidth;
-    const width = Math.max(oldWidth, maxTime * timeScale + margin.left + margin.right + 100);
+    const width = Math.max(oldWidth, maxTime * timeScale + margin.left + margin.right + 200);
 
     svg.setAttribute("width", width);
     svg.setAttribute("height", height);
@@ -294,6 +392,10 @@ function drawCumulativeGraph() {
     const graphHeight = height - margin.top - margin.bottom;
 
     Object.keys(cumulativeGraphData).forEach(branch => {
+
+        if(!selectedBranches.has(branch)){
+            return;
+        }
 
         const branchIndex = workspaceBranches.indexOf(branch);
         const hue = Math.floor((branchIndex * 137.5 + 150) % 360);
@@ -321,7 +423,7 @@ function drawCumulativeGraph() {
 
         if (endPoint) {
             const branchHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            branchHeading.setAttribute("x", endPoint.x + 4);
+            branchHeading.setAttribute("x", endPoint.x + 10);
             branchHeading.setAttribute("y", endPoint.y - 6);
             branchHeading.setAttribute("fill", branchColour);
             branchHeading.setAttribute("font-size", "11");
@@ -351,7 +453,7 @@ function drawCumulativeGraph() {
     yAxisHeading.setAttribute("y", height / 2);
     yAxisHeading.setAttribute("fill", "var(--text-color)");
     yAxisHeading.setAttribute("transform", `rotate(-90 15 ${height / 2})`);
-    yAxisHeading.textContent = "Carbon";
+    yAxisHeading.textContent = "Carbon (g CO₂)";
     svg.appendChild(yAxisHeading);
 
     const xAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -378,71 +480,13 @@ function drawCumulativeGraph() {
 }
 
 function getCColor(carbon) {
-    if (carbon < 0.5) {
+    if (carbon < 15) {
         return "var(--low-carbon)";
     }
-    if (carbon < 4.5) {
+    if (carbon < 40) {
         return "var(--avg-carbon)";
     }
     return "var(--high-carbon)";
-}
-
-function drawCommitDots() {
-    if (graphType === "timeline") {
-
-        if (!pendingCommitDots) {
-            return;
-        }
-
-        const horizontalPaths = document.querySelectorAll("#carbon-usage-graph-main-area > div > div");
-
-        if (horizontalPaths.length === 0) {
-            return;
-        }
-
-        horizontalPaths.forEach(horizontalPath => {
-            const branchName = horizontalPath.querySelector("span").innerText;
-            const horizontalLine = horizontalPath.querySelector("div");
-
-            horizontalLine.querySelectorAll(".commit-dot").forEach(dot => dot.remove());
-
-            const commitDots = pendingCommitDots[branchName];
-
-            if (commitDots) {
-                commitDots.forEach(commit => {
-                    const commitDot = document.createElement("div");
-                    commitDot.classList.add("commit-dot");
-                    commitDot.style.width = "10px";
-                    commitDot.style.height = "10px";
-                    commitDot.style.borderRadius = "50%";
-                    commitDot.style.position = "absolute";
-                    commitDot.style.left = commit.xAxis + "px";
-                    commitDot.style.background = getCColor(commit.carbon);
-                    commitDot.style.transform = "translateY(-4px)";
-                    commitDot.style.cursor = "pointer";
-
-                    commitDot.addEventListener("mouseenter", (e) => {
-                        hoverFunctionality.innerHTML = `<strong>${branchName}</strong><br/>
-                                                        Carbon: ${commit.carbon}g CO2`;
-                        hoverFunctionality.style.opacity = "1";
-                    });
-
-                    commitDot.addEventListener("mousemove", (e) => {
-                        const position = container.getBoundingClientRect();
-                        hoverFunctionality.style.left = (e.clientX - position.left + 12) + "px";
-                        hoverFunctionality.style.top = (e.clientY - position.top - 20) + "px";
-                    });
-
-                    commitDot.addEventListener("mouseleave", () => {
-                        hoverFunctionality.style.opacity = "0";
-                    });
-
-                    horizontalLine.appendChild(commitDot);
-
-                });
-            }
-        });
-    }
 }
 
 function makeButtons(text, id) {
@@ -456,7 +500,7 @@ function makeButtons(text, id) {
 
 cumulativeGraphButton.addEventListener("click", () => {
     graphType = "cumulative";
-    slider.style.transform = "translateX(0%)";
+    slider.style.transform = "translateX(100%)";
 
     cumulativeGraphButton.classList.add("toggle-active");
     cumulativeGraphButton.classList.remove("toggle-inactive");
@@ -469,7 +513,7 @@ cumulativeGraphButton.addEventListener("click", () => {
 
 timelineGraphButton.addEventListener("click", () => {
     graphType = "timeline";
-    slider.style.transform = "translateX(calc(100% + 3px))";
+    slider.style.transform = "translateX(0%)";
 
     timelineGraphButton.classList.add("toggle-active");
     timelineGraphButton.classList.remove("toggle-inactive");
@@ -479,3 +523,248 @@ timelineGraphButton.addEventListener("click", () => {
 
     drawGraphs();
 });
+
+
+function drawCandleStickTimelineGraph(){
+    if (selectedBranches.size === 0) {
+        return;
+    }
+    const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
+    
+    if (!mainGraphArea || !pendingCommitDots) return;
+    
+    const allCommits = [];
+
+    Object.keys(pendingCommitDots).forEach(branch => {
+
+        if(!selectedBranches.has(branch)) {
+            return;
+        }
+
+        let cumulativeTotal = 0;
+
+        pendingCommitDots[branch].forEach(commit => {
+            cumulativeTotal = cumulativeTotal + commit.carbon;
+            allCommits.push({
+                branch: branch,
+                carbon: commit.carbon,
+                cumulative: cumulativeTotal,
+                time: new Date(commit.timeStamp).getTime(),
+                timeStamp: commit.timeStamp
+            });
+        });
+
+    });
+    if (allCommits.length === 0) return;
+
+    allCommits.sort((a,b) => a.time - b.time);
+
+    const pixelsPerCommit = 50;
+
+    const width = Math.max(mainGraphArea.clientWidth, allCommits.length * pixelsPerCommit);
+    const height = mainGraphArea.clientHeight;
+
+    const margin = { top: 20, right: 60, bottom: 50, left: 60 };
+
+    const graphWidth = width - margin.left - margin.right;
+    const graphHeight = height - margin.top - margin.bottom;
+
+    let minTime = Infinity;
+    let maxTime = -Infinity;
+    let maxCarbon = 0;
+
+    allCommits.forEach(c => {
+        if (c.time < minTime) {
+            minTime = c.time;
+        }
+        if (c.time > maxTime) {
+            maxTime = c.time;
+        }
+        if (c.carbon > maxCarbon) {
+            maxCarbon = c.carbon;
+        }
+    });
+
+    if (maxCarbon === 0) {
+        maxCarbon = 1;
+    }
+
+    const startEdgePadding = (maxTime - minTime) * 0.08;
+    minTime = minTime - startEdgePadding;
+    maxTime = maxTime + startEdgePadding;
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+
+    allCommits.forEach(commit => {
+        const xAxis = margin.left + ((commit.time - minTime)/(maxTime - minTime)) * graphWidth;
+        const topYSpace = margin.top + graphHeight - (commit.carbon / maxCarbon) * graphHeight;
+        const bottomYSpace = margin.top + graphHeight;
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", xAxis);
+        line.setAttribute("x2", xAxis);
+        line.setAttribute("y1", bottomYSpace);
+        line.setAttribute("y2", topYSpace);
+
+        line.setAttribute("stroke", getCColor(commit.carbon));
+        line.setAttribute("stroke-width", "5.5");
+
+        line.style.cursor = "pointer";
+        
+        line.addEventListener("mouseenter", () => {
+            const timeStamp = new Date(commit.timeStamp).toLocaleString();
+            hoverFunctionality.innerHTML = `<strong>Branch:</strong> ${commit.branch}<br>
+                                        <strong>Carbon emitted by this commit:</strong> ${commit.carbon.toFixed(2)} g CO₂<br>
+                                        <strong>Carbon emitted so far:</strong> ${commit.cumulative.toFixed(2)} g CO₂<br>
+                                        <strong>Time:</strong> ${timeStamp}`;
+            hoverFunctionality.style.opacity = "1";
+        });
+
+        line.addEventListener("mousemove", (e) => {
+            const rect = container.getBoundingClientRect();
+            hoverFunctionality.style.left = (e.clientX - rect.left + 12) + "px";
+            hoverFunctionality.style.top = (e.clientY - rect.top - 20) + "px";
+        });
+
+        line.addEventListener("mouseleave", () => {
+            hoverFunctionality.style.opacity = "0";
+        });
+
+        svg.appendChild(line);
+    });
+
+    const xAxisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    xAxisLine.setAttribute("x1", margin.left);
+    xAxisLine.setAttribute("x2", width - margin.right);
+    xAxisLine.setAttribute("y1", height - margin.bottom);
+    xAxisLine.setAttribute("y2", height - margin.bottom);
+    xAxisLine.setAttribute("stroke", "var(--text-color)");
+
+    svg.appendChild(xAxisLine);
+
+    const xMarkingsSpacing = 140;
+    const xMarkings = Math.floor(graphWidth / xMarkingsSpacing);
+    for (let i = 0; i <= xMarkings; i++) {
+        const time = minTime + (i / xMarkings) * (maxTime - minTime);
+        const xAxis = margin.left + ((time - minTime)/(maxTime - minTime)) * graphWidth;
+
+        const heading = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+        heading.setAttribute("x", xAxis);
+        heading.setAttribute("y", height - margin.bottom + 18);
+        heading.setAttribute("text-anchor", "middle");
+        heading.setAttribute("font-size", "12");
+        heading.setAttribute("fill", "var(--secondary-text)");
+
+        heading.textContent = new Date(time).toLocaleString([], {
+             day: "2-digit",
+             month: "short",
+             hour: "2-digit",
+             minute: "2-digit"
+            });
+
+        svg.appendChild(heading);
+    }
+
+    const yAxisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    yAxisLine.setAttribute("x1", margin.left);
+    yAxisLine.setAttribute("x2", margin.left);
+    yAxisLine.setAttribute("y1", margin.top);
+    yAxisLine.setAttribute("y2", height - margin.bottom);
+    yAxisLine.setAttribute("stroke", "var(--text-color)");
+
+    svg.appendChild(yAxisLine);
+
+    const yMarkings = 5;
+
+    for (let i = 1; i <= yMarkings; i++) {
+        const carbonEmitted = (i / yMarkings) * maxCarbon;
+        const yAxis = margin.top + graphHeight - (carbonEmitted / maxCarbon) * graphHeight;
+
+        const heading = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+        heading.setAttribute("x", margin.left - 8);
+        heading.setAttribute("y", yAxis + 3);
+        heading.setAttribute("text-anchor", "end");
+        heading.setAttribute("font-size", "12");
+        heading.setAttribute("fill", "var(--secondary-text)");
+
+        heading.textContent = carbonEmitted.toFixed(1) + "g";
+
+        svg.appendChild(heading);
+    }
+
+    const now = Date.now();
+
+    if(now >= minTime && now <= maxTime){
+        const xAxisNow = margin.left + ((now - minTime)/(maxTime - minTime)) * graphWidth;
+        const nowVerticalLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        nowVerticalLine.setAttribute("x1", xAxisNow);
+        nowVerticalLine.setAttribute("x2", xAxisNow);
+        nowVerticalLine.setAttribute("y1", margin.top);
+        nowVerticalLine.setAttribute("y2", height - margin.bottom);
+        nowVerticalLine.setAttribute("stroke", "var(--secondary-text)");
+        nowVerticalLine.setAttribute("stroke-dasharray", "5 5");
+
+        svg.appendChild(nowVerticalLine);
+
+        const nowHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        nowHeading.setAttribute("x", xAxisNow);
+        nowHeading.setAttribute("y", margin.top - 6);
+        nowHeading.setAttribute("text-anchor", "middle");
+        nowHeading.setAttribute("font-size", "11");
+        nowHeading.setAttribute("fill", "var(--secondary-text)");
+        nowHeading.setAttribute("font-weight", "600");
+        nowHeading.textContent = "Now";
+        svg.appendChild(nowHeading);
+    }
+
+    const scrollContainer = document.createElement("div");
+    scrollContainer.style.width = "100%";
+    scrollContainer.style.height = "100%";
+    scrollContainer.style.overflowX = "auto";
+    scrollContainer.style.overflowY = "hidden";
+
+    scrollContainer.appendChild(svg);
+    mainGraphArea.appendChild(scrollContainer);
+
+    setTimeout(() => {
+        scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    }, 10);
+}
+
+function enableDynamicSizeChanger() {
+    const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
+
+    if (!mainGraphArea){
+        return;
+    }
+
+    if(dynamicSizeChanger){
+        dynamicSizeChanger.disconnect();
+    }
+
+    dynamicSizeChanger = new ResizeObserver(() => {
+        drawGraphs();
+    });
+
+    dynamicSizeChanger.observe(mainGraphArea);
+
+
+}
+
+function updateSelectedBranchesCount(){
+    const branchCount = selectedBranches.size;
+
+    if(branchCount === 0){
+        displaySelectedBranchesCount.textContent = "No branches selected";
+    }
+    else if(branchCount === workspaceBranches.length){
+        displaySelectedBranchesCount.textContent = "All branches selected";
+    }
+    else {
+        displaySelectedBranchesCount.textContent = `${branchCount} branch${branchCount > 1 ? "es" : ""} selected`;
+    }
+}

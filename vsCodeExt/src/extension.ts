@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Memento } from 'vscode';
 import { stringify } from 'querystring';
-import * as child_process from 'child_process';
+import * as childProcess from 'child_process';
 
 import { CarbonDashboardPanel } from './dashboard';
 import { state } from './state';
@@ -128,10 +128,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
         var num = Number(limit);
         if (!Number.isNaN(num)) {
-            let date = new Date();
-            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(date.toLocaleDateString()) };
+            let now = new Date();
+            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(now.getTime()) };
             updateTree(newCall);
+        vscode.window.showInformationMessage(`Added ${num}g CO2e for today.`);
         }
+        
         else {
             vscode.window.showInformationMessage('Error: NaN inputted.');
         }
@@ -437,7 +439,7 @@ export function getCurrentBranch(): string {
             return "Unknown Branch";
         }
         const cwd = workspaceFolders[0].uri.fsPath;
-        const branch = child_process.execSync("git rev-parse --abbrev-ref HEAD", { cwd, encoding: 'utf8' }).trim();
+        const branch = childProcess.execSync("git rev-parse --abbrev-ref HEAD", { cwd, encoding: 'utf8' }).trim();
         return branch || "Unknown Branch"; // defaults to unknown branch
     } catch (error) {
         console.error("Error getting git branch:", error);
@@ -489,6 +491,7 @@ export async function getLogs(context: vscode.ExtensionContext) {
 
         if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime}
 
+        //vscode.window.showInformationMessage("Copilot log files refreshed.");
     }
     catch (error) {
         console.log(error);
