@@ -148,6 +148,9 @@ backgroundColor(c) {
                 display: false,
                 drawBorder: false,
                 tickLength: 0
+            },
+            border: {
+                display:false
             }
         },
        x: {
@@ -176,7 +179,8 @@ backgroundColor(c) {
         },
         font: { size: 8 }
     },
-    grid: { display: false }
+    grid: { display: false },
+    border: { display: false }
 }
     };
 
