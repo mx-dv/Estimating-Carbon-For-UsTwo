@@ -4,6 +4,10 @@
     // initialising vscode api so that back end can be connected
     const vscode = acquireVsCodeApi();
 
+
+    // exposing the API gloablly so graph.js can use it
+    window.vscodeAPI = vscode;
+
     // click listener so reset button can be used
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) {
@@ -373,6 +377,15 @@ backgroundColor(c) {
                 } else {
                     fillEl.classList.remove('danger');
                 }
+                
+                // Update average emission display if data is available
+                if (message.averageEmission !== undefined) {
+                    const avgEl = document.getElementById('average-cost-display');
+                    if (avgEl) {
+                        avgEl.innerText = message.averageEmission.toFixed(4) + ' g';
+                    }
+                }
+
             }
         }
     });
