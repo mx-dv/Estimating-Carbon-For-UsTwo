@@ -559,16 +559,6 @@ function drawCandleStickTimelineGraph(){
 
     allCommits.sort((a,b) => a.time - b.time);
 
-    const pixelsPerCommit = 50;
-
-    const width = Math.max(mainGraphArea.clientWidth, allCommits.length * pixelsPerCommit);
-    const height = mainGraphArea.clientHeight;
-
-    const margin = { top: 20, right: 60, bottom: 50, left: 60 };
-
-    const graphWidth = width - margin.left - margin.right;
-    const graphHeight = height - margin.top - margin.bottom;
-
     let minTime = Infinity;
     let maxTime = -Infinity;
     let maxCarbon = 0;
@@ -592,6 +582,18 @@ function drawCandleStickTimelineGraph(){
     const startEdgePadding = (maxTime - minTime) * 0.08;
     minTime = minTime - startEdgePadding;
     maxTime = maxTime + startEdgePadding;
+
+    const margin = { top: 20, right: 60, bottom: 50, left: 60 };
+
+    const pixelsPerHour = 60;
+
+    const totalHours = (maxTime - minTime) / (1000 * 60 * 60);
+
+    const width = Math.max(mainGraphArea.clientWidth, totalHours * pixelsPerHour + margin.left + margin.right);
+    const height = mainGraphArea.clientHeight;
+
+    const graphWidth = width - margin.left - margin.right;
+    const graphHeight = height - margin.top - margin.bottom;
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", width);
@@ -644,28 +646,41 @@ function drawCandleStickTimelineGraph(){
 
     svg.appendChild(xAxisLine);
 
-    const xMarkingsSpacing = 140;
-    const xMarkings = Math.floor(graphWidth / xMarkingsSpacing);
-    for (let i = 0; i <= xMarkings; i++) {
-        const time = minTime + (i / xMarkings) * (maxTime - minTime);
-        const xAxis = margin.left + ((time - minTime)/(maxTime - minTime)) * graphWidth;
+    let currentTime = new Date(minTime);
+    currentTime.setHours(0,0,0,0);
 
-        const heading = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    while (currentTime.getTime() <= maxTime) {
+        for (let hour = 0; hour < 24; hour = hour + 3) {
 
-        heading.setAttribute("x", xAxis);
-        heading.setAttribute("y", height - margin.bottom + 18);
-        heading.setAttribute("text-anchor", "middle");
-        heading.setAttribute("font-size", "12");
-        heading.setAttribute("fill", "var(--secondary-text)");
+            const time = new Date(currentTime);
+            time.setHours(hour);
 
-        heading.textContent = new Date(time).toLocaleString([], {
-             day: "2-digit",
-             month: "short",
-             hour: "2-digit",
-             minute: "2-digit"
+            const newTime = time.getTime();
+
+            if (newTime > maxTime || newTime < minTime) {
+                continue;
+            }
+
+            const xMarkingsSpacing = margin.left + ((newTime - minTime)/(maxTime - minTime)) * graphWidth;
+
+            const xAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            xAxisHeading.setAttribute("x", xMarkingsSpacing);
+            xAxisHeading.setAttribute("y", height - margin.bottom + 18);
+            xAxisHeading.setAttribute("text-anchor", "middle");
+            xAxisHeading.setAttribute("font-size", "12");
+            xAxisHeading.setAttribute("fill", "var(--secondary-text)");
+
+            xAxisHeading.textContent = new Date(newTime).toLocaleDateString([], {
+                day: "2-digit", 
+                month: "short", 
+                hour: "2-digit", 
+                minute: "2-digit"
             });
 
-        svg.appendChild(heading);
+            svg.appendChild(xAxisHeading);
+        }
+
+        currentTime.setDate(currentTime.getDate() + 1);
     }
 
     const yAxisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
