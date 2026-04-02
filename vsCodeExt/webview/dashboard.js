@@ -379,10 +379,16 @@ backgroundColor(c) {
                 rightEl.innerText = totalEmissions.toFixed(5) + 'g / ' + SESSION_BUDGET + 'g CO₂e';
 
                 // change colour to red if over 90% of budget is used
-                if (percentUsed >= 90) {
+                if (percentUsed >= 66.6) {
+                    fillEl.classList.remove('warning');
                     fillEl.classList.add('danger');
+                } else if (percentUsed >= 33.3) {
+                    fillEl.classList.remove('danger');
+                    fillEl.classList.add('warning');
                 } else {
                     fillEl.classList.remove('danger');
+                    fillEl.classList.remove('warning');
+                    fillEl.classList.add('safe');
                 }
                 
                 // Update average emission display if data is available
