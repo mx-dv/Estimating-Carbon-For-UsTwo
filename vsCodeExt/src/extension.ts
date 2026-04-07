@@ -85,7 +85,12 @@ export async function activate(context: vscode.ExtensionContext) {
     // budget.initStorage(context.workspaceState);
     restoreCallHistory(treeDataProvider, budg);
     barManager.updateLimit(budg.updateLimit());
-    const BarManager = vscode.window.createStatusBarItem();
+    const pastCalls = budg.getCalls();
+    if (pastCalls.length > 0) {
+        barManager.updateBar(pastCalls[pastCalls.length - 1].Emissions);
+    } else {
+        barManager.updateBar(0);
+    }
 
 
 
@@ -120,6 +125,19 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
 
+    // keep track of the last known branch 
+    let lastKnownBranch = getCurrentBranch();
+
+    const branchChangeListener = vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        const currentBranch = getCurrentBranch();
+        // only send new data if the branch has changed                   
+        if (currentBranch !== lastKnownBranch) {
+            lastKnownBranch = currentBranch;
+            //Trigger the data recalculation and update the dashboard with the new branch information
+            CarbonDashboardPanel.sendData();
+        }
+    });
+    context.subscriptions.push(branchChangeListener);
 
     const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {
         //vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
@@ -131,10 +149,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
         var num = Number(limit);
         if (!Number.isNaN(num)) {
-            let date = new Date();
-            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(date.toLocaleDateString()) };
+            let now = new Date();
+            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(now.getTime()) };
             updateTree(newCall);
+        vscode.window.showInformationMessage(`Added ${num}g CO2e for today.`);
         }
+        
         else {
             vscode.window.showInformationMessage('Error: NaN inputted.');
         }
@@ -373,55 +393,46 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 
 }
 class statusBarManager {
-    mainItem = vscode.window.createStatusBarItem(); //creates a status bar item for limit word
-    loading: vscode.StatusBarItem[] = []; //creates a list of statusbar items for the loading bar items
-    defaultColour: string = "statusBarItem.activeBackground";
-    newColour: string;
+    mainItem = vscode.window.createStatusBarItem(); // creates a new item in the VS Code status bar
+    defaultColour: string = "statusBarItem.activeBackground"; // defines default colour for the status bar item
+    newColour: string; // stores the new colour calculated based on the carbon emissions of the latest request
 
     constructor() {
         this.newColour = this.defaultColour;
-        this.mainItem.text = 'Average carbon cost: g CO₂e';
-        this.mainItem.show();//displays the limit item
-
-
+        this.mainItem.text = 'Last Request: 0 g CO₂e';
+        this.mainItem.show();
     }
 
     updateLimit(input: number) {
-        this.mainItem.text = 'Average carbon cost: ' + input + ' g CO₂e';
+        this.mainItem.text = 'Last Request: 0 g CO₂e';
         this.newColour = "statusBarItem.activeBackground";
     }
-
-    updateBar(input: number, limit: number) {
-
-        if (input) {
-            this.mainItem.text = 'Average carbon cost: ' + limit.toFixed(4) + ' g CO₂e';
-            if (input >= 3 * limit) {
-                this.newColour = "statusBarItem.errorBackground"; //if well beyond the limit the loading bar goes red
-                //vscode.window.showInformationMessage('VERY high carbon AI call made (check pane for details)');
+    //this method updates the status bar item with the carbon emissions of the latest request and changes its colour based on predefined thresholds to provide real-time feedback on the environmental impact of development activities
+    updateBar(input: number) { 
+        if (input !== undefined) {
+            this.mainItem.text = 'Last Request: ' + input.toFixed(4) + ' g CO₂e';
+            
+            // Utilising static thresholds for real-time feedback
+            if (input >= 40) {
+                this.newColour = "statusBarItem.errorBackground"; // High Emission
             }
-            else if (input >= 1.5 * limit) {
-                this.newColour = "statusBarItem.warningBackground"; //if beyond the limit the loading bar goes yellow
-                //vscode.window.showInformationMessage('High carbon AI call made (check pane for details)');
+            else if (input >= 15) {
+                this.newColour = "statusBarItem.warningBackground"; // Average Emission
+            }
+
+            else if (input > 0) {
+                this.newColour = "statusBarItem.background"; // Low Emission (keeping for now if there is a way to make it green)
             }
             else {
-                this.newColour = "statusBarItem.activeBackground"; //if not beyond the limit loading bar is clear
-                //vscode.window.showInformationMessage('below limit');  
+                this.newColour = "statusBarItem.activeBackground"; // Low Emission
             }
-            var i: number = 0;
         }
         else {
             this.newColour = "statusBarItem.activeBackground";
-            input = 0;
-            //vscode.window.showInformationMessage('not satisfied!');
+            this.mainItem.text = 'Last Request: 0 g CO₂e';
         }
-        // for(i = 0;i<Math.max(input);i++){ //populates the loading bar
-        //  this.loading[i].backgroundColor = new vscode.ThemeColor(this.newColour);
-        //  }
-        // for(i;i<this.loading.length;i++){
-        //  this.loading[i].backgroundColor = new vscode.ThemeColor("statusBarItem.activeBackground");
-        //  }
 
-        this.mainItem.backgroundColor = new vscode.ThemeColor(this.newColour); //colours the word "loading"
+        this.mainItem.backgroundColor = new vscode.ThemeColor(this.newColour);  // Update the background color of the status bar item based on the new colour
     }
 }
 
@@ -453,9 +464,8 @@ export function updateTree(call: budget.Call) {
         call.Branch = getCurrentBranch();
     }
     budg.storeCall(call);
-    var cLimit = budg.updateLimit();
-    console.log("limit: " + cLimit);
-    bar.updateBar(call.Emissions, cLimit);
+   
+    bar.updateBar(call.Emissions);
     tree.addMessage("Emissions: " + call.Emissions + "g CO₂e - Model: " + call.Model + " - Date: " + new Date(call.DateTime).toLocaleString());
 
     CarbonDashboardPanel.sendData();
@@ -482,11 +492,12 @@ export async function getLogs(context: vscode.ExtensionContext) {
         for (let index = 0; index < models.length; index++) {
 
             if (models[index].DateTime > lastAccess) {
-                updateTree(models[index]);//updates side bar with all calls returned
+                updateTree(models[index]);
             }
         }
-        lastAccess = new Date().getTime(); //plan to only give identify model and such the log file after the last access to make it quicker
+        lastAccess = new Date().getTime();
 
+        //vscode.window.showInformationMessage("Copilot log files refreshed.");
     }
     catch (error) {
         console.log(error);
