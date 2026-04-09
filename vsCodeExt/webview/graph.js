@@ -16,7 +16,7 @@ let displaySelectedBranchesCount;
 let zoom = 1;
 const zoomGap = 1.5;
 const minZoom = 0.5;
-const maxZoom = 10;
+const maxZoom = 100;
 
 const ref = document.getElementById("branchGraph");
 
@@ -87,6 +87,18 @@ if (ref) {
     toggleButtonContainer.style.cursor = "pointer";
     toggleButtonContainer.style.position = "relative";
 
+    const zoomButtonWrapper = document.createElement("div");
+    zoomButtonWrapper.style.display = "flex";
+    zoomButtonWrapper.style.flexDirection = "column";
+    zoomButtonWrapper.style.alignItems = "center";
+    zoomButtonWrapper.style.gap = "4px";
+    zoomButtonWrapper.style.marginLeft = "10px";
+
+    const zoomHeading = document.createElement("span");
+    zoomHeading.textContent = "Zoom";
+    zoomHeading.style.fontSize = "12px";
+    zoomHeading.style.opacity = "0.7";
+
     const zoomButtonControls = document.createElement("div");
     zoomButtonControls.style.display = "flex";
     zoomButtonControls.style.gap = "6px";
@@ -99,6 +111,14 @@ if (ref) {
         button.style.border = "1px solid var(--secondary-text)";
         button.style.borderRadius = "6px";
         button.style.userSelect = "none";
+        button.style.fontSize = "13px";
+        button.style.transition = "all 0.15s ease";
+        button.addEventListener("mouseenter", () => {
+            button.style.background = "rgba(255, 255, 255, 0.08)";
+        });
+        button.addEventListener("mouseleave", () => {
+            button.style.background = "transparent";
+        });
         return button;
     }
 
@@ -117,6 +137,8 @@ if (ref) {
 
     zoomButtonControls.appendChild(zoomOutButton);
     zoomButtonControls.appendChild(zoomInButton);
+    zoomButtonWrapper.appendChild(zoomHeading);
+    zoomButtonWrapper.appendChild(zoomButtonControls);
 
     slider = document.createElement("div");
     slider.style.position = "absolute";
@@ -163,7 +185,6 @@ if (ref) {
     toggleButtonContainer.appendChild(cumulativeGraphButton);
 
     references.appendChild(title);
-    references.appendChild(zoomButtonControls);
 
     branchSelector = document.createElement("div");
     branchSelector.style.position = "relative";
@@ -258,6 +279,7 @@ if (ref) {
     }
 
     references.appendChild(toggleButtonContainer);
+    references.appendChild(zoomButtonWrapper);
 
     header.appendChild(references);
     header.appendChild(referenceStrip);
@@ -654,11 +676,9 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
 
     const margin = { top: 20, right: 60, bottom: 50, left: 60 };
 
-    const pixelsPerHour = 60 * zoom;
+    const pixelsPerMilliseconds = 0.00005 * zoom;
 
-    const totalHours = (maxTime - minTime) / (1000 * 60 * 60);
-
-    const width = Math.max(mainGraphArea.clientWidth, totalHours * pixelsPerHour + margin.left + margin.right);
+    const width = Math.max(mainGraphArea.clientWidth, (maxTime - minTime) * pixelsPerMilliseconds + margin.left + margin.right);
     const height = mainGraphArea.clientHeight;
 
     const graphWidth = width - margin.left - margin.right;
@@ -669,7 +689,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
     svg.setAttribute("height", height);
 
     allCommits.forEach(commit => {
-        const xAxis = margin.left + ((commit.time - minTime)/(maxTime - minTime)) * graphWidth;
+        const xAxis = margin.left + (commit.time - minTime) * pixelsPerMilliseconds;
         const topYSpace = margin.top + graphHeight - (commit.carbon / maxCarbon) * graphHeight;
         const bottomYSpace = margin.top + graphHeight;
 
@@ -730,7 +750,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
                 continue;
             }
 
-            const xMarkingsSpacing = margin.left + ((newTime - minTime)/(maxTime - minTime)) * graphWidth;
+            const xMarkingsSpacing = margin.left + (newTime - minTime) * pixelsPerMilliseconds;
 
             const xAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
             xAxisHeading.setAttribute("x", xMarkingsSpacing);
@@ -783,7 +803,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
     const now = Date.now();
 
     if(now >= minTime && now <= maxTime){
-        const xAxisNow = margin.left + ((now - minTime)/(maxTime - minTime)) * graphWidth;
+        const xAxisNow = margin.left + (now - minTime) * pixelsPerMilliseconds;
         const nowVerticalLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
         nowVerticalLine.setAttribute("x1", xAxisNow);
         nowVerticalLine.setAttribute("x2", xAxisNow);
