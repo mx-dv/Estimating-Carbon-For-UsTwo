@@ -483,7 +483,7 @@ function getCColor(carbon) {
     if (carbon < 30) {
         return "var(--low-carbon)";
     }
-    if (carbon < 40) {
+    if (carbon < 80) {
         return "var(--avg-carbon)";
     }
     return "var(--high-carbon)";
