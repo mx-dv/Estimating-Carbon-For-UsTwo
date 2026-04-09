@@ -378,25 +378,15 @@ backgroundColor(c) {
                 pctEl.innerText = percentUsed.toFixed(1) + '% used';
                 rightEl.innerText = totalEmissions.toFixed(5) + 'g / ' + SESSION_BUDGET + 'g CO₂e';
 
-                // change colour to red if over 90% of budget is used
+                                
+                fillEl.classList.remove('safe', 'warning', 'danger');
+
                 if (percentUsed >= 66.6) {
-                    fillEl.classList.remove('warning');
                     fillEl.classList.add('danger');
                 } else if (percentUsed >= 33.3) {
-                    fillEl.classList.remove('danger');
                     fillEl.classList.add('warning');
                 } else {
-                    fillEl.classList.remove('danger');
-                    fillEl.classList.remove('warning');
                     fillEl.classList.add('safe');
-                }
-                
-                // Update average emission display if data is available
-                if (message.averageEmission !== undefined) {
-                    const avgEl = document.getElementById('average-cost-display');
-                    if (avgEl) {
-                        avgEl.innerText = message.averageEmission.toFixed(4) + ' g';
-                    }
                 }
 
             }
