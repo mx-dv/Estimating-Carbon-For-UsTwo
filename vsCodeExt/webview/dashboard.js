@@ -334,6 +334,10 @@ backgroundColor(c) {
     window.addEventListener('message', event => {
         const message = event.data;
         if (message.command === 'updateData') {
+            const avgCostEl = document.getElementById('average-cost-display');
+            if (avgCostEl && message.averageEmission !== undefined) {
+                avgCostEl.innerText = message.averageEmission.toFixed(4);
+            }
 
             // live emission by model data from backend
             if (message.heatMapData && heatChart) {
