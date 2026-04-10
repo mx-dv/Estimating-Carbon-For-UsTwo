@@ -127,7 +127,7 @@ backgroundColor(c) {
             min: 1,
             max: 7,
             ticks: {
-                color:getChartTextColor(),
+                color: '#ffffff',
                 stepSize: 1,
                 callback: function (value) {
                     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -160,7 +160,7 @@ backgroundColor(c) {
         }
     },
     ticks: {
-        color:getChartTextColor(),
+        color: '#ffffff',
         source: 'auto', 
         maxRotation: 45,
         minRotation: 45,
