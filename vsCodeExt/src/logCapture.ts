@@ -23,9 +23,9 @@ const GPTPattern =/(?<= gpt-5.*\| \d+ms \| \[.*\]\s*\d*-\d*-\d* \d*:\d*:\d*.\d* 
 //gets the tokens used in claude calls
 //this is the same no matter the purpose
 
-export function getLogFilePath(context: vscode.ExtensionContext) {
+export function getLogFilePath(context: vscode.ExtensionContext) { // function to get log file location
     return context.logPath;
-} // function to get log file location
+} 
 
 export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     var matches: budget.Call[] = [];
