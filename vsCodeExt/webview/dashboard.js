@@ -24,6 +24,7 @@
         });
     }
 
+    //dark mode toggle listener
     const btn = document.getElementById('theme-switch');
     btn.addEventListener('click', () => { document.body.classList.toggle('darkmode'); 
 
@@ -36,7 +37,7 @@
         }
     });
 
-    // --- heat map here ---
+    //heat map start here 
 
     function isoDayOfWeek(dt) {
         let wd = dt.getDay(); // 0...6 from sunday to saturday
@@ -45,6 +46,7 @@
 
     };
 
+    //generate empty data for the past 365 days
    function generateEmptyData() {
     const today = new Date();
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -69,7 +71,7 @@
     }
     return data2;
 }
-    //setup block
+    //get grid color from css
 const getGridColor = () => getComputedStyle(document.body).getPropertyValue('--grid-border').trim();
 const getChartTextColor = () => getComputedStyle(document.body).getPropertyValue('--chart-text').trim();
     const data = {
@@ -77,17 +79,23 @@ const getChartTextColor = () => getComputedStyle(document.body).getPropertyValue
             label: 'Heat Map',
             data: generateEmptyData(),
             anchor: 'start',
-           // --- Replace the existing backgroundColor(c) block with this ---
+
+
+
+        //heat map color logic that changes 
+        //the brighter the color the higher the emissions
 backgroundColor(c) {
     const value = c.dataset.data[c.dataIndex]?.v || 0;
     if (value === 0) { return 'rgba(200, 200, 200, 0.05)'; }
 
-    
+    //from 0-400 is green
     if (value <= 400) {
         const p = value / 400; 
         const g = Math.round(120 + (p * 135));
         return `rgb(0, ${g}, 0)`;
     }
+
+    //from 400-2000 is yellow
     if (value <= 2000) {
         const p = (value - 400) / 1600;
         const r = Math.round(180 + (p * 75));
@@ -95,7 +103,7 @@ backgroundColor(c) {
         return `rgb(${r}, ${g}, 0)`;
     }
 
-    
+    //above 2000 is red with increasing up to 5000 where it caps at rbg(255,0,0)
     const p = Math.min((value - 2000) / 3000, 1);
     const r = Math.round(180 + (p * 75));
     return `rgb(${r}, 0, 0)`;
@@ -120,6 +128,7 @@ backgroundColor(c) {
 
     //scales block
     const scales = {
+        //y axis
         y: {
             type: 'linear',
             position: 'right',
@@ -146,11 +155,12 @@ backgroundColor(c) {
                 display:false
             }
         },
+        //x axis
        x: {
     type: 'time',
     position: 'bottom',
-    offset: true, // This stops the skewing by giving columns room
-    bounds: 'ticks', // This stops the blocks from vanishing
+    offset: true, 
+    bounds: 'ticks', 
     time: {
         unit: 'week',
         round:'week',
@@ -159,6 +169,7 @@ backgroundColor(c) {
             week: 'MMM dd'
         }
     },
+    //ticks settings
     ticks: {
         color: '#ffffff',
         source: 'auto', 
@@ -211,59 +222,12 @@ backgroundColor(c) {
             }
         }
     };
-
-    // --- TO CONNECT THE BUTTON ---
     const testBtn = document.getElementById('testBtn');
     if (testBtn) {
         testBtn.addEventListener('click', function () {
             generateData();
         });
     }
-
-
-    // const ctxTutorial = document.getElementById('myChart');
-    // if (ctxTutorial) {
-    //     // We pass your 'config' variable here so it knows about the data and scales
-    //     const myChart = new Chart(ctxTutorial, config);
-
-    //     // Now update your button so it actually talks to THIS chart
-    //     const testBtn = document.getElementById('testBtn');
-    //     if (testBtn) {
-    //         testBtn.addEventListener('click', function () {
-    //             myChart.data.datasets[0].data = generateData();
-    //             myChart.update();
-    //         });
-    //     }
-
-
-    //     /* --- COMMENT OUT FROM HERE ---
-    //     data: {
-    //         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    //         datasets: [{
-    //             label: 'Weekly Sales',
-    //             data: [18, 12, 6, 9, 12, 3, 9],
-    //             backgroundColor: 'rgba(54, 162, 235, 0.2)',
-    //             borderColor: 'rgba(54, 162, 235, 1)',
-    //             borderWidth: 1
-    //         }]
-    //     },
-    //     options: {
-    //         responsive: true,
-    //         maintainAspectRatio: false,
-    //         scales: {
-    //             y: { beginAtZero: true }
-    //         }
-    //     }
-
-    //     --- TO HERE --- */
-
-
-    //     // Update the version number in the header if you added the span
-    //     const versionTag = document.getElementById('chartVersion');
-    //     if (versionTag) { versionTag.innerText = Chart.version; }
-    // }
-    // --- NEW TUTORIAL CHART END ---
-
 
     let heatChart;
     const heatCtx = document.getElementById('myChart');
