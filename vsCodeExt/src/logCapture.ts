@@ -24,7 +24,6 @@ const GPTPattern =/(?<= gpt-5.*\| \d+ms \| \[.*\]\s*\d*-\d*-\d* \d*:\d*:\d*.\d* 
 //this is the same no matter the purpose
 
 export function getLogFilePath(context: vscode.ExtensionContext) {
-    console.log("TESTING TESTING ---------------------------------------");
     return context.logPath;
 } // function to get log file location
 
