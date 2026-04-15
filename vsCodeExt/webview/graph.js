@@ -743,6 +743,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
     currentTime.setHours(0,0,0,0);
 
     while (currentTime.getTime() <= maxTime) {
+        const xAxisPositions = [];
         for (let hour = 0; hour < 24; hour = hour + 8) {
 
             const time = new Date(currentTime);
@@ -755,6 +756,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
             }
 
             const xMarkingsSpacing = margin.left + (newTime - minTime) * pixelsPerMilliseconds;
+            xAxisPositions.push(xMarkingsSpacing);
 
             const xAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
             xAxisHeading.setAttribute("x", xMarkingsSpacing);
@@ -769,6 +771,27 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
             });
 
             svg.appendChild(xAxisHeading);
+        }
+
+        if (xAxisPositions.length > 0) {
+            const originalXAxis = xAxisPositions[0];
+            const xAxisDifference = -60;
+
+            const dateHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            dateHeading.setAttribute("x", originalXAxis + xAxisDifference);
+            dateHeading.setAttribute("y", height - margin.bottom + 34);
+            dateHeading.setAttribute("text-anchor", "start");
+            dateHeading.setAttribute("font-size", "10");
+            dateHeading.setAttribute("fill", "var(--text-color)");
+            dateHeading.setAttribute("font-weight", "500");
+            dateHeading.style.opacity = "0.8";
+
+            dateHeading.textContent = new Date(currentTime).toLocaleDateString([], {
+                day: "2-digit",
+                month: "short"
+            });
+
+            svg.appendChild(dateHeading);
         }
 
         currentTime.setDate(currentTime.getDate() + 1);
