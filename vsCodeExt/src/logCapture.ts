@@ -4,6 +4,8 @@ import { resolve } from 'path';
 import * as budget from './budget';
 import * as vscode from 'vscode';
 import * as convert from './convert';
+import * as tiktoken from '@dqbd/tiktoken';
+import * as geminiser from '@lenml/tokenizer-gemini';
 import { getPreEmitDiagnostics } from 'typescript';
 
 
@@ -59,8 +61,6 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                 newGPTFlag = true;
             };
 
-            
-
             switch (model) {
                 case 'claude-haiku-4.5': //adds the specifc claude model to an array of claude models
                     console.log("claude-haiku-4.5 found");
@@ -87,12 +87,10 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                     claudes.push(model);
                     claudeFlag = true;
                     break;
-         
                 case 'claude-sonnet-4.6':
                     claudes.push(model);
                     claudeFlag = true;
                     break;
-
                 case 'gemini-2.5-pro':
                     geminis.push(model);
                     geminiFlag = true;
@@ -123,8 +121,13 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
 
         if(geminiFlag) {
             console.log("Extracting gemini text......");
+            const enc = geminiser.fromPreTrained();
             const outputText = findOutputText(rawLog, geminiTextPattern);
+            const outputTokens = enc.encode(outputText).length;
+            console.log("\n\nOUTPUT TOKENS: ", outputTokens);
             const reasoningText = findOutputText(rawLog, geminiReasoningPattern);
+            const reasoningTokens = enc.encode(reasoningText).length;
+            console.log("\n\nOUTPUT TOKENS: ", outputTokens);
             const time = findOutputText(rawLog, geminiDatePattern);
             console.log("OUTPUT:\n\n", outputText);
             console.log("REASONING:\n\n", reasoningText);
