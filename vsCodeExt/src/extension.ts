@@ -514,8 +514,7 @@ export function wrappedGetBudget(): number {
 }
 
 export function wrappedGetBudgetWindowStart(): number {
-    return budg.getBudget();
-}
+    return budg.getBudgetWindowStart();}
 
 export function wrappedSetBudget(newBudget: number): void {
     budg.setBudget(newBudget);

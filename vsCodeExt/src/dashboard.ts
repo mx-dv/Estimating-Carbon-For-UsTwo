@@ -52,8 +52,17 @@ export class CarbonDashboardPanel {
                         this._sendData();
                         return;
                     case 'triggerReset':
-                        // When the button is clicked, run your clear command!
-                        vscode.commands.executeCommand('ecode.clearStore');
+                        vscode.window.showWarningMessage(
+                            "Are you sure you want to reset your session budget and calls? This will shift the analysis start point to now. This cannot be undone.",
+                            {modal: true},
+                            "Yes, Reset"
+                        ).then(selection =>{
+                            if (selection === "Yes, Reset") {
+                                vscode.commands.executeCommand('ecode.clearStore');
+                            }
+    
+                        });
+    
                         return;
                     case 'setBudget':
                         vscode.window.showInputBox({
@@ -117,14 +126,27 @@ export class CarbonDashboardPanel {
         // Aggregate emissions by model from stored calls
         const sessionBudget = require('./extension').wrappedGetBudget();
         const allCalls = require('./extension').wrappedGetCall();
-        const totalRepoEmissions = allCalls.reduce((sum: number, call: any) => sum + call.Emissions, 0);
+        const budgetWindowStart = require('./extension').wrappedGetBudgetWindowStart();
 
         // Filter calls based on the selected branch for the dashboard widgets
         const calls = this._selectedBranches === null
             ? allCalls
             : allCalls.filter((c: any) => this._selectedBranches!.includes(c.Branch || "Unknown Branch"));
 
-        // calculate mean average of all calls
+
+        // windowed calls is only those after the budget window start
+        // Used for budget progress bar so it tracks from the reset point.
+        const windowedCalls = allCalls.filter((c: any) => {
+            const callTime = new Date(c.DateTime).getTime();
+            return callTime >= budgetWindowStart;
+        });
+        const totalRepoEmissions = windowedCalls.reduce(
+            (sum: number, call: any) => sum + call.Emissions, 0
+        );
+        
+        
+        
+            // calculate mean average of all calls
         const totalEmissions = calls.reduce((sum: number, call: any) => sum + call.Emissions, 0);
         const averageEmission = calls.length > 0 ? totalEmissions / calls.length : 0;
 
