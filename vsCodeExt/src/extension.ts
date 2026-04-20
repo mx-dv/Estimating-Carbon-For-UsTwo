@@ -379,12 +379,12 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
             message,
             vscode.TreeItemCollapsibleState.None
         ));
-        this._onDidChangeTreeData.fire(); //refreshes the sidebar
+        this._onDidChangeTreeData.fire(undefined); //refreshes the sidebar
 
     }
     clearTree() {
         this.items = [];
-        this._onDidChangeTreeData.fire();
+        this._onDidChangeTreeData.fire(undefined);
     }
 
     // UstwoBristolEstimatingCarbon
@@ -498,7 +498,7 @@ export async function getLogs(context: vscode.ExtensionContext) {
             }
         }
 
-        if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime}
+        if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime;}
 
         //vscode.window.showInformationMessage("Copilot log files refreshed.");
     }
