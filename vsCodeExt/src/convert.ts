@@ -85,14 +85,21 @@ export const modelRegistry: Record<string, TieredModel> = {
     "claude-sonnet-4": new TieredModel("Claude Sonnet 4", [{ limit: 2000, energyPerToken: 5.63/2000 }, { limit: 11500, energyPerToken: 10.02/11500 }]),
     "claude-opus-4": new TieredModel("Claude Opus 4", [{ limit: 2000, energyPerToken: 5.62/2000 }, { limit: 11500, energyPerToken: 10.73/11500 }]),
     "claude-haiku-3": new TieredModel("Claude Haiku 3", [{ limit: 2000, energyPerToken: 1.77/2000 }, { limit: 11500, energyPerToken: 2.74/11500 }]),
+    "claude-sonnet": new TieredModel("Claude Sonnet (Generic - using 4.5 data)", [{ limit: 2000, energyPerToken: 6.44/2000 }, { limit: 11500, energyPerToken: 10.11/11500 }]),
+    "claude-haiku": new TieredModel("Claude Haiku (Generic - using 4.5 data)", [{ limit: 2000, energyPerToken: 4.75/2000 }, { limit: 11500, energyPerToken: 8.73/11500 }]),
+    "claude-opus": new TieredModel("Claude Opus (Generic - using 4.1 data)", [{ limit: 2000, energyPerToken: 6.97/2000 }, { limit: 11500, energyPerToken: 13.22/11500 }]),
 
 
     "gemini-2.5-pro": new TieredModel("Gemini 2.5 Pro", [{ limit: 2000, energyPerToken: 2.29/2000 }, { limit: 11500, energyPerToken: 2.54/11500 }]),
     "gemini-2.5-flash": new TieredModel("Gemini 2.5 Flash", [{ limit: 2000, energyPerToken: 1.24/2000 }, { limit: 11500, energyPerToken: 2.51/11500 }]),
+    
+    // data from this website since other study had no data for gemini models 3+
+    // https://www.climatealigned.co/tools/ai-footprint-calculator
+
     "gemini-3.1-pro": new TieredModel("Gemini 3.1 Pro", [{ limit: 2000, energyPerToken: 1.44/2000 }, { limit: 11500, energyPerToken: 10.33/11500 }]),
     "gemini-3-flash": new TieredModel("Gemini 3 Flash", [{ limit: 2000, energyPerToken: 0.57/2000 }, { limit: 11500, energyPerToken: 4.14/11500 }]),
 
-    
+
     
     
     // OLD DATA FROM BEFORE - IMPLEMENT NEW TIERS ABOVE
