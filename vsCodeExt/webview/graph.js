@@ -460,7 +460,6 @@ function drawCumulativeGraph(scrollRatio = 1) {
     svg.setAttribute("width", width);
     svg.setAttribute("height", height);
 
-    const graphWidth = width - margin.left - margin.right;
     const graphHeight = height - margin.top - margin.bottom;
 
     Object.keys(cumulativeGraphData).forEach(branch => {
@@ -680,12 +679,12 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
 
     const margin = { top: 20, right: 60, bottom: 50, left: 60 };
 
-    const pixelsPerMilliseconds = 0.000003 * zoom;
+    const timeDifference = maxTime - minTime;
+    const pixelsPerMilliseconds = (mainGraphArea.clientWidth / timeDifference) * zoom;
 
     const width = Math.max(mainGraphArea.clientWidth, (maxTime - minTime) * pixelsPerMilliseconds + margin.left + margin.right);
     const height = mainGraphArea.clientHeight;
 
-    const graphWidth = width - margin.left - margin.right;
     const graphHeight = height - margin.top - margin.bottom;
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
