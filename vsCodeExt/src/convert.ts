@@ -65,7 +65,6 @@ export const modelRegistry: Record<string, TieredModel> = {
 
     "GPT-4o-mini": new TieredModel("OpenAI GPT 4o mini", [{limit: 2000, energyPerToken: 1.65/2000}, { limit: 11500, energyPerToken: 3.85/11500 }]),
 
-
     
     
     // OLD DATA FROM BEFORE - IMPLEMENT NEW TIERS ABOVE
