@@ -8,6 +8,23 @@
     // exposing the API gloablly so graph.js can use it
     window.vscodeAPI = vscode;
 
+    // define colour palette:
+    const palette = [
+        "#D8F3DC",
+        "#B7e4C7",
+        "#95D5B2",
+        "#74C69D",
+        "#52B788",
+        "#40916C",
+        "#2D6A4F",
+        "#1B4332",
+        "#081C15"
+    ];
+
+    const warningColor = '#FFBF00'; // Amber
+    const dangerColor = '#FF0000';
+    const safeColor = '#39FF14';
+
     // click listener so reset button can be used
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) {
@@ -292,7 +309,15 @@ backgroundColor(c) {
         colors.push(`rgba(0, 255, 0, ${alpha.toFixed(2)})`);
     }
     return colors;
-}
+    }
+
+    function generateDynamicColours(dataLength){
+        const colours = [];
+        for (let i = 0; i < dataLength; i++) {
+            colours.push(palette[i % palette.length]);
+        }
+        return colours;
+    }
 
     const commonOptions = {
         responsive: true,
@@ -307,8 +332,8 @@ backgroundColor(c) {
             labels: [],
             datasets: [{
                 data: [],
-                backgroundColor: generateColors(0),
-                borderColor:'0d0d0d',
+                backgroundColor: generateDynamicColours(data.datasets[0].data.length),
+                borderColor:'#0d0d0d',
                 borderWidth:1
             }]
         },
@@ -445,10 +470,12 @@ backgroundColor(c) {
 
                 radarChart.data.labels = message.radarData.labels;
                 message.radarData.datasets.forEach((ds, index) => {
-                    const hue = Math.floor((index * 137.5) % 360);
-                    ds.backgroundColor = `hsl(${hue}, 70%, 50%, 0.2)`;
-                    ds.borderColor = `hsl(${hue}, 70%, 50%)`;
-                    ds.pointBackgroundColor = `hsl(${hue}, 70%, 50%, 0.2)`;
+                    const regularColour = palette[index % palette.length];
+                    const fadedColour = palette[index % palette.length] + '75'; // Adding transparency to the base color
+                    // const hue = Math.floor((index * 137.5) % 360);
+                    ds.backgroundColor = fadedColour;
+                    ds.borderColor = regularColour;
+                    ds.pointBackgroundColor = fadedColour;
                     ds.borderWidth = 1.5;
                 });
                 radarChart.data.datasets = message.radarData.datasets;
@@ -458,9 +485,9 @@ backgroundColor(c) {
                 const carEmptyMsg = document.getElementById('car-empty-msg');
                 const phoneEmptyMsg = document.getElementById('phone-empty-msg');
                 const treeEmptyMsg = document.getElementById('tree-empty-msg');
-                if (carEmptyMsg) { carEmptyMsg.innerText = message.conversionData.carMiles === 0 ? "Equivalent to 0 miles driven" : `Equivalent to ${message.conversionData.milesDriven.toFixed(2)} miles driven`; }
+                if (carEmptyMsg) { carEmptyMsg.innerText = message.conversionData.milesDriven === 0 ? "Equivalent to 0 miles driven" : `Equivalent to ${message.conversionData.milesDriven.toFixed(2)} miles driven`; }
                 if (phoneEmptyMsg) { phoneEmptyMsg.innerText = message.conversionData.phoneCharges === 0 ? "Equivalent to charging 0 iPhone 17s" : `Equivalent to charging ${message.conversionData.phoneCharges.toFixed(2)} iPhone 17s`; }
-                if (treeEmptyMsg) { treeEmptyMsg.innerText = message.conversionData.treeAbsorption === 0 ? "Equivalent to the carbon absorption of 0 trees" : `Equivalent to the carbon absorption of ${message.conversionData.treeYearlyAbsorption.toFixed(2)} trees`; }
+                if (treeEmptyMsg) { treeEmptyMsg.innerText = message.conversionData.treeYearlyAbsorption === 0 ? "Equivalent to the carbon absorption of 0 trees" : `Equivalent to the carbon absorption of ${message.conversionData.treeYearlyAbsorption.toFixed(2)} trees`; }
             }
             if (message.modelLabels && message.modelEmissions) {
                 const hasData = message.modelLabels.length > 0;
@@ -469,7 +496,7 @@ backgroundColor(c) {
 
                 modelEmissionsChart.data.labels = message.modelLabels;
                 modelEmissionsChart.data.datasets[0].data = message.modelEmissions;
-                modelEmissionsChart.data.datasets[0].backgroundColor = generateColors(message.modelLabels.length);
+                modelEmissionsChart.data.datasets[0].backgroundColor = generateDynamicColours(message.modelLabels.length);
                 modelEmissionsChart.data.datasets[0].borderColor = '#0d0d0d';
                 modelEmissionsChart.data.datasets[0].borderWidth = 1;
                 modelEmissionsChart.update();

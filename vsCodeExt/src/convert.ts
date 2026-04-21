@@ -44,17 +44,17 @@ const veryLarge = Number.MAX_SAFE_INTEGER;
 //99999999999999999999999999999999999999999999999999999999999999;
 export const modelRegistry: Record<string, TieredModel> = {
     // "gpt-4o-mini": new TieredModel("GPT4oMini", [{ limit: 400, energyPerToken: 0.00923 }, { limit: 2000, energyPerToken: 0.00369 }, { limit: 11500, energyPerToken: 0.0006293 }]),
-    "gpt-3.5-turbo": new TieredModel("GPT3.5Turbo", [{ limit: veryLarge, energyPerToken: 0.000002 }]),// kwh (1)
-    "gpt-4-turbo": new TieredModel("GPT4Turbo", [{ limit: veryLarge, energyPerToken: 0.000006 }]), //kwh (1)
-    "gpt-4o": new TieredModel("GPT4o", [{ limit: veryLarge, energyPerToken: 0.0000012 }]), //kwh (1)
+    // "gpt-3.5-turbo": new TieredModel("GPT3.5Turbo", [{ limit: veryLarge, energyPerToken: 0.000002 }]),// kwh (1)
+    // "gpt-4-turbo": new TieredModel("GPT4Turbo", [{ limit: veryLarge, energyPerToken: 0.000006 }]), //kwh (1)
+    "gpt-4o": new TieredModel("GPT4o", [{ limit: veryLarge, energyPerToken: 0.9/365000 }]), //kwh (1)
     // "gpt-4.5": new TieredModel("GPT4.5", [{ limit: veryLarge, energyPerToken: 0.0003 }]),
-    "gpt-4": new TieredModel("GPT4", [{ limit: veryLarge, energyPerToken: 0.000006 }]), //kwh (1)
-    "gpt-5": new TieredModel("GPT5", [{ limit: veryLarge, energyPerToken: 0.00269722222 }]), // ESTIMATED //https://impact.esg.ai/
-    // "claude-haiku-4.5": new TieredModel("ClaudeHaiku4.5", [{ limit: veryLarge, energyPerToken: 0.000269444444 }]),  //https://impact.esg.ai/
-    // "claude-sonnet-4.5": new TieredModel("ClaudeSonnet4.5", [{ limit: veryLarge, energyPerToken: 0.0005388888889 }]),  //https://impact.esg.ai/
-    // "claude-opus-4.5": new TieredModel("ClaudeOpus4.5", [{ limit: veryLarge, energyPerToken: 0.0561888888888889 }]),  //https://impact.esg.ai/
+    // "gpt-4": new TieredModel("GPT4", [{ limit: veryLarge, energyPerToken: 0.000006 }]), //kwh (1)
+    "gpt-5": new TieredModel("GPT5", [{ limit: veryLarge, energyPerToken: 1.8/365000 }]), // ESTIMATED //https://impact.esg.ai/
+    "claude-haiku-4.5": new TieredModel("ClaudeHaiku4.5", [{ limit: veryLarge, energyPerToken: 0.2/365000 }]),  //https://impact.esg.ai/
+    "claude-sonnet-4.5": new TieredModel("ClaudeSonnet4.5", [{ limit: veryLarge, energyPerToken: 0.4/365000 }]),  //https://impact.esg.ai/
+    "claude-opus-4.5": new TieredModel("ClaudeOpus4.5", [{ limit: veryLarge, energyPerToken: 4.6/365000 }]),  //https://impact.esg.ai/
     // "claude": new TieredModel("Generic Claude", [{ limit: veryLarge, energyPerToken: 0.000969444444 }]), // generic claude catcher
-    "gemini": new TieredModel("Gemini", [{ limit: veryLarge, energyPerToken: 0.0006 }]),
+    "gemini": new TieredModel("Gemini", [{ limit: veryLarge, energyPerToken: 0.7/365000 }]) // based on gemini 2.5 pro
     // "gpt": new TieredModel("Generic GPT Model", [{ limit: veryLarge, energyPerToken: 0.00036 }]) // emissions based on 0.09g per median gemini prompt. Assuming this to be 250 tokens (input and output) then 0.09/250
 
 };

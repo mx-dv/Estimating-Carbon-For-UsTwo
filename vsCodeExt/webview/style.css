@@ -1,6 +1,7 @@
 :root{
     --base-color: #ffffff;
     --base-variant: #ffffff;
+    --text-color: var(--vscode-editor-text);
     --text-color:#000000;
     --secondary-text: #000000;
     --primary-color: #ffffff;
@@ -12,6 +13,19 @@
     --grid-border: #2e7d32;
     --chart-text: #666666;
 }
+
+/* body {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    font-family: var(--vscode-font-family);
+    padding: 0;
+    margin: 0;
+}
+
+.button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground); */
+/* } */
 
 .darkmode{
     --base-color:#070b1d;
@@ -47,6 +61,10 @@ body{
   min-height: 100vh;
   background-color: var(--base-variant);
   color: var(--text-color);
+}
+
+div{
+  justify-content: center;
 }
 
 header, section{
@@ -239,7 +257,7 @@ header .chartBox {
   display: grid;
   grid-template-columns: repeat(3, 1fr); 
   gap: 20px; 
-  width: 100%;
+  width: 90%;
   min-height: 400px;
   align-items: center; 
   justify-items: center; 
@@ -249,7 +267,7 @@ header .chartBox {
   display: grid;
   grid-template-columns: repeat(2, 1fr); 
   gap: 20px; 
-  width: 100%;
+  width: 90%;
   min-height: 400px;
   align-items: center; 
   justify-items: center; 

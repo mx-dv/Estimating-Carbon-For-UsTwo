@@ -302,6 +302,7 @@ export class CarbonDashboardPanel {
         const scriptUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'dashboard.js')));
         const graphUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'graph.js')));
         const darkModeUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'darkmode.js')));
+        // const themeUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'webview', 'theming.js')));
         return `<!DOCTYPE html>
 <html lang="en">
 
@@ -364,7 +365,6 @@ export class CarbonDashboardPanel {
             <p id="radar-empty-msg" style="text-align:center; margin-top:12px;">No calls recorded yet.</p>
         </div>
     </div>
-
 
     <section id="main-view">
         <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">

@@ -19,7 +19,7 @@ const ref = document.getElementById("branchGraph");
 if (ref) {
     container = document.createElement("div");
     container.id = "carbon-graph-wrapper";
-    container.style.width = "100%";
+    container.style.width = "98%";
     container.style.height = "300px";
     container.style.position = "relative";
     container.style.border = "1px solid var(--secondary-text)";
