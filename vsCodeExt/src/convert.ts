@@ -78,9 +78,6 @@ export const modelRegistry: Record<string, TieredModel> = {
     "gpt-4o-2024-08": new TieredModel("GPT4o August", [{ limit: 2000, energyPerToken: 1.63/2000 }, { limit: 11500, energyPerToken: 2.24/11500 }]),
     "gpt-4.1-nano": new TieredModel("GPT4.1 Nano", [{ limit: 2000, energyPerToken: 0.36/2000 }, { limit: 11500, energyPerToken: 0.57/11500 }]),
 
-
-    "": new TieredModel("", [{ limit: 2000, energyPerToken: /2000 }, { limit: 11500, energyPerToken: /11500 }]),
-
     
     
     // OLD DATA FROM BEFORE - IMPLEMENT NEW TIERS ABOVE
