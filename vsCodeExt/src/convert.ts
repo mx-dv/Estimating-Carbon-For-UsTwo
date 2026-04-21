@@ -74,6 +74,12 @@ export const modelRegistry: Record<string, TieredModel> = {
     "gpt-4o-2024-11": new TieredModel("GPT4o November", [{ limit: 2000, energyPerToken: 1.33/2000 }, { limit: 11500, energyPerToken: 2.74/11500 }]),
     "gpt-4o-2024-08": new TieredModel("GPT4o August", [{ limit: 2000, energyPerToken: 1.63/2000 }, { limit: 11500, energyPerToken: 2.24/11500 }]),
     "gpt-4.1-nano": new TieredModel("GPT4.1 Nano", [{ limit: 2000, energyPerToken: 0.36/2000 }, { limit: 11500, energyPerToken: 0.57/11500 }]),
+    "claude-haiku-4.5": new TieredModel("ClaudeHaiku4.5", [{ limit: 2000, energyPerToken: 4.75/2000 }, { limit: 11500, energyPerToken: 8.73/11500 }]),
+    "claude-opus-4.1": new TieredModel("ClaudeOpus4.1", [{ limit: 2000, energyPerToken: 6.97/2000 }, { limit: 11500, energyPerToken: 13.22/11500 }]),
+    "claude-sonnet-4.5": new TieredModel("ClaudeSonnet4.5", [{ limit: 2000, energyPerToken: 6.44/2000 }, { limit: 11500, energyPerToken: 10.11/11500 }]),
+    "claude-sonnet-4": new TieredModel("ClaudeSonnet4", [{ limit: 2000, energyPerToken: 5.63/2000 }, { limit: 11500, energyPerToken: 10.02/11500 }]),
+    "claude-opus-4": new TieredModel("ClaudeOpus4", [{ limit: 2000, energyPerToken: 5.62/2000 }, { limit: 11500, energyPerToken: 10.73/11500 }]),
+    "claude-haiku-3": new TieredModel("ClaudeHaiku3", [{ limit: 2000, energyPerToken: 1.77/2000 }, { limit: 11500, energyPerToken: 2.74/11500 }]),
 
     
     
