@@ -50,7 +50,22 @@ const veryLarge = Number.MAX_SAFE_INTEGER;
 
 export const modelRegistry: Record<string, TieredModel> = {
     "o3-pro": new TieredModel("OpenAI o3 Pro", [{limit: 2000, energyPerToken: 32.36/2000}, { limit: 11500, energyPerToken: 36.08/11500 }]),
-    
+    "o3": new TieredModel("OpenAI o3", [{limit: 2000, energyPerToken: 4.32/2000}, { limit: 11500, energyPerToken: 5.73/11500 }]),
+    "o4-mini (high)": new TieredModel("OpenAI o4-mini (high)", [{limit: 2000, energyPerToken: 6.13/2000}, { limit: 11500, energyPerToken: 5.66/11500 }]),
+
+
+    "GPT-5 (high)": new TieredModel("OpenAI GPT 5 (high)", [{limit: 2000, energyPerToken: 22.16/2000}, { limit: 11500, energyPerToken: 21.83/11500 }]),
+    "GPT-5 (medium)": new TieredModel("OpenAI GPT 5 (medium)", [{limit: 2000, energyPerToken: 11.89/2000}, { limit: 11500, energyPerToken: 10.59/11500 }]),
+    "GPT-5 (low)": new TieredModel("OpenAI GPT 5 (low)", [{limit: 2000, energyPerToken: 5.01/2000}, { limit: 11500, energyPerToken: 6.47/11500 }]),
+    "GPT-5 (minimal)": new TieredModel("OpenAI GPT 5 (minimal)", [{limit: 2000, energyPerToken: 3.00/2000}, { limit: 11500, energyPerToken: 10.59/11500 }]),
+
+    "GPT-5-nano (high)": new TieredModel("OpenAI GPT 5 nano", [{limit: 2000, energyPerToken: 6.65/2000}, { limit: 11500, energyPerToken: 6.45/11500 }]),
+    "GPT-4-turbo": new TieredModel("OpenAI GPT 4 turbo", [{limit: 2000, energyPerToken: 7.01/2000}, { limit: 11500, energyPerToken: 10.93/11500 }]),
+    "GPT-4.1": new TieredModel("OpenAI GPT 4.1", [{limit: 2000, energyPerToken: 1.85/2000}, { limit: 11500, energyPerToken: 2.94/11500 }]),
+
+    "GPT-4o-mini": new TieredModel("OpenAI GPT 4o mini", [{limit: 2000, energyPerToken: 1.65/2000}, { limit: 11500, energyPerToken: 3.85/11500 }]),
+
+
     
     
     // OLD DATA FROM BEFORE - IMPLEMENT NEW TIERS ABOVE
@@ -95,10 +110,21 @@ export const modelRegistry: Record<string, TieredModel> = {
 // so our SCI = ((Energy of model tokens * global average carbon intensity) + manufacturing emissions per R tokens) / R = gCO2e per token
 
 export function getModel(inputString: string): TieredModel | null {
-    const lowerModel = inputString.toLowerCase();
-    if (modelRegistry[lowerModel]) { return modelRegistry[inputString]; }
-    const key = Object.keys(modelRegistry).find(k => inputString.includes(k));
-    return key ? modelRegistry[key] : null;
+    const normalizedInput = inputString.trim().toLowerCase();
+    if (!normalizedInput) {
+        return null;
+    }
+
+    // Exact match (case-insensitive)
+    const exactKey = Object.keys(modelRegistry).find(k => k.toLowerCase() === normalizedInput);
+    if (exactKey) {
+        return modelRegistry[exactKey];
+    }
+
+    // Substring match (case-insensitive). Prefer the longest key to avoid partial collisions.
+    const keysBySpecificity = Object.keys(modelRegistry).sort((a, b) => b.length - a.length);
+    const matchedKey = keysBySpecificity.find(k => normalizedInput.includes(k.toLowerCase()));
+    return matchedKey ? modelRegistry[matchedKey] : null;
 }
 
 export function calculateEmission(modelName: string, numTokens: number) {
