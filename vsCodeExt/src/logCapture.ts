@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import * as budget from './budget';
 import * as vscode from 'vscode';
 import * as convert from './convert';
-import * as tiktoken from '@dqbd/tiktoken';
+import * as tiktoken from 'tiktoken';
 import * as geminiser from '@lenml/tokenizer-gemini';
 import { getPreEmitDiagnostics } from 'typescript';
 
@@ -19,7 +19,7 @@ const modelPattern = /(?<= \| success \| )\S*/g; //gets all the models used in t
 //regex to capture Claude model tokens with datetime
 const dateRegex = /\d*-\d*-\d* \d*:\d*:\d*.\d*/g; //returns all the dates
 const claudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<=stop_reason":null(.*)"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)|(?<=stop_reason":"end_turn",(.*))}}/g;
-const GPTPattern =/(?<= gpt-5.*\| \d+ms \| \[.*\]\s*\d*-\d*-\d* \d*:\d*:\d*.\d* \[info\] \[ToolCallingLoop\] Stop hook result: )shouldContinue=false|(?<={"input_tokens":)\d*|(?<=,"input_tokens_details":{"cached_tokens":)\d*|(?<=},"output_tokens":)\d*|(?<=,"output_tokens_details":{"reasoning_tokens":)\d*|(?<= gpt-5.*\| \d+ms \| \[.*\]\s*)\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)shouldContinue=false)/g; 
+const GPT5Pattern =/(?<= gpt-5.*\| \d+ms \| \[.*\]\s*\d*-\d*-\d* \d*:\d*:\d*.\d* \[info\] \[ToolCallingLoop\] Stop hook result: )shouldContinue=false|(?<={"input_tokens":)\d*|(?<=,"input_tokens_details":{"cached_tokens":)\d*|(?<=},"output_tokens":)\d*|(?<=,"output_tokens_details":{"reasoning_tokens":)\d*|(?<= gpt-5.*\| \d+ms \| \[.*\]\s*)\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)shouldContinue=false)/g; 
 //should continue = false is the line in the log files for when a call is done
 //this collects all the tokens from GPT models past 5 and the timestamp 
 
@@ -31,6 +31,12 @@ const geminiTextPattern = /(?<=content":")(.*)(?=","role)/g;
 
 //gets Gemini dates
 const geminiDatePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*){"finish_reason":"stop")/g;
+
+//gets older GPT dates
+const gptDatePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)\| success \| gpt-[^5])/g;
+
+//gets older GPT text
+const gptTextPattern = /(?<=\[trace\] choice {"delta":{"content":")[^"]+/g;
 
 //gets the tokens used in claude calls
 //this is the same no matter the purpose
@@ -44,6 +50,7 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     var claudeFlag: boolean = false; //flag used to tell us if we need to use our claude regex
     var newGPTFlag: boolean = false;
     var geminiFlag: boolean = false;
+    var oldGPTFlag: boolean = false;
     var activeCall: budget.Call = { Emissions: 0, Model: "TEST", DateTime: 0 };
     var claudes: string[] = [];
     var GPTs: string[] = [];
@@ -66,23 +73,19 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                     console.log("claude-haiku-4.5 found");
                     claudes.push(model);
                     claudeFlag = true;
-                    break;
-                    
+                    break;              
                 case 'claude-opus-4.5':
                     claudes.push(model);
                     claudeFlag = true;
                     break;
-
                 case 'claude-opus-4.6':
                     claudes.push(model);
                     claudeFlag = true;
                     break;
-
                 case 'claude-sonnet-4':
                     claudes.push(model);
                     claudeFlag = true;
                     break;
-
                 case 'claude-sonnet-4.5':
                     claudes.push(model);
                     claudeFlag = true;
@@ -94,6 +97,10 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                 case 'gemini-2.5-pro':
                     geminis.push(model);
                     geminiFlag = true;
+                case 'gpt-4o':
+                    oldGPTFlag = true;
+                case 'gpt-4.1':
+                    oldGPTFlag = true;
                 default:
                     console.log("Functionality coming soon!");
                     break;
@@ -101,7 +108,7 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
         } 
     }
     console.log("GPT flag",newGPTFlag);
-    if (claudeFlag || newGPTFlag || geminiFlag){
+    if (claudeFlag || newGPTFlag || geminiFlag || oldGPTFlag){
         var times:number[] = [];
         var results:number[] = [];
         var allModels:string[] = claudes.concat(GPTs);
@@ -114,7 +121,7 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
         }
         if(newGPTFlag){
             console.log("checking for GPT pattern");
-            const [timesG,resultsG] = findModel(rawLog,GPTPattern,"shouldContinue=false");
+            const [timesG,resultsG] = findModel(rawLog,GPT5Pattern,"shouldContinue=false");
             results = results.concat(resultsG);
             times = times.concat(timesG);
         }
@@ -131,6 +138,18 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
             console.log("OUTPUT:\n\n", outputText);
             console.log("REASONING:\n\n", reasoningText);
         }
+
+        if(oldGPTFlag) {
+            const enc = tiktoken.get_encoding('o200k_base');
+            const outputText = findOutputText(rawLog, gptTextPattern);
+            const outputTokens = enc.encode(outputText).length;
+            console.log("\n\nOUTPUT TOKENS: ", outputTokens);
+            const time = findOutputText(rawLog, gptDatePattern);
+            console.log("OUTPUT:\n\n", outputText);
+
+        }
+
+
         //var totalResults = [resultsC,resultsG];
         
         //for (const results of totalResults)
