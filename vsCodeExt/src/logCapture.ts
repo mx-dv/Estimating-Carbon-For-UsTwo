@@ -33,7 +33,7 @@ const geminiTextPattern = /(?<=content":")(.*)(?=","role)/g;
 const geminiDatePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*){"finish_reason":"stop")/g;
 
 //gets older GPT dates
-const gptDatePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)success)/g;
+const gptDatePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)\| success \| gpt-[^5])/g;
 
 //gets older GPT text
 const gptTextPattern = /(?<=\[trace\] choice {"delta":{"content":")[^"]+/g;
