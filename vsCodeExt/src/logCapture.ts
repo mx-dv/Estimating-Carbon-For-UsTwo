@@ -100,6 +100,8 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                     geminiFlag = true;
                 case 'gpt-4o':
                     oldGPTFlag = true;
+                case 'gpt-4.1':
+                    oldGPTFlag = true;
                 default:
                     console.log("Functionality coming soon!");
                     break;
