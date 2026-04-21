@@ -136,27 +136,33 @@ export async function activate(context: vscode.ExtensionContext) {
     });
     context.subscriptions.push(branchChangeListener);
 
-    const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {
-        //vscode.window.showInformationMessage('Hello World from EstimatingCarbon!');
-        const limit = await vscode.window.showInputBox({ //opens an input box currently representing the carbon footprint
-            prompt: 'Enter test call: ',
-            placeHolder: 'eg. 5',
-            ignoreFocusOut: true // keep input box open even if focus moves away from window
-        });
-
-        var num = Number(limit);
-        if (!Number.isNaN(num)) {
-            let now = new Date();
-            var newCall: budget.Call = { Emissions: num, Model: "TEST", DateTime: Number(now.getTime()) };
-            updateTree(newCall);
-        vscode.window.showInformationMessage(`Added ${num}g CO2e for today.`);
-        }
-        
-        else {
-            vscode.window.showInformationMessage('Error: NaN inputted.');
-        }
-
+   const input = vscode.commands.registerCommand('ecode.inputdisplay', async () => {
+    const limit = await vscode.window.showInputBox({
+        prompt: 'Enter test call: ',
+        placeHolder: 'eg. 5',
+        ignoreFocusOut: true 
     });
+
+    var num = Number(limit);
+    if (!Number.isNaN(num)) {
+        // Use a local date string to prevent timezone shifting
+        const now = new Date();
+        const bumpedTime = now.getTime() + (5 * 60 * 60 * 1000);
+       
+        
+        
+        var newCall: budget.Call = { 
+            Emissions: num, 
+            Model: "TEST", 
+            DateTime: bumpedTime
+        };
+        
+        updateTree(newCall);
+        vscode.window.showInformationMessage(`Added ${num}g CO2e for today.`);
+    }else {
+        vscode.window.showInformationMessage('Error: NaN inputted.');
+    }
+});
     context.subscriptions.push(input);
     context.subscriptions.push(dashboardCommand);
 
@@ -462,11 +468,12 @@ export function updateTree(call: budget.Call) {
     }
     budg.storeCall(call);
    
+    
+    console.log("BACKEND CHECK: Stored call value:", call.Emissions, "for date:", new Date(call.DateTime).toISOString());
+
     bar.updateBar(call.Emissions);
-    tree.addMessage("Emissions: " + call.Emissions + "g CO₂e - Model: " + call.Model + " - Date: " + new Date(call.DateTime).toLocaleString());
-
-    CarbonDashboardPanel.sendData();
-
+    CarbonDashboardPanel.sendData(); 
+    
 }
 
 export async function getLogs(context: vscode.ExtensionContext) {
