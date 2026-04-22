@@ -99,7 +99,15 @@ export const modelRegistry: Record<string, TieredModel> = {
     "gemini-3.1-pro": new TieredModel("Gemini 3.1 Pro", [{ limit: 2000, energyPerToken: 1.44/2000 }, { limit: 11500, energyPerToken: 10.33/11500 }]),
     "gemini-3-flash": new TieredModel("Gemini 3 Flash", [{ limit: 2000, energyPerToken: 0.57/2000 }, { limit: 11500, energyPerToken: 4.14/11500 }]),
 
-
+    "gpt-5-medium": new TieredModel("GPT5 ", [{ limit: 2000, energyPerToken: 11.89/2000 }, { limit: 11500, energyPerToken: 10.59/11500 }]), 
+    "o1": new TieredModel("OpenAI o1", [{ limit: 2000, energyPerToken: 6.51/2000 }, { limit: 11500, energyPerToken: 15.31/11500}]),
+    "o4-mini-high": new TieredModel("OpenAI o4 Mini", [{ limit: 2000, energyPerToken: 6.13/2000 }, { limit: 11500, energyPerToken: 5.66/11500}]),
+    "gpt-4o-2024-05": new TieredModel("GPT4o May", [{ limit: 2000, energyPerToken: 2.18/2000 }, { limit: 11500, energyPerToken: 3.89/11500}]),
+    "gpt-5-mini": new TieredModel("GPT5 Mini", [{ limit: 2000, energyPerToken: 4.30/2000 }, { limit: 11500, energyPerToken: 3.52/11500}]),
+    "gpt-4o-2024-11": new TieredModel("GPT4o November", [{ limit: 2000, energyPerToken: 1.33/2000 }, { limit: 11500, energyPerToken: 2.90/11500}]),
+    "gpt-4o-2024-03": new TieredModel("GPT4o March", [{ limit: 2000, energyPerToken: 1.18/2000 }, { limit: 11500, energyPerToken: 5.81/11500}]),
+    "gpt-4o-chatGPT": new TieredModel("GPT4o ChatGPT", [{ limit: 2000, energyPerToken: 1.30/2000 }, { limit: 11500, energyPerToken: 3.47/11500}]),
+    "gpt-5-nano-minimal": new TieredModel("GPT5 Nano", [{ limit: 2000, energyPerToken: 0.50/2000 }, { limit: 11500, energyPerToken: 0.65/11500}]),
     
     
     // OLD DATA FROM BEFORE - IMPLEMENT NEW TIERS ABOVE
