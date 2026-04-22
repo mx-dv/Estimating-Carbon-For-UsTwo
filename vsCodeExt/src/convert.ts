@@ -176,6 +176,8 @@ export function calculateEmission(modelName: string, numTokens: number) {
 export function getEnergy(modelName: string, numTokens: number): number {
     if (numTokens < 0) { return 0; }
     const chosenModel = getModel(modelName);
-    const energy = chosenModel?.calculate(numTokens) ?? 0;
-    return energy;
+    const energyWh = chosenModel?.calculate(numTokens) ?? 0;
+    const energyKwh = energyWh / 1000; // convert Wh to kWh
+
+    return energyKwh;
 }
