@@ -25,8 +25,13 @@ export class TieredModel extends LLMModel {
     }
 
     calculate(tokens: number): number {
-        const energyRate = this.energyTiers.find(t => tokens <= t.limit)?.energyPerToken ?? 0; // returns 0 if no rate found
-        return tokens * energyRate;
+        let surplusTokens = 0;
+        if (tokens >= 2000) {
+            surplusTokens = tokens - 2000;
+        }
+        const energyRate1 = this.energyTiers[0].energyPerToken; // rate for first 2000 tokens
+        const energyRate2 = this.energyTiers[1].energyPerToken; // rate for tokens beyond 2000 (up to 11500)
+        return ((tokens-surplusTokens) * energyRate1) + (surplusTokens * energyRate2);
         // // return {
         //     carbon: carbonRate*tokens,
         //     water : waterRate * tokens{}};
@@ -55,7 +60,7 @@ export const modelRegistry: Record<string, TieredModel> = {
     "o3-mini": new TieredModel("OpenAI o3 Mini", [{ limit: 2000, energyPerToken: 1.72/2000 }, { limit: veryLarge, energyPerToken: 2.7/11500 }]),
     "o3": new TieredModel("OpenAI o3", [{limit: 2000, energyPerToken: 4.32/2000}, { limit: veryLarge, energyPerToken: 5.73/11500 }]),
     "o1": new TieredModel("OpenAI o1", [{ limit: 2000, energyPerToken: 7.03/2000 }, { limit: veryLarge, energyPerToken: 14.4/11500 }]),
-
+    "o4": new TieredModel("OpenAI o4 default (o4 high)", [{limit: 2000, energyPerToken: 6.13/2000}, { limit: veryLarge, energyPerToken: 5.66/11500 }]),
 
 
 
@@ -147,6 +152,9 @@ export const modelRegistry: Record<string, TieredModel> = {
 // so our SCI = ((Energy of model tokens * global average carbon intensity) + manufacturing emissions per R tokens) / R = gCO2e per token
 
 export function getModel(inputString: string): TieredModel | null {
+    if (inputString === undefined){
+        return null;
+    }
     const normalisedInput = inputString.trim().toLowerCase();
     if (!normalisedInput) {
         return null;
