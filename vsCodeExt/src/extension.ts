@@ -472,7 +472,7 @@ export function updateTree(call: budget.Call) {
    
     
     console.log("BACKEND CHECK: Stored call value:", call.Emissions, "for date:", new Date(call.DateTime).toISOString());
-
+    tree.addMessage("Emissions: " + call.Emissions + "g CO₂e - Model: " + call.Model + " - Date: " + new Date(call.DateTime).toLocaleString());
     bar.updateBar(call.Emissions);
     CarbonDashboardPanel.sendData(); 
     
@@ -517,7 +517,7 @@ export async function getLogs(context: vscode.ExtensionContext) {
             }
         }
 
-        if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime}
+        if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime;}
 
         //vscode.window.showInformationMessage("Copilot log files refreshed.");
     }
