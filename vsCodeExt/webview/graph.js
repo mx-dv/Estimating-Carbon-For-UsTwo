@@ -777,7 +777,8 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
         if(selectedInterval < 24 * 60 * 60 * 1000){
             xAxisHeading.textContent = new Date(currentTime).toLocaleTimeString([], {
                 hour: "2-digit",
-                minute: "2-digit"
+                minute: "2-digit",
+                hour12: false
             });
         }
         else{
