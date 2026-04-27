@@ -8,3 +8,5 @@ dist/
 .vscode-test
 .vscode-test/
 *.vsix
+.coverage
+coverage/
