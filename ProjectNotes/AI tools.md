@@ -121,6 +121,10 @@ When conducting research into how I can use a regex to exclude the lines I need 
 
 While adding support for Gemini in DevTime, I was unable to find any clear research into the inner workings of LLM tokenisers. I opted to use ChatGPT to research whether I could use the tiktoken library, which I was already familiar with, to tokenise Gemini outputs. ChatGPT suggested using a rough mathematical calculation to tokenise the outputs. I initially planned on using this but was able to find a better [Gemini tokeniser](https://www.npmjs.com/package/@lenml/tokenizer-gemini) on the npm registry upon further research, so I ended up scrapping the AI solution.
 
+> Prompt used - "Convert the data stored in the model registry to JSON and store it in the models.json file"
+
+I used ChatGPT here to handle the brunt conversion of our original emissions data from the convert.ts model registry to a separate JSON file, as there were over 80 data points to convert. I did not use any logic from the LLM and solely used it to save time in copying the data over myself.
+
 <h3>Debugging</h3>
 
 > Prompt used - "ESLint: 10.0.2 TypeError: util.styleText is not a function at util.styleText.validateStream - what causes this error?"
