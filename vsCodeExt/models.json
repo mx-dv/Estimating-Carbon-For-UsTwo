@@ -4,11 +4,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "6.13/2000"
+        "energyPerToken": 6.13
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "5.66/11500"
+        "energyPerToken": 5.66
       }
     ]
   },
@@ -17,11 +17,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "32.36/2000"
+        "energyPerToken": 32.36
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "36.08/11500"
+        "energyPerToken": 36.08
       }
     ]
   },
@@ -30,11 +30,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "5.04/2000"
+        "energyPerToken": 5.04
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "8.47/11500"
+        "energyPerToken": 8.47
       }
     ]
   },
@@ -43,11 +43,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.72/2000"
+        "energyPerToken": 1.72
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "2.7/11500"
+        "energyPerToken": 2.7
       }
     ]
   },
@@ -56,11 +56,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "4.32/2000"
+        "energyPerToken": 4.32
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "5.73/11500"
+        "energyPerToken": 5.73
       }
     ]
   },
@@ -69,11 +69,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "7.03/2000"
+        "energyPerToken": 7.03
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "14.4/11500"
+        "energyPerToken": 14.4
       }
     ]
   },
@@ -82,11 +82,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "6.13/2000"
+        "energyPerToken": 6.13
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "5.66/11500"
+        "energyPerToken": 5.66
       }
     ]
   },
@@ -95,11 +95,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "14.86/2000"
+        "energyPerToken": 14.86
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "13.37/11500"
+        "energyPerToken": 13.37
       }
     ]
   },
@@ -108,11 +108,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "4.3/2000"
+        "energyPerToken": 4.3
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "3.52/11500"
+        "energyPerToken": 3.52
       }
     ]
   },
@@ -121,11 +121,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "6.65/2000"
+        "energyPerToken": 6.65
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "6.45/11500"
+        "energyPerToken": 6.45
       }
     ]
   },
@@ -134,11 +134,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "3.87/2000"
+        "energyPerToken": 3.87
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "3.14/11500"
+        "energyPerToken": 3.14
       }
     ]
   },
@@ -147,11 +147,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "0.5/2000"
+        "energyPerToken": 0.5
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "0.65/11500"
+        "energyPerToken": 0.65
       }
     ]
   },
@@ -160,11 +160,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "3.00/2000"
+        "energyPerToken": 3
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "4.72/11500"
+        "energyPerToken": 4.72
       }
     ]
   },
@@ -173,11 +173,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "22.16/2000"
+        "energyPerToken": 22.16
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "21.83/11500"
+        "energyPerToken": 21.83
       }
     ]
   },
@@ -186,11 +186,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "11.89/2000"
+        "energyPerToken": 11.89
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.59/11500"
+        "energyPerToken": 10.59
       }
     ]
   },
@@ -199,11 +199,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "5.01/2000"
+        "energyPerToken": 5.01
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "6.47/11500"
+        "energyPerToken": 6.47
       }
     ]
   },
@@ -212,11 +212,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "4.30/2000"
+        "energyPerToken": 4.3
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "3.52/11500"
+        "energyPerToken": 3.52
       }
     ]
   },
@@ -225,11 +225,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "11.89/2000"
+        "energyPerToken": 11.89
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.59/11500"
+        "energyPerToken": 10.59
       }
     ]
   },
@@ -238,11 +238,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "7.01/2000"
+        "energyPerToken": 7.01
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.93/11500"
+        "energyPerToken": 10.93
       }
     ]
   },
@@ -251,11 +251,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "0.36/2000"
+        "energyPerToken": 0.36
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "0.57/11500"
+        "energyPerToken": 0.57
       }
     ]
   },
@@ -264,11 +264,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.4/2000"
+        "energyPerToken": 1.4
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "2.25/11500"
+        "energyPerToken": 2.25
       }
     ]
   },
@@ -277,11 +277,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.85/2000"
+        "energyPerToken": 1.85
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "2.94/11500"
+        "energyPerToken": 2.94
       }
     ]
   },
@@ -290,11 +290,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.33/2000"
+        "energyPerToken": 1.33
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "3.19/11500"
+        "energyPerToken": 3.19
       }
     ]
   },
@@ -303,11 +303,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.63/2000"
+        "energyPerToken": 1.63
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "2.24/11500"
+        "energyPerToken": 2.24
       }
     ]
   },
@@ -316,11 +316,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "2.18/2000"
+        "energyPerToken": 2.18
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "3.89/11500"
+        "energyPerToken": 3.89
       }
     ]
   },
@@ -329,11 +329,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.65/2000"
+        "energyPerToken": 1.65
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "3.85/11500"
+        "energyPerToken": 3.85
       }
     ]
   },
@@ -342,11 +342,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.30/2000"
+        "energyPerToken": 1.3
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "3.47/11500"
+        "energyPerToken": 3.47
       }
     ]
   },
@@ -355,11 +355,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "4.75/2000"
+        "energyPerToken": 4.75
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "8.73/11500"
+        "energyPerToken": 8.73
       }
     ]
   },
@@ -368,11 +368,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "6.97/2000"
+        "energyPerToken": 6.97
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "13.22/11500"
+        "energyPerToken": 13.22
       }
     ]
   },
@@ -381,11 +381,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "6.44/2000"
+        "energyPerToken": 6.44
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.11/11500"
+        "energyPerToken": 10.11
       }
     ]
   },
@@ -394,11 +394,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "5.63/2000"
+        "energyPerToken": 5.63
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.02/11500"
+        "energyPerToken": 10.02
       }
     ]
   },
@@ -407,11 +407,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "5.62/2000"
+        "energyPerToken": 5.62
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.73/11500"
+        "energyPerToken": 10.73
       }
     ]
   },
@@ -420,11 +420,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.77/2000"
+        "energyPerToken": 1.77
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "2.74/11500"
+        "energyPerToken": 2.74
       }
     ]
   },
@@ -433,11 +433,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "6.44/2000"
+        "energyPerToken": 6.44
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.11/11500"
+        "energyPerToken": 10.11
       }
     ]
   },
@@ -446,11 +446,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "4.75/2000"
+        "energyPerToken": 4.75
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "8.73/11500"
+        "energyPerToken": 8.73
       }
     ]
   },
@@ -459,11 +459,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "6.97/2000"
+        "energyPerToken": 6.97
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "13.22/11500"
+        "energyPerToken": 13.22
       }
     ]
   },
@@ -472,11 +472,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "2.29/2000"
+        "energyPerToken": 2.29
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "2.54/11500"
+        "energyPerToken": 2.54
       }
     ]
   },
@@ -485,11 +485,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.24/2000"
+        "energyPerToken": 1.24
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "2.51/11500"
+        "energyPerToken": 2.51
       }
     ]
   },
@@ -498,11 +498,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "1.44/2000"
+        "energyPerToken": 1.44
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "10.33/11500"
+        "energyPerToken": 10.33
       }
     ]
   },
@@ -511,11 +511,11 @@
     "tiers": [
       {
         "limit": 2000,
-        "energyPerToken": "0.57/2000"
+        "energyPerToken": 0.57
       },
       {
         "limit": "veryLarge",
-        "energyPerToken": "4.14/11500"
+        "energyPerToken": 4.14
       }
     ]
   }
