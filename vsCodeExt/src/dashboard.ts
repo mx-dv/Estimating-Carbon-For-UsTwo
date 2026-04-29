@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as budget from './budget';
-import * as extension from './extension';
-import { domainToASCII } from 'url';
-import { all } from 'axios';
+// import * as extension from './extension';
+// import { domainToASCII } from 'url';
+// import { all } from 'axios';
 // import {RadarController,
 // LineElement,
 // PointElement} from 'chart.js';
@@ -30,12 +30,14 @@ export class CarbonDashboardPanel {
     private readonly _panel: vscode.WebviewPanel;
     private _disposables: vscode.Disposable[] = [];
     private readonly _extensionUri: vscode.Uri;
+    private _budget: budget.budget;
     
     private _selectedBranches: string[] | null = null;
     
 
 
-    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
+    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, budg: budget.budget) {
+        this._budget = budg
         this._panel = panel;
         this._extensionUri = extensionUri;
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
@@ -69,7 +71,7 @@ export class CarbonDashboardPanel {
             message => {
                 switch (message.command) {
                     case 'frontEndReady':
-                        this._sendData();
+                        this._sendData(); // Send initial data to populate the dashboard when the frontend signals it's ready
                         return;
                    
                     case 'triggerReset':
@@ -92,7 +94,7 @@ export class CarbonDashboardPanel {
                             placeHolder: "e.g. 15",
                         }).then(value => {
                             if (value && !isNaN(Number(value))) {
-                                require('./extension').wrappedSetBudget(Number(value));
+                                this._budget.setBudget(Number(value)); // Update the budget instance with the new value
                                 this._sendData(); // Update the dashboard with the new budget
                             }
                         });
@@ -109,7 +111,7 @@ export class CarbonDashboardPanel {
         );
     }
 
-    public static createOrShow(extensionUri: vscode.Uri) {
+    public static createOrShow(extensionUri: vscode.Uri ,budg: budget.budget) {
         const column = vscode.window.activeTextEditor
             ? vscode.window.activeTextEditor.viewColumn
             : undefined;
@@ -131,12 +133,12 @@ export class CarbonDashboardPanel {
             }
         );
 
-        CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri);
+        CarbonDashboardPanel.currentPanel = new CarbonDashboardPanel(panel, extensionUri, budg);
         // CarbonDashboardPanel.currentPanel._sendData();
     }
 
     // Call this from extension whenever a new call is recorded to keep the chart live
-    public static sendData() {
+    public static sendData(budg: any) {
         if (CarbonDashboardPanel.currentPanel) {
             CarbonDashboardPanel.currentPanel._sendData();
         }
@@ -157,11 +159,15 @@ export class CarbonDashboardPanel {
 
         
         // Aggregate emissions by model from stored calls
-        const sessionBudget = require('./extension').wrappedGetBudget();
-        const allCalls = require('./extension').wrappedGetCall();
+        // const sessionBudget = require('./extension').wrappedGetBudget();
+
+        const sessionBudget = this._budget.getBudget();
+        const allCalls = this._budget.getCalls();
+        // const allCalls = require('./extension').wrappedGetCall();
         
 
-        const budgetWindowStart = require('./extension').wrappedGetBudgetWindowStart();
+        // const budgetWindowStart = require('./extension').wrappedGetBudgetWindowStart();
+        const budgetWindowStart = this._budget.getBudgetWindowStart();
 
         // Branch-filtered calls for pie chart, average
         const calls = this._selectedBranches === null
@@ -195,10 +201,11 @@ export class CarbonDashboardPanel {
         const dailyEmissions: Record<string, number> = {};
         for (const call of allCalls) {
             let subDate = "";
+            const rawDateTime: unknown = call.DateTime;
 
-            let callDate = new Date(call.DateTime);
-            if (isNaN(callDate.getTime()) && typeof call.DateTime === 'string') {
-                const parts = call.DateTime.split(/[,\s/:]+/);
+            let callDate = new Date(rawDateTime as string | number | Date);
+            if (isNaN(callDate.getTime()) && typeof rawDateTime === 'string') {
+                const parts = rawDateTime.split(/[,\s/:]+/);
                 if (parts.length >= 3) {
                     const day = parseInt(parts[0], 10);
                     const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed

@@ -103,10 +103,13 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
                 case 'gemini-2.5-pro':
                     geminis.push(model);
                     geminiFlag = true;
+                    break;
                 case 'gpt-4o':
                     oldGPTFlag = true;
+                    break;
                 case 'gpt-4.1':
                     oldGPTFlag = true;
+                    break;
                 default:
                     console.log("Functionality coming soon!");
                     break;

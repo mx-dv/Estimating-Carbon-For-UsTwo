@@ -24,23 +24,6 @@
     const warningColor = '#FFBF00'; // Amber
     const dangerColor = '#FF0000';
     const safeColor = '#39FF14';
-
-    // define colour palette:
-    const palette = [
-        "#D8F3DC",
-        "#B7e4C7",
-        "#95D5B2",
-        "#74C69D",
-        "#52B788",
-        "#40916C",
-        "#2D6A4F",
-        "#1B4332",
-        "#081C15"
-    ];
-
-    const warningColor = '#FFBF00'; // Amber
-    const dangerColor = '#FF0000';
-    const safeColor = '#39FF14';
     // click listener so reset button can be used
 
     const resetBtn = document.getElementById('reset-btn');

@@ -170,7 +170,7 @@ export function getModel(inputString: string): TieredModel | null {
         return null;
     }
     let defaultModelKey;
-    let reasoningCheckNeeded;
+    let reasoningCheckNeeded = true;
     const exactKey = Object.keys(modelRegistry).find(k => k.toLowerCase() === normalisedInput);
     if (exactKey) {
         if (["high, medium, low, minimal"].some(item => exactKey.includes(item))) {
