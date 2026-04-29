@@ -537,6 +537,11 @@ export function wrappedGetBudget(): number {
     return budg.getBudget();
 }
 
+export function wrappedGetBudgetWindowStart(): number {
+    return budg.getBudgetWindowStart();
+}
+
+
 export function wrappedSetBudget(newBudget: number): void {
     budg.setBudget(newBudget);
 }
