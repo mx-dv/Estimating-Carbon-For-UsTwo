@@ -1,12 +1,8 @@
-
-import { error } from 'console';
-import { resolve } from 'path';
 import * as budget from './budget';
 import * as vscode from 'vscode';
 import * as convert from './convert';
 import * as tiktoken from 'tiktoken';
 import * as geminiser from '@lenml/tokenizer-gemini';
-import { getPreEmitDiagnostics } from 'typescript';
 
 
 const splitPattern= /(?<=\[info\].*copilotmd \| success \| .* \| \d+ms \| \[.*)]/g;
@@ -18,10 +14,11 @@ export const modelPattern = /(?<= \| success \| )\S*/g; //gets all the models us
 
 
 
-//regex to capture Claude model tokens with datetime
 export const dateRegex = /\d*-\d*-\d* \d*:\d*:\d*.\d*/g; //returns all the dates
 export const claudePattern = /\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)"stop_reason":"end_turn")|(?<=stop_reason":null(.*)"cache_creation_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"cache_read_input_tokens":)(\d+)|(?<=stop_reason":null(.*)"input_tokens":)(\d+)|(?<=stop_reason":"end_turn"(.*)"output_tokens":)(\d+)|(?<=stop_reason":"end_turn",(.*))}}/g;
+//regex to capture Claude model tokens with datetime
 export const GPT5Pattern =/(?<= gpt-5.*\| \d+ms \| \[.*\]\s*\d*-\d*-\d* \d*:\d*:\d*.\d* \[info\] \[ToolCallingLoop\] Stop hook result: )shouldContinue=false|(?<={"input_tokens":)\d*|(?<=,"input_tokens_details":{"cached_tokens":)\d*|(?<=},"output_tokens":)\d*|(?<=,"output_tokens_details":{"reasoning_tokens":)\d*|(?<= gpt-5.*\| \d+ms \| \[.*\]\s*)\d*-\d*-\d* \d*:\d*:\d*.\d*(?=(.*)shouldContinue=false)/g; 
+//issues with GPT5+ logging may make this obselete 
 export const effortLevel = /(?<=effort":")[^"]*/g;
 //should continue = false is the line in the log files for when a call is done
 //this collects all the tokens from GPT models past 5 and the timestamp 
@@ -50,7 +47,7 @@ export function getLogFilePath(context: vscode.ExtensionContext) { // function t
 
 export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     var matches: budget.Call[] = [];
-    var claudeFlag: boolean = false; //flag used to tell us if we need to use our claude regex
+    var claudeFlag: boolean = false; //flag used to tell us if we need to use each specific regex
     var newGPTFlag: boolean = false;
     var geminiFlag: boolean = false;
     var oldGPTFlag: boolean = false;
@@ -63,15 +60,18 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     if (models!==null){
         for(var i = 0;i< models.length;i++){
             var model = models[i]; 
-            console.log("testing testing ",model);
+            console.log(model);
 
             if (model.startsWith('gpt-5')){
                 var efforts:RegExpMatchArray | null = rawLog.match(effortLevel);
                 if (efforts === null){efforts = ["medium"];}
-                
+                //assigns the effort of the model caught
                 console.log("gpt model caught");
-                GPTs.push(model+"-"+efforts[efforts.length-1]);
-                newGPTFlag = true;
+
+                GPTs.push(model+"-"+efforts[efforts.length-1]); //1
+                newGPTFlag = true;//2
+                //to remove GPT model collection entirely due to its inconsistency comment out the lines marked 1 and 2
+
             };
 
             switch (model) {
@@ -118,10 +118,10 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     }
     console.log("GPT flag",newGPTFlag);
     if (claudeFlag || newGPTFlag || geminiFlag || oldGPTFlag){
-        var times:number[] = [];
-        var results:number[] = [];
-        var allModels:string[] = claudes.concat(GPTs);
-        if (claudeFlag){
+        var times:number[] = []; //list of timestamps of each call made
+        var results:number[] = []; //list of total tokens each call used
+        var allModels:string[] = claudes.concat(GPTs);//a list of all models we support that have be caught
+        if (claudeFlag){ 
             console.log("claude Flag");
             const [timesC, resultsC] = findModel(rawLog,claudePattern,"}}");//returns an array of time stamps and total tokens for all claude models
             results = results.concat(resultsC);
@@ -130,7 +130,7 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
         }
         if(newGPTFlag){
             console.log("checking for GPT pattern");
-            const [timesG,resultsG] = findModel(rawLog,GPT5Pattern,"shouldContinue=false");
+            const [timesG,resultsG] = findModel(rawLog,GPT5Pattern,"shouldContinue=false");//returns an array of time stamps and total tokens for all GPT models
             results = results.concat(resultsG);
             times = times.concat(timesG);
         }
@@ -167,8 +167,8 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
             if (results[i] !== -1) { 
                 activeCall.Model = allModels[i];
                 console.log("MODEL:   "+ activeCall.Model);
-                activeCall.Emissions = Number(convert.calculateEmission(activeCall.Model, results[i]).toFixed(4));
-                // converts current call's token count to emissions 
+                activeCall.Emissions = Number(convert.calculateEmission(activeCall.Model, results[i]).toFixed(4)); 
+                // converts current call's token count to emissions and stores it in the call data structure
                 activeCall.DateTime = times[i]; //apply appropriate time stamp
                 claudeFlag = false; //resets flags
                 newGPTFlag = false;
@@ -179,7 +179,7 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
     
     }
 
-    return matches;
+    return matches; 
 }
 
 
@@ -224,7 +224,7 @@ export function findModel(log: string,pattern : RegExp,splitString : string): [n
 
         }
         console.log(timestamp,result);
-        return [timestamp, result];
+        return [timestamp, result]; //returns a list fo timestamps and totals found
     }
 
     return [[0], [-1]];
