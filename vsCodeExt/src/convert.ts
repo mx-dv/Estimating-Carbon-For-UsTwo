@@ -40,12 +40,12 @@ export class TieredModel extends LLMModel {
     };
 }
 
-export function setCalculationData(vscode: any): void {
-    // check to see if configuration data already exists:
-    const config = vscode.workspace.getConfiguration("carbonIntensity");
+// export function setCalculationData(vscode: any): void {
+//     // check to see if configuration data already exists:
+//     const config = vscode.workspace.getConfiguration("carbonIntensity");
 
 
-}
+// }
 
 const veryLarge = Number.MAX_SAFE_INTEGER;
 

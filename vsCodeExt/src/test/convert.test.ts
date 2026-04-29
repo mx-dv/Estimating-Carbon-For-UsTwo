@@ -111,23 +111,29 @@ suite("Conversion Tests", () => {
     });
 
     test("Calculates correct energy for tokens above and below 2000 tier limit", () => {
-    // Tests the < 2000 branch
-    const underLimit = convert.calculateEmission(modelKey, 1000);
-    assert.ok(underLimit > 0);
+        const underLimit = convert.calculateEmission(modelKey, 1000);
+        assert.ok(underLimit > 0);
 
-    // Tests the >= 2000 branch
-    const overLimit = convert.calculateEmission(modelKey, 2500);
-    assert.ok(overLimit > 0);
-    assert.ok(overLimit > underLimit); 
+        const overLimit = convert.calculateEmission(modelKey, 2500);
+        assert.ok(overLimit > 0);
+        assert.ok(overLimit > underLimit); 
     });
 
     test("Correctly parses reasoning levels from strings", () => {
-    assert.strictEqual(convert.getModel("gpt-5-minimal")?.modelName, "GPT5 (minimal)");
-    
-    assert.strictEqual(convert.getModel("o3-mini-high")?.modelName, "OpenAI o3 Mini (high)");
+        assert.strictEqual(convert.getModel("gpt-5-minimal")?.modelName, "GPT5 (minimal)");
+        
+        assert.strictEqual(convert.getModel("o3-mini-high")?.modelName, "OpenAI o3 Mini (high)");
 
-    assert.strictEqual(convert.getModel("gpt-5")?.modelName, "GPT5 (medium)");
+        assert.strictEqual(convert.getModel("gpt-5")?.modelName, "GPT5 (medium)");
     });
+
+    
 }
+  test("getModel handles undefined and whitespace gracefully", () => {
+    // @ts-ignore - Forcing undefined to test runtime safety
+    assert.strictEqual(convert.getModel(undefined), null);
+    
+    assert.strictEqual(convert.getModel("   ")?.modelName ?? null, null);
+});
 
 });
