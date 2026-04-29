@@ -21,9 +21,24 @@ Research into testing Development time
   
  When conducting research into how to use and test the extensions response to copliot chat I found out that copilot does not allow for this. So I have since decided to research into testing options (without AI)
 
+Research into estimating cached tokens for models which don't directly publishment
+
+> Prompt used - "I am making a project which tracks tokens of various LLMs used when programming in vscode with copilot currently we are using the log files to catch all tokens revealed by the model Copilot and older GPT models don't reveal cached tokens which are a large portion of the overall tokens how could I best estimate this"
+  
+  When conducting research into how to estimate the cached tokens we could not find an appropriate solution in time. And have hence not solved this issue and notified the client as gemini and old GPT models were a stretch goal from the begining
 
 <h3>Debugging</h3>
 
+Debugging time of each call
+
+> Prompt used this is my code how can I change this to be in 24 hour format 
+var lDate:string[] = (new Date(lastAccess).toLocaleString('us-GB', { 
+  })).split(",");
+
+  soltion found
+  > var lDate:string[] = (new Date(lastAccess).toLocaleString('us-GB', { 
+                hour12: false
+            })).split(",");
 <h3>Review</h3>
 
 <h2>Iman</h2>
@@ -37,11 +52,20 @@ Research into creating a dashboard and adding features
 
 I found it a bit difficult finding clear ways of implementing this as examples when I was initially conducting research were too simple or complex, by doing so research time was also expedited. 
 
+Research into getting more types of green for the pie chart
+
+> Prompt used - " I am creating a pie chart and need to havee all the sections as different types of greens how can i do this"
+
+The result was an equation to reduce the opacity of the green for each slice in the pie chart
+
 <h3>Debugging</h3>
 
 > Prompt used - " I am getting this error (Image was inserted of the error) what does it mean"
 
 The error occured when I would run the webview when I was initially creating it for the dashboard. I was having issues finding a way to alleviate this problem using online resources so I used AI which gave me a reason for this and steps to fix the error.
+
+
+
 
 <h3>Review</h3>
 

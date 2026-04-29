@@ -1,4 +1,4 @@
 vsCodeExt/.vscode
 **/.DS_Store
-/RunTimeTests/__pycache__/
-/RunTimeTests/.venv/
+RunTimeTests/.venv
+RunTimeTests/__pycache__
