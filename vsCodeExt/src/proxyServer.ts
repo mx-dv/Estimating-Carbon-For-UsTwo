@@ -11,10 +11,11 @@ export class InterceptorProxy {
     private port: number;
     private logger: vscode.OutputChannel;
     public certPath: string = "";
+    private onCallRecorded:(call: budget.Call) => void;
 
-    constructor(port: number) {
+    constructor(port: number, onCallRecorded:(call: budget.Call) => void) {
         this.port = port;
-
+        this.onCallRecorded = onCallRecorded;
         this.logger = vscode.window.createOutputChannel("Interceptor");
     }
 
@@ -61,7 +62,8 @@ export class InterceptorProxy {
                     if (fullCall === true) {
                         console.log(`id: ${id}, model: ${mod}, cost: ${cost}`);
                         var call: budget.Call = { DateTime: new Date(id).getTime(), Model: mod, Emissions: +cost };
-                        updateTree(call);
+                        this.onCallRecorded(call);
+                        // updateTree(call);
                     }
                 } else if (msg.type === 'error') {
                     vscode.window.showErrorMessage(`Proxy Error: ${msg.message}`);

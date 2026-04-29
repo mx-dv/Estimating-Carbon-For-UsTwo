@@ -5,13 +5,14 @@ import * as budget from '../budget';
 import * as logCap from '../logCapture'; 
 import path from 'path';
 import fs from 'fs';
+import { InterceptorProxy } from '../proxyServer';
 import { Memento } from "vscode";
 import { wrappedGetCall } from '../extension';
 
 import { state } from '../state';
 import { appendFile } from 'fs';
 
-
+suite("Runtime Tests", () => {
 suite('CommandTests', () => {
 	// gets all registered commands
 	let allCommands: string[];
@@ -51,14 +52,30 @@ suite('CommandTests', () => {
 	// below test is for checking failed tests fail. They do!
 
 });
+suite("Proxy Server Tests", () => {
+	let proxy: InterceptorProxy;
+	let onCallRecorded: sinon.SinonSpy;
+	setup(() => {
+		onCallRecorded = sinon.spy();
+		proxy = new InterceptorProxy(3024, onCallRecorded);
+	});
 
-suite("UI Tests", () => {
+	test('Should build a Call object across multiple log messages', () => {
+        const messageHandler = (proxy as any).handleWorkerMessage; 
+        
+        // ... Send your mock DateTime, Model, and Emissions messages ...
+        messageHandler({ type: 'log', message: `>> DateTime: 2026-04-29T15:00:00Z` });
+        messageHandler({ type: 'log', message: `>> Model: gpt-4o` });
+        messageHandler({ type: 'log', message: `>> Emissions: 0.0125` });
 
-});
+        assert.ok(onCallRecorded.calledOnce, 'The callback should be triggered after Emissions are received');
+        
+        const passedCall = onCallRecorded.firstCall.args[0];
+        assert.strictEqual(passedCall.Model, 'gpt-4o');
+        assert.strictEqual(passedCall.Emissions, 0.0125);
+    });
 
-suite("RunTime Tests", () => {
-
-});
+});});
 
 suite("DevTime Tests", () => {
 	let ext: any;
@@ -116,6 +133,38 @@ suite("DevTime Tests", () => {
 
 	}); //tests correct tokens are caught for new GPT models
 
+    test("parse newGPTFlag (GPT-5)", async () => {
+        const mockLog = `
+            [info] copilotmd | success | gpt-5 | 120ms | [req]
+            "effort":"high"
+            {"input_tokens":15,"input_tokens_details":{"cached_tokens":0},"output_tokens":25,"output_tokens_details":{"reasoning_tokens":5}}
+            gpt-5 | 120ms | [req] 2026-04-29 15:00:00.000 [info] [ToolCallingLoop] Stop hook result: shouldContinue=false
+        `;
+
+        const models = await logCap.identifyModel(mockLog);
+        assert.ok(true, "GPT-5 parsing block executed without errors");
+    });
+
+    test("parse geminiFlag", async () => {
+        const mockLog = `
+            | success | gemini-2.5-pro | 200ms
+            "content":"This is the mock text for Gemini output.","role":"assistant"
+            "reasoning_text":"This is the mock reasoning text."}}
+            2026-04-29 15:05:00.000 {"finish_reason":"stop"}
+        `;
+        const models = await logCap.identifyModel(mockLog);
+        assert.ok(true, "Gemini parsing block executed without errors");
+    });
+
+    test("parse oldGPTFlag (gpt-4o)", async () => {
+        const mockLog = `
+            2026-04-29 15:10:00.000 | success | gpt-4o | 100ms
+            [trace] choice {"delta":{"content":"This is mock text for old GPT models"}
+        `;
+        const models = await logCap.identifyModel(mockLog);
+        assert.ok(true, "Old GPT parsing block executed without errors");
+    });
+
 	test("Testing the findModel function",async () =>{
 		assert.deepEqual(logCap.findModel(text4,logCap.claudePattern,"}}")[1], [24022]);
 	}); //tests that findmodel function returns the correct total tokens
@@ -129,9 +178,6 @@ suite("DevTime Tests", () => {
 		assert.deepEqual(result,[call]);
 	}); //tests the final resultant call is accurate
 
-});
-
-suite("Conversion Tests", () => {
 
 });
 

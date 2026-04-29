@@ -51,6 +51,19 @@
       }
     ]
   },
+  "o3-medium": {
+    "name": "OpenAI o3 Medium",
+    "tiers": [
+      {
+        "limit": 2000,
+        "energyPerToken": 4.32
+      },
+      {
+        "limit": "veryLarge",
+        "energyPerToken": 5.73
+      }
+    ]
+  },
   "o3": {
     "name": "OpenAI o3",
     "tiers": [
@@ -61,6 +74,19 @@
       {
         "limit": "veryLarge",
         "energyPerToken": 5.73
+      }
+    ]
+  },
+  "o1-medium": {
+    "name": "OpenAI o1 Medium",
+    "tiers": [
+      {
+        "limit": 2000,
+        "energyPerToken": 7.03
+      },
+      {
+        "limit": "veryLarge",
+        "energyPerToken": 14.4
       }
     ]
   },

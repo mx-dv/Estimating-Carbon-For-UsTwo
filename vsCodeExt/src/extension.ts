@@ -177,7 +177,9 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         try {
             // start local server
-            proxyServer = new InterceptorProxy(PROXY_PORT);
+            proxyServer = new InterceptorProxy(PROXY_PORT, (call) => {
+                updateTree(call);
+            });
             await proxyServer.start(context.globalStorageUri.fsPath);
 
             // set VSCode to use local proxy

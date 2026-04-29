@@ -68,6 +68,8 @@ export const modelRegistry: Record<string, TieredModel> = {
     "o3-pro": modelFromJson("o3-pro"),
     "o3-mini-high": modelFromJson("o3-mini-high"),
     "o3-mini": modelFromJson("o3-mini"),
+    "o3-medium": modelFromJson("o3-medium"),
+    "o1-medium": modelFromJson("o1-medium"),
     "o3": modelFromJson("o3"),
     "o1": modelFromJson("o1"),
     "o4": modelFromJson("o4"),
@@ -161,50 +163,73 @@ export const modelRegistry: Record<string, TieredModel> = {
 
 // so our SCI = ((Energy of model tokens * global average carbon intensity) + manufacturing emissions per R tokens) / R = gCO2e per token
 
+// export function getModel(inputString: string): TieredModel | null {
+//     if (inputString === undefined){
+//         return null;
+//     }
+//     const normalisedInput = inputString.trim().toLowerCase();
+//     if (!normalisedInput) {
+//         return null;
+//     }
+//     let defaultModelKey;
+//     let reasoningCheckNeeded = true;
+//     const exactKey = Object.keys(modelRegistry).find(k => k.toLowerCase() === normalisedInput);
+//     if (exactKey) {
+//         if (["high", "medium", "low", "minimal"].some(item => exactKey.includes(item))) {
+//             reasoningCheckNeeded = false;
+//         }
+//         defaultModelKey = null;
+//     }
+//     else{
+//         defaultModelKey = Object.keys(modelRegistry).find(k => normalisedInput.includes(k.toLowerCase()));
+//     }
+//     // const defaultModelKey = Object.keys(modelRegistry).find(k => normalisedInput.includes(k.toLowerCase()));
+//     const activeModelKey = (exactKey || defaultModelKey) ?? "Unknown Model";
+
+//     let reasoningLevel;
+//     if (reasoningCheckNeeded){
+//         if (["gpt-5-mini", "gpt-5-nano", "gpt-5", "o3", "o4-mini", "o4", "o3-pro", "o3-mini", "o3", "o1"].some(item => activeModelKey.includes(item))) {
+//             if (normalisedInput.includes("minimal")){
+//                 reasoningLevel = "minimal";}
+//             else if (normalisedInput.includes("medium")){
+//                 reasoningLevel = "medium";}
+//             else if (normalisedInput.includes("high")){
+//                 reasoningLevel = "high";}
+//             else if (normalisedInput.includes("low")){
+//                 reasoningLevel = "low";}
+//             else {reasoningLevel = "medium";}
+//             return modelRegistry[`${activeModelKey+"-"+reasoningLevel}`];
+
+//         }}
+//     if (exactKey) {
+//         return modelRegistry[exactKey];
+//     }
+//     else{
+//         return defaultModelKey ? modelRegistry[defaultModelKey] : null;    }
+    
+// }
+
 export function getModel(inputString: string): TieredModel | null {
-    if (inputString === undefined){
+    if (inputString === undefined) {
         return null;
     }
     const normalisedInput = inputString.trim().toLowerCase();
     if (!normalisedInput) {
         return null;
     }
-    let defaultModelKey;
-    let reasoningCheckNeeded = true;
+
     const exactKey = Object.keys(modelRegistry).find(k => k.toLowerCase() === normalisedInput);
-    if (exactKey) {
-        if (["high, medium, low, minimal"].some(item => exactKey.includes(item))) {
-            reasoningCheckNeeded = false;
-        }
-        defaultModelKey = null;
-    }
-    else{
-        defaultModelKey = Object.keys(modelRegistry).find(k => normalisedInput.includes(k.toLowerCase()));
-    }
-    // const defaultModelKey = Object.keys(modelRegistry).find(k => normalisedInput.includes(k.toLowerCase()));
-    const activeModelKey = (exactKey || defaultModelKey) ?? "Unknown Model";
-
-    let reasoningLevel;
-    if (reasoningCheckNeeded){
-        if (["gpt-5-mini", "gpt-5-nano", "gpt-5", "o3", "o4-mini", "o4", "o3-pro", "o3-mini", "o3", "o1"].some(item => activeModelKey.includes(item))) {
-            if (activeModelKey.includes("minimal")){
-                reasoningLevel = "minimal";}
-            else if (activeModelKey.includes("medium")){
-                reasoningLevel = "medium";}
-            else if (activeModelKey.includes("high")){
-                reasoningLevel = "high";}
-            else if (activeModelKey.includes("low")){
-                reasoningLevel = "low";}
-            else {reasoningLevel = "medium";}
-            return modelRegistry[`${activeModelKey+"-"+reasoningLevel}`];
-
-        }}
     if (exactKey) {
         return modelRegistry[exactKey];
     }
-    else{
-        return defaultModelKey ? modelRegistry[defaultModelKey] : null;    }
-    
+
+    const defaultModelKey = Object.keys(modelRegistry).find(k => normalisedInput.includes(k.toLowerCase()));
+
+    if (defaultModelKey) {
+        return modelRegistry[defaultModelKey];
+    }
+
+    return null;
 }
     
     // if (exactKey) {
@@ -237,3 +262,7 @@ export function getEnergy(modelName: string, numTokens: number): number {
 
     return energyKwh;
 }
+
+
+getModel("gpt-4o-mini");
+getModel("gpt-5-minimal");
