@@ -489,23 +489,8 @@ export async function getLogs(context: vscode.ExtensionContext) {
 
         // reads file and outputs lines to console one at a time
         const content = fs.readFileSync(logUri, 'utf-8');
-        var lDate:string[] = (new Date(lastAccess).toLocaleString('us-GB', { 
-                        hour12: false
-                    })).split(",");
-        
 
-        var dateSec = new Date(lastAccess).toISOString().slice(0, 10).split('/').join('-'); //formats the date in accordance to the log files
-        var timeSplit = dateSec+lDate[1];
-        const regex: RegExp = new RegExp(timeSplit);
-        const splitting:string[] = content.split(regex);//splits the time stamp
-        var input: string;
-        if (splitting.length < 2){//uses the entire log file if nothing can be found the timestamp
-            input= content;
-        }
-        else{
-            input = splitting[splitting.length-1];//incase multiple lines of the log file are at the same second look past the last one
-        }
-        
+        var input:string = content;
         const models: budget.Call[] = await logCap.identifyModel(input);
         const sortedModels = models.sort((a: budget.Call, b: budget.Call) => {
             return a.DateTime - b.DateTime;
