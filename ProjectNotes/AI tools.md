@@ -112,7 +112,7 @@ I used AI to review the release.yml file to ensure that it worked before merging
 <h2>Hao Ni</h2>
 <p> I, Hao Ni declare that this document is accurate to my AI usage throughout the course of SEP</p>
 
-<p>All models used have been  ChatGPT and Gemini</p> <br>
+<p>All models used have been ChatGPT and Gemini</p> <br>
 <h3>Development</h3>
 reseach into which papers to look into for carbon to emission formula
 
@@ -143,7 +143,11 @@ When conducting research into how I can use a regex to exclude the lines I need 
 
 > Prompt used - "How useful would the tiktoken library be for tokenising Gemini outputs? Is there a better option I can use in typescript if they are too dissimilar?"
 
-While adding support for Gemini in DevTime, I was unable to find any clear research into the inner workings of LLM tokenisers. I opted to use ChatGPT to research whether I could use the tiktoken liibrary, which I was already familiar with, to tokenise Gemini outputs. ChatGPT suggested using a rough mathematical calculation to tokenise the outputs. I initially planned on using this but was able to find a better [Gemini tokeniser](https://www.npmjs.com/package/@lenml/tokenizer-gemini) on the npm registry upon further research, so I ended up scrapping the AI solution.
+While adding support for Gemini in DevTime, I was unable to find any clear research into the inner workings of LLM tokenisers. I opted to use ChatGPT to research whether I could use the tiktoken library, which I was already familiar with, to tokenise Gemini outputs. ChatGPT suggested using a rough mathematical calculation to tokenise the outputs. I initially planned on using this but was able to find a better [Gemini tokeniser](https://www.npmjs.com/package/@lenml/tokenizer-gemini) on the npm registry upon further research, so I ended up scrapping the AI solution.
+
+> Prompt used - "Convert the data stored in the model registry to JSON and store it in the models.json file"
+
+I used ChatGPT here to handle the brunt conversion of our original emissions data from the convert.ts model registry to a separate JSON file, as there were over 80 data points to convert. I did not use any logic from the LLM and solely used it to save time in copying the data over myself.
 
 <h3>Debugging</h3>
 
