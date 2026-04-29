@@ -199,11 +199,11 @@ export function findModel(log: string,pattern : RegExp,splitString : string): [n
             else{
                 if (match[i].match(dateRegex) !== null){ //if match we are currently looking at is a date make it the timestamp
                     if (!timeFlag){
-                        timestamp.push(new Date(match[i]).getTime());
+                        timestamp.push(new Date(match[i] + "Z").getTime());
                         timeFlag = true;
                     }
                     else{
-                        timestamp[i] = new Date(match[i]).getTime();
+                        timestamp[i] = new Date(match[i] + "Z").getTime();
                     }
                     //add here what to do if flag is off and such
                     
