@@ -1,21 +1,18 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+/****************************************************************
+ *                         EXTENSION.TS                         *
+ * THE MAIN FILE FOR THE EXTENSION. RESPONSIBLE FOR ACTIVATION, *
+ *       REGISTERING COMMANDS, AND MANAGING OVERALL STATE       *
+ ****************************************************************/
 
+import * as childProcess from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import * as budget from './budget';
 import * as logCap from './logCapture';
-import * as fs from 'fs';
-import * as path from 'path';
-import { stringify } from 'querystring';
-import * as childProcess from 'child_process';
-
-
 import { CarbonDashboardPanel } from './dashboard';
 import { state } from './state';
-
 import { InterceptorProxy } from './proxyServer';
-import { privateEncrypt } from 'crypto';
-import { getSystemErrorMap } from 'util';
 
 export let tree: MyTreeDataProvider;
 export let bar: statusBarManager;
@@ -49,7 +46,6 @@ export async function activate(context: vscode.ExtensionContext) {
     budg = new budget.budget(context.workspaceState);
 
 
-    // state.runningInterceptor = true;
 
     var barManager = new statusBarManager();
     const treeDataProvider = new MyTreeDataProvider();
@@ -63,7 +59,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 
-    //let lastInlineState = false;
     const disposables: vscode.Disposable[] = [];
 
 
@@ -78,7 +73,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 
 
-    // budget.initStorage(context.workspaceState);
     restoreCallHistory(treeDataProvider, budg);
     barManager.updateLimit(budg.updateLimit());
     const pastCalls = budg.getCalls();
@@ -100,14 +94,10 @@ export async function activate(context: vscode.ExtensionContext) {
         await budg.resetBudget();
         treeDataProvider.clearTree();
         barManager.updateBar(0);
-        //vscode.window.showInformationMessage('Past calls cleared.');
-        // state.runningInterceptor = true;
 
         CarbonDashboardPanel.sendData(budg);
 
     });
-
-    // }));
 
     // Dashboard command 
     const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
@@ -179,30 +169,7 @@ export async function activate(context: vscode.ExtensionContext) {
                 updateTree(call);
             });
             await proxyServer.start(context.globalStorageUri.fsPath);
-
-            // set VSCode to use local proxy
-            // const config = vscode.workspace.getConfiguration('http');
-            // await config.update('proxy', `http://localhost:${PROXY_PORT}`, vscode.ConfigurationTarget.Global);
-
-            // //QUICK FIX TO NOT NEED SSL CERTS FOR NOW
-            // // NEED TO CHANGE FOR BETA
-            // await config.update('proxyStrictSSL', false, vscode.ConfigurationTarget.Global);
-
-
-            // const disposableAPIKEY = vscode.commands.registerCommand('ecode.setApiKey', async () => {
-            //  const apiKey = await vscode.window.showInputBox({
-            //      prompt: 'Enter your API Key',
-            //      placeHolder: 'e.g.   sk - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-            //      ignoreFocusOut: true // keep input box open even if focus moves away from window
-
-            //  });
-            //  if (apiKey) {
-            //      await context.secrets.store('myApiKey', apiKey); // securely stores apikey using key 'myApiKey'
-
-            //      // to retrieve key from secret store, use:   const apiKey = await context.secrets.get('myApiKey');
             state.runningInterceptor = true;
-            // vscode.window.showInformationMessage('Interceptor Proxy started on port ' + "->" + PROXY_PORT + state.runningInterceptor + "DONE");
-            // vscode.window.showInformationMessage("Status: " + state.runningInterceptor);
         } catch (error) {
             console.error("Error starting Interceptor Proxy:", error);
             vscode.window.showErrorMessage('Failed to start Interceptor Proxy: ' + error);
@@ -250,7 +217,6 @@ export async function activate(context: vscode.ExtensionContext) {
         });
 
         terminal.show();
-        // vscode.window.showInformationMessage("Opened Terminal with Proxy Environment Vars");
     });
 
 
@@ -265,13 +231,6 @@ export async function activate(context: vscode.ExtensionContext) {
         if (terminal) {
             terminal.dispose();
         }
-
-        // clear VSCode proxy settings
-        // const config = vscode.workspace.getConfiguration('http');
-        // await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
-        // await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
-
-        // vscode.window.showInformationMessage('Interceptor Proxy stopped. ');//Proxy settings cleared.');
     });
 
     let runtimeDisposable = vscode.commands.registerCommand("ecode.runtimeAnalysis", async () => {
@@ -294,7 +253,6 @@ export async function activate(context: vscode.ExtensionContext) {
                 label: `$(play) Stop Runtime Proxy`,
                 description: "Stops the recording of carbon emissions",
                 command: "ecode.interceptorStop"
-                // TODO need to have a way to keep the environment variables (gemini api key) so that it doesn't need to be input every time
             },
             {
                 label: `$(play) Reset Stored Session`,
@@ -318,18 +276,10 @@ export async function activate(context: vscode.ExtensionContext) {
     });
 
     const runtimeLaunchButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    // runtimeLaunchButton.text = `$(play) Start Ecode Runtime Analysis`;
-    // runtimeLaunchButton.tooltip = "Click to open terminal to run file to be analysed";
-    // runtimeLaunchButton.command = "ecode.runtimeAnalysis";
-    // runtimeLaunchButton.show();
     runtimeLaunchButton.text = `$(list-unordered) Ecode`;
     runtimeLaunchButton.tooltip = "Click to see AI Analysis Options";
     runtimeLaunchButton.command = "ecode.menu";
     runtimeLaunchButton.show();
-
-    // TODO need to make sure that multiple interceptors can't be started at once. 
-    // This isn't handled very gracefully at the moment.
-
 
     context.subscriptions.push(terminalDisposable);
     context.subscriptions.push(startDisposable);
@@ -349,10 +299,6 @@ export async function deactivate() {
     if (proxyServer) {
         await proxyServer.stop();
     }
-    // const config = vscode.workspace.getConfiguration('http');
-    // await config.update('proxy', undefined, vscode.ConfigurationTarget.Global);
-    // await config.update('proxyStrictSSL', undefined, vscode.ConfigurationTarget.Global);
-
 }
 
 
@@ -392,9 +338,6 @@ class MyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
         this.items = [];
         this._onDidChangeTreeData.fire(undefined);
     }
-
-    // UstwoBristolEstimatingCarbon
-
 }
 class statusBarManager {
     mainItem = vscode.window.createStatusBarItem(); // creates a new item in the VS Code status bar
@@ -490,7 +433,6 @@ export async function getLogs(context: vscode.ExtensionContext) {
         var lDate:string[] = (new Date(lastAccess).toLocaleString('us-GB', { 
                         hour12: false
                     })).split(",");
-        
 
         var dateSec = new Date(lastAccess).toISOString().slice(0, 10).split('/').join('-'); //formats the date in accordance to the log files
         var timeSplit = dateSec+lDate[1];
@@ -518,10 +460,7 @@ export async function getLogs(context: vscode.ExtensionContext) {
             }
         }
 
-        if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime;}
-
-                //vscode.window.showInformationMessage("Copilot log files refreshed.");
-        
+        if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime;}        
     }
     catch (error) {
         console.log(error);

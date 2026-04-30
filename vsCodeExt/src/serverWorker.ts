@@ -1,3 +1,14 @@
+/**************************************************************************
+ *                            SERVERWORKER.TS                             *
+ *    A SERVER WORKER PROCESS THAT USES THE MOCKTTP LIBRARY TO CREATE     *
+ *     A LOCAL PROXY SERVER THAT CAN INTERCEPT AND LOG HTTP REQUESTS      *
+ *     AND RESPONSES, LOOKING FOR POTENTIAL AUTHORISATION TOKENS AND      *
+ *     EXTRACTING TOKEN AND MODEL DATA FROM AI PROVIDER RESPONSES TO      *
+ *     CALCULATE EMISSIONS. COMMUNICATES WITH PARENT PROCESS VIA IPC      *
+ *       MESSAGES TO RECEIVE COMMANDS AND SEND LOGS AND DATA BACK.        *
+ * DESIGNED TO BE FORKED AS A CHILD PROCESS FROM THE MAIN EXTENSION CODE. *
+ **************************************************************************/
+
 import * as mockttp from 'mockttp';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -134,6 +145,7 @@ function detectTokens(headers: mockttp.Headers, body: string) {
 }
 
 function scanJsonForTokens(obj: any) {
+    //regex patterns for token keys
     const TOKEN_MATCHERS = [/token/i, /key/i, /auth/i, /secret/i];
     if (!obj || typeof obj !== 'object') { return; };
 
@@ -146,13 +158,9 @@ function scanJsonForTokens(obj: any) {
     });
 }
 
-// interface ModelData {
-//     inputTokens: number,
-//     ouputTokens: number,
-//     totalTokens: number,
-//     modelName: string
-// };
-
+// parses the response from AI providers
+// extracts model, token data and calculates emissions
+// logs these results and sends to be recorded as a call
 function getJsonTokenCount(body: string) {
     const jsonBody = JSON.parse(body);
     let inputTokens = 0;
@@ -166,23 +174,22 @@ function getJsonTokenCount(body: string) {
     // OpenAI and claude use this format in response
     if (
         (jsonBody.usage && jsonBody.model) //|| // basic text
-        // (jsonBody.usage && jsonBody.quality && jsonBody.size && jsonBody.output_format) // image models
     ) {
+        // for future support, takes input and output differently
         inputTokens = jsonBody.usage.input_tokens??jsonBody.usage.prompt_tokens??0;
         outputTokens = jsonBody.usage.output_tokens??jsonBody.usage.completion_tokens??0;
-        // totalTokens = jsonBody.usage.total_tokens;
         totalTokens = inputTokens + outputTokens;
         console.log(`input tokens: ${inputTokens}, output tokens: ${outputTokens}, total tokens: ${jsonBody.usage.total_tokens}`);
         modelName = jsonBody.model;
         console.log(`model name: ${modelName}`);
     }
-    // Gemini uses this format in response
+    // For image generations - to be used for image tracking
     else if (jsonBody.quality && jsonBody.size) {
         modelName = jsonBody.model;
         imageSize = jsonBody.size;
         imageNumber = jsonBody.n;
         imageQuality = jsonBody.quality;
-        totalTokens = jsonBody.usage.total_tokens;
+        totalTokens = jsonBody.usage.total_tokens; // note images might not return this field!
         if (imageSize !== "No size" && totalTokens === 0 && modelName !== "Unknown Model" && imageQuality !== "No Quality" && imageNumber !== 0) {
             sendLog("Image detected!");
             sendLog(`Model: ${modelName}`);
@@ -192,6 +199,7 @@ function getJsonTokenCount(body: string) {
         }
 
     }
+    // gemini responses have a different format, with usageMetadata and modelVersion fields
     else if (jsonBody.usageMetadata) {
         totalTokens = jsonBody.usageMetadata.totalTokenCount;
         // gemini gives model version directly
@@ -203,8 +211,10 @@ function getJsonTokenCount(body: string) {
     } else {
         return "UNKNOWN AI USED";
     }
+    // calculate emissions
     const emission = convert.calculateEmission(modelName, totalTokens);
 
+    // log final metrics to parent process
     let dateTime = new Date();
     sendLog(`   >> DateTime: ${dateTime.toLocaleString()}`);
     sendLog(`   >> Model: ${modelName}`);

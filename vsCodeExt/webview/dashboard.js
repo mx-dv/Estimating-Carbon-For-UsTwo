@@ -1,3 +1,9 @@
+/*************************************************************************
+ *                             DASHBOARD.JS                              *
+ *         HOLDS THE LOGIC FOR THE DASHBOARD WEBVIEW, INCLUDING          *
+ * CHART SETUP AND COMMUNICATION WITH EXTENSION FOR ALL DYNAMIC ELEMENTS *
+ *************************************************************************/
+
 (function () {
 
 
@@ -33,7 +39,6 @@
         });
     }
     
-
     const setBudgetBtn = document.getElementById('set-budget-btn');
     if (setBudgetBtn) {
         setBudgetBtn.addEventListener('click', () => {
@@ -259,7 +264,6 @@ backgroundColor(c) {
         }
     };
 
-    // --- TO CONNECT THE BUTTON ---
     const testBtn = document.getElementById('testBtn');
     if (testBtn) {
         testBtn.addEventListener('click', function () {
@@ -273,18 +277,6 @@ backgroundColor(c) {
     const heatCtx = document.getElementById('myChart');
     if (heatCtx) {
         heatChart = new Chart(heatCtx, config);
-    }
-
-
-    function generateColors(count) {
-    const colors = [];
-    for (let i = 0; i < count; i++) {
-        // This drops the opacity gradually for each new slice
-        // Starting at solid neon green (1.0) and fading down to slightly transparent (0.2)
-        const alpha = 1 - (i * (0.8 / Math.max(count - 1, 1)));
-        colors.push(`rgba(0, 255, 0, ${alpha.toFixed(2)})`);
-    }
-    return colors;
     }
 
     function generateDynamicColours(dataLength){
@@ -331,7 +323,6 @@ backgroundColor(c) {
     });
 
     // radar chart config
-
     const radarElement = document.getElementById('radarChart');
     let radarChart;
     if (radarElement) {
@@ -389,7 +380,6 @@ backgroundColor(c) {
 
     window.addEventListener('message', event => {
     const message = event.data;
-    console.log('[TEST 7] Message received:', message.command); // ← ADD THIS
     if (message.command === 'updateData') {
             const avgCostEl = document.getElementById('average-cost-display');
             if (avgCostEl && message.averageEmission !== undefined) {
@@ -414,7 +404,6 @@ backgroundColor(c) {
                 message.radarData.datasets.forEach((ds, index) => {
                     const regularColour = palette[index % palette.length];
                     const fadedColour = palette[index % palette.length] + '75'; // Adding transparency to the base color
-                    // const hue = Math.floor((index * 137.5) % 360);
                     ds.backgroundColor = fadedColour;
                     ds.borderColor = regularColour;
                     ds.pointBackgroundColor = fadedColour;
@@ -443,27 +432,8 @@ backgroundColor(c) {
                 modelEmissionsChart.data.datasets[0].borderWidth = 1;
                 modelEmissionsChart.update();
 
-                // // radar updating logic
-                // const dynamicColours = generateColors(message.modelLabels.length);
-                // const fadedDynamicColours = dynamicColours.map(color => color.replace(/[\d.]+\)$/, '0.2)'));                newRadarChart.data.labels = message.modelLabels;
-                // // for (let i = 0; i < message.modelLabels.length; i++) {
-                // newRadarChart.data.datasets[0].data = message.modelEmissions;
-                // radarConfig.baseColour = dynamicColours;
 
-                // newRadarChart.data.datasets[0].backgroundColor = fadedDynamicColours;
-                // newRadarChart.data.datasets[0].borderColor = dynamicColours;
-                // newRadarChart.data.datasets[0].pointBackgroundColor = fadedDynamicColours;
-                // newRadarChart.data.datasets[0].pointHoverBorderColor = fadedDynamicColours;
-                // // newRadarChart.data.datasets[0].backgroundColor = 'rgba(50, 205, 50, 0.2)'; // Adding transparency to the base color
-                // // newRadarChart.data.datasets[0].borderColor = 'rgba(50, 205, 50, 1)';
-                // // newRadarChart.data.datasets[0].pointBackgroundColor = 'rgba(50, 205, 50, 0.2)';
-                // // newRadarChart.data.datasets[0].pointHoverBorderColor = 'rgba(50, 205, 50, 0.2)';
-                
-                // newRadarChart.update();
-            // }
-
-
-                //budget prgess bar update logic
+                //budget progess bar update logic
                 // calculate total session emissions by summing the array
                 const totalEmissions = message.modelEmissions.reduce((sum, current) => sum + current, 0);
 
