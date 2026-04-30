@@ -157,11 +157,12 @@ We aim to design a toolkit that:
   
   <h2 id="team"> Team Members </h2>
   <ul>
-    <li> Hao Ni (wx24939) </li>
+    <li>Hao Ni (wx24939) </li>
     <li>Iman Hadi (jp24368) </li>
     <li>Jacob Connor (gn24034)</li>
     <li>Max Davies (cg24012)</li>
     <li>Morgan Parry (vi24348)</li>
+    <li>Aayush Bhalerao (in24486)</li>
   </ul>
   <h2> Supporting Mentor</h2>
   <ul> 
