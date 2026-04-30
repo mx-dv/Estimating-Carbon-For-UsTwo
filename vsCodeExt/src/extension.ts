@@ -2,12 +2,10 @@
 // Import the module and reference it with the alias vscode in your code below
 
 import * as vscode from 'vscode';
-import * as https from 'https';
 import * as budget from './budget';
 import * as logCap from './logCapture';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Memento } from 'vscode';
 import { stringify } from 'querystring';
 import * as childProcess from 'child_process';
 
