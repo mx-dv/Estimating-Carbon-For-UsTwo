@@ -1,35 +1,39 @@
 let pendingCommitDots = null;
-let cumulativeGraphButton;
+let cumulativeGraphButton; // UI variables
 let timelineGraphButton;
 let slider;
-let graphType = "timeline";
+let graphType = "timeline"; // current graph mode
 let workspaceBranches = [];
 let referenceStrip;
 let hoverFunctionality;
 let container;
 let branchSelector;
-let selectedBranches = new Set();
+let selectedBranches = new Set(); // this handles branches that are selected to display
 let dynamicSizeChanger;
 const branchSelectorTool = document.getElementById("branch-selector-tool");
 let dropDownTool;
 let displaySelectedBranchesCount;
-let zoom = 1;
+let zoom = 1; // zoom controls
 const zoomGap = 1.5;
 const minZoom = 1;
 const maxZoom = 100;
 
-const ref = document.getElementById("branchGraph");
+const ref = document.getElementById("branchGraph"); // main container for graph
 
 if (ref) {
+    // container for everything
     container = document.createElement("div");
     container.id = "carbon-graph-wrapper";
-    container.style.width = "100%";
+    container.style.width = "98%";
     container.style.height = "300px";
     container.style.position = "relative";
     container.style.border = "1px solid var(--secondary-text)";
     container.style.borderRadius = "8px";
     container.style.background = "var(--base-variant)";
     container.style.color = "var(--text-color)";
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+    container.style.overflow = "hidden";
 
     const title = document.createElement("h3");
     referenceStrip = document.createElement("div");
@@ -38,7 +42,7 @@ if (ref) {
     referenceStrip.style.gap = "16px";
     referenceStrip.style.fontSize = "12px";
     referenceStrip.style.alignItems = "center";
-    [
+    [ // creates the reference strip
         { label: "Low Emission", color: "var(--low-carbon)" },
         { label: "Average Emission", color: "var(--avg-carbon)" },
         { label: "High Emission", color: "var(--high-carbon)" },
@@ -116,7 +120,7 @@ if (ref) {
         button.style.userSelect = "none";
         button.style.fontSize = "13px";
         button.style.transition = "all 0.15s ease";
-        button.addEventListener("mouseenter", () => {
+        button.addEventListener("mouseenter", () => { // hover effect
             button.style.background = "rgba(255, 255, 255, 0.08)";
         });
         button.addEventListener("mouseleave", () => {
@@ -128,6 +132,7 @@ if (ref) {
     const zoomInButton = makeZoomButton("+");
     const zoomOutButton = makeZoomButton("−");
 
+    // incrase/decrease zoom and then redraw the graph
     zoomInButton.onclick = () => {
         zoom = Math.min(zoom * zoomGap, maxZoom);
         drawGraphs();
@@ -164,8 +169,9 @@ if (ref) {
     const mainGraphArea = document.createElement("div");
     mainGraphArea.id = "carbon-usage-graph-main-area";
     mainGraphArea.style.width = "100%";
-    mainGraphArea.style.height = "240px";
+    mainGraphArea.style.height = "auto";
     mainGraphArea.style.position = "relative";
+    mainGraphArea.style.flex = "1";
 
     hoverFunctionality = document.createElement("div");
     hoverFunctionality.id = "hover-functionality";
@@ -295,15 +301,16 @@ if (ref) {
 
 
 
-window.addEventListener("message", event => {
+window.addEventListener("message", event => { // receive data from backend
     const message = event.data;
-    if (message.command === "commitDots") {
+    if (message.command === "commitDots") { // draw graph if data received
         pendingCommitDots = message.data;
         drawGraphs();
     }
 
     if (message.command === "workspaceBranches") {
         if(JSON.stringify(workspaceBranches) === JSON.stringify(message.data)) return;
+        // if data received is same then no need to redraw
         workspaceBranches = message.data;
         dropDownTool.innerHTML = "";
 
@@ -331,8 +338,9 @@ window.addEventListener("message", event => {
             checkbox.style.accentColor = "#4ade80";
             checkbox.style.cursor = "pointer";
 
-            selectedBranches.add(branch);
+            selectedBranches.add(branch); // by default all branches are selected 
 
+            // handle the checkbox selection and user changing the branch
             checkbox.addEventListener("change", () => {
                 if (checkbox.checked) {
                     selectedBranches.add(branch);
@@ -343,7 +351,7 @@ window.addEventListener("message", event => {
                 updateSelectedBranchesCount();
                 drawGraphs();
 
-                if (window.vscodeAPI) {
+                if (window.vscodeAPI) { // inform the backend
                     window.vscodeAPI.postMessage({ 
                         command: 'filterByBranch', 
                         branches: Array.from(selectedBranches) 
@@ -372,12 +380,12 @@ function deletePreviousGraph() {
     mainGraphArea.innerHTML = "";
 }
 
-function drawGraphs() {
+function drawGraphs() { // main graph drawing function - chooses which graph to draw
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
     const currentScroll = mainGraphArea.querySelector("div");
 
     let scrollRatio = 1;
-
+    // keep scroll position same
     if(currentScroll){
         const maxScroll = currentScroll.scrollWidth - currentScroll.clientWidth;
         if(maxScroll > 0){
@@ -408,7 +416,7 @@ function drawGraphs() {
     }
 }
 
-function getCumulativeGraphData() {
+function getCumulativeGraphData() { // converts data to cumulative data
     if (!pendingCommitDots) {
         return {};
     }
@@ -419,7 +427,7 @@ function getCumulativeGraphData() {
         let netTotal = 0;
 
         cumulativeGraphData[branch] = [...pendingCommitDots[branch]]
-            .sort((a, b) => a.xAxis - b.xAxis)
+            .sort((a, b) => a.xAxis - b.xAxis) // important for time order
             .map((commit, index) => {
                 netTotal += commit.carbon;
                 return {
@@ -559,8 +567,8 @@ function drawCumulativeGraph(scrollRatio = 1) {
     mainGraphArea.appendChild(horizontalScrollContainer);
 
     setTimeout(() => {
-        const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-        scrollContainer.scrollLeft = maxScroll * scrollRatio;
+        const maxScroll = horizontalScrollContainer.scrollWidth - horizontalScrollContainer.clientWidth;
+        horizontalScrollContainer.scrollLeft = maxScroll * scrollRatio;
     }, 10);
 }
 
@@ -574,7 +582,7 @@ function getCColor(carbon) {
     return "var(--high-carbon)";
 }
 
-function makeButtons(text, id) {
+function makeButtons(text, id) { // this is for the toggle buttons
     const button = document.createElement("div");
     button.innerText = text;
     button.id = id;
@@ -583,6 +591,7 @@ function makeButtons(text, id) {
     return button;
 }
 
+// this is the toggle logic
 cumulativeGraphButton.addEventListener("click", () => {
     graphType = "cumulative";
     slider.style.transform = "translateX(100%)";
@@ -620,7 +629,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
     
     const allCommitsMap = new Map();
 
-    Object.keys(pendingCommitDots).forEach(branch => {
+    Object.keys(pendingCommitDots).forEach(branch => { // combine commits
 
         if(!selectedBranches.has(branch)) {
             return;
@@ -638,7 +647,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
                     timeStamp: commit.timeStamp
                 });
             }
-            const findMatch = allCommitsMap.get(match);
+            const findMatch = allCommitsMap.get(match); // add carbon of commits from same timestamps
             findMatch.carbon = findMatch.carbon + commit.carbon;
         });
 
@@ -648,7 +657,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
 
     allCommits.sort((a,b) => a.time - b.time);
 
-    const branchTotals = {};
+    const branchTotals = {}; // used to track cumulative carbon for each branch
 
     allCommits.forEach(commit => {
         if (!branchTotals[commit.branch]) {
@@ -699,7 +708,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
     svg.setAttribute("width", width);
     svg.setAttribute("height", height);
 
-    allCommits.forEach(commit => {
+    allCommits.forEach(commit => { // draw each commit
         const xAxis = margin.left + (commit.time - minTime) * pixelsPerMilliseconds;
         const topYSpace = margin.top + graphHeight - (commit.carbon / maxCarbon) * graphHeight;
         const bottomYSpace = margin.top + graphHeight;
@@ -746,46 +755,67 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
 
     svg.appendChild(xAxisLine);
 
-    let currentTime = new Date(minTime);
-    currentTime.setHours(0,0,0,0);
 
-    while (currentTime.getTime() <= maxTime) {
-        const xAxisPositions = [];
-        for (let hour = 0; hour < 24; hour = hour + 8) {
+    const millisecondsPerPixel = 1 / pixelsPerMilliseconds;
+    const millisecondsGap = 100 * millisecondsPerPixel;
 
-            const time = new Date(currentTime);
-            time.setHours(hour);
+    const intervals = [60 * 60 * 1000,
+        2 * 60 * 60 * 1000,
+        4 * 60 * 60 * 1000,
+        8 * 60 * 60 * 1000,
+        12 * 60 * 60 * 1000,
+        24 * 60 * 60 * 1000,
+    ];
 
-            const newTime = time.getTime();
+    let selectedInterval = intervals[intervals.length - 1];
 
-            if (newTime > maxTime || newTime < minTime) {
-                continue;
-            }
-
-            const xMarkingsSpacing = margin.left + (newTime - minTime) * pixelsPerMilliseconds;
-            xAxisPositions.push(xMarkingsSpacing);
-
-            const xAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            xAxisHeading.setAttribute("x", xMarkingsSpacing);
-            xAxisHeading.setAttribute("y", height - margin.bottom + 18);
-            xAxisHeading.setAttribute("text-anchor", "middle");
-            xAxisHeading.setAttribute("font-size", "10");
-            xAxisHeading.setAttribute("fill", "var(--secondary-text)");
-
-            xAxisHeading.textContent = new Date(newTime).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-
-            svg.appendChild(xAxisHeading);
+    for (let interval of intervals) {
+        if (interval >= millisecondsGap) {
+            selectedInterval = interval;
+            break;
         }
+    }
+    let currentTime = Math.ceil(minTime / selectedInterval) * selectedInterval;
 
-        if (xAxisPositions.length > 0) {
-            const originalXAxis = xAxisPositions[0];
-            const xAxisDifference = -60;
+    while (currentTime <= maxTime) {
+        const xMarkingsSpacing = margin.left + (currentTime - minTime) * pixelsPerMilliseconds;
 
+        const xAxisHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        xAxisHeading.setAttribute("x", xMarkingsSpacing);
+        xAxisHeading.setAttribute("y", height - margin.bottom + 18);
+        xAxisHeading.setAttribute("text-anchor", "middle");
+        xAxisHeading.setAttribute("font-size", "10");
+        xAxisHeading.setAttribute("fill", "var(--secondary-text)");
+
+        if(selectedInterval < 24 * 60 * 60 * 1000){
+            xAxisHeading.textContent = new Date(currentTime).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            });
+        }
+        else{
+            xAxisHeading.textContent = new Date(currentTime).toLocaleDateString([], {
+                day: "2-digit",
+                month: "short"
+            });
+        }
+        svg.appendChild(xAxisHeading);
+
+        currentTime = currentTime + selectedInterval;
+    }
+
+    let lastDisplayedDay = null;
+    currentTime = Math.ceil(minTime / (24 * 60 * 60 * 1000)) * (24 * 60 * 60 * 1000);
+
+    while (currentTime <= maxTime) {
+        const date = new Date(currentTime);
+        const day = date.toDateString();
+        const xMarkingsSpacing = margin.left + (currentTime - minTime) * pixelsPerMilliseconds;
+
+        if (day !== lastDisplayedDay) {
             const dateHeading = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            dateHeading.setAttribute("x", originalXAxis + xAxisDifference);
+            dateHeading.setAttribute("x", xMarkingsSpacing);
             dateHeading.setAttribute("y", height - margin.bottom + 34);
             dateHeading.setAttribute("text-anchor", "start");
             dateHeading.setAttribute("font-size", "10");
@@ -793,15 +823,15 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
             dateHeading.setAttribute("font-weight", "500");
             dateHeading.style.opacity = "0.8";
 
-            dateHeading.textContent = new Date(currentTime).toLocaleDateString([], {
+            dateHeading.textContent = date.toLocaleDateString([], {
                 day: "2-digit",
                 month: "short"
             });
 
             svg.appendChild(dateHeading);
+            lastDisplayedDay = day;
         }
-
-        currentTime.setDate(currentTime.getDate() + 1);
+        currentTime = currentTime + (24 * 60 * 60 * 1000);
     }
 
     const yAxisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -872,7 +902,7 @@ function drawCandleStickTimelineGraph(scrollRatio = 1){
     }, 10);
 }
 
-function enableDynamicSizeChanger() {
+function enableDynamicSizeChanger() { // the graph needs to be redrawn if container size changes
     const mainGraphArea = document.getElementById("carbon-usage-graph-main-area");
 
     if (!mainGraphArea){

@@ -59,15 +59,24 @@ I found it a bit difficult finding clear ways of implementing this as examples w
 
 Research into getting more types of green for the pie chart
 
-> Prompt used - " I am creating a pie chart and need to havee all the sections as different types of greens how can i do this"
+> Prompt used - " I am creating a pie chart and need to have all the sections as different types of greens how can i do this"
 
 The result was an equation to reduce the opacity of the green for each slice in the pie chart
 
+Needed to quickly implement a feature so I asked AI how to do it to reduce time spent 
+> Prompt used - "I need to add a scrollable feature using CSS how can I do this"
+
+Result was being told to add "scrollable-container" to the containers that needed them
 <h3>Debugging</h3>
 
 > Prompt used - " I am getting this error (Image was inserted of the error) what does it mean"
 
 The error occured when I would run the webview when I was initially creating it for the dashboard. I was having issues finding a way to alleviate this problem using online resources so I used AI which gave me a reason for this and steps to fix the error.
+
+I used copilot in VsCode
+> Prompt used - "/explain Property 'asWebviewUri' does not exist on type 'Webview'."
+
+I was given a series of possible causes as the method asWebviewUri was not available. I was told to fix this i should: 1. check my VSCode API version 2. Update VSCode dependency 3. Verify Object Type
 
 
 
@@ -150,7 +159,11 @@ When conducting research into how I can use a regex to exclude the lines I need 
 
 > Prompt used - "How useful would the tiktoken library be for tokenising Gemini outputs? Is there a better option I can use in typescript if they are too dissimilar?"
 
-While adding support for Gemini in DevTime, I was unable to find any clear research into the inner workings of LLM tokenisers. I opted to use ChatGPT to research whether I could use the tiktoken liibrary, which I was already familiar with, to tokenise Gemini outputs. ChatGPT suggested using a rough mathematical calculation to tokenise the outputs. I initially planned on using this but was able to find a better [Gemini tokeniser](https://www.npmjs.com/package/@lenml/tokenizer-gemini) on the npm registry upon further research, so I ended up scrapping the AI solution.
+While adding support for Gemini in DevTime, I was unable to find any clear research into the inner workings of LLM tokenisers. I opted to use ChatGPT to research whether I could use the tiktoken library, which I was already familiar with, to tokenise Gemini outputs. ChatGPT suggested using a rough mathematical calculation to tokenise the outputs. I initially planned on using this but was able to find a better [Gemini tokeniser](https://www.npmjs.com/package/@lenml/tokenizer-gemini) on the npm registry upon further research, so I ended up scrapping the AI solution.
+
+> Prompt used - "Convert the data stored in the model registry to JSON and store it in the models.json file"
+
+I used ChatGPT here to handle the brunt conversion of our original emissions data from the convert.ts model registry to a separate JSON file, as there were over 80 data points to convert. I did not use any logic from the LLM and solely used it to save time in copying the data over myself.
 
 <h3>Debugging</h3>
 

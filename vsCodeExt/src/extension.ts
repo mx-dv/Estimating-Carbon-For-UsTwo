@@ -47,9 +47,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     }
 
-
     budg = new budget.budget(context.workspaceState);
-
 
     // state.runningInterceptor = true;
 
@@ -62,14 +60,10 @@ export async function activate(context: vscode.ExtensionContext) {
         treeDataProvider
     );
 
-
-
-
     //let lastInlineState = false;
     const disposables: vscode.Disposable[] = [];
 
-
-
+// sets the display for the tree and status bar 
     setDisplay(treeDataProvider, barManager);
 
 
@@ -90,22 +84,19 @@ export async function activate(context: vscode.ExtensionContext) {
         barManager.updateBar(0);
     }
 
-
-
-
     disposables.push(vscode.workspace.onDidSaveTextDocument(async evt => {
         console.log("Updating logs..........");
         getLogs(context);
     }));
 
-    const reset = vscode.commands.registerCommand('ecode.clearStore', () => {
-        budg.resetBudget();
+    const reset = vscode.commands.registerCommand('ecode.clearStore', async () => {
+        await budg.resetBudget();
         treeDataProvider.clearTree();
-        barManager.updateLimit(0);
+        barManager.updateBar(0);
         //vscode.window.showInformationMessage('Past calls cleared.');
         // state.runningInterceptor = true;
 
-        CarbonDashboardPanel.sendData();
+        CarbonDashboardPanel.sendData(budg);
 
     });
 
@@ -113,7 +104,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Dashboard command 
     const dashboardCommand = vscode.commands.registerCommand('ecode.openDashboard', () => {
-        CarbonDashboardPanel.createOrShow(context.extensionUri);
+        CarbonDashboardPanel.createOrShow(context.extensionUri, budg);
         console.log('Carbon Dashboard command registered.');
     });
 
@@ -125,14 +116,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // keep track of the last known branch 
     let lastKnownBranch = getCurrentBranch();
-
+//listens for branch changes and updates dashboard accordingly with new branch information 
     const branchChangeListener = vscode.workspace.onDidChangeWorkspaceFolders(() => {
         const currentBranch = getCurrentBranch();
         // only send new data if the branch has changed                   
         if (currentBranch !== lastKnownBranch) {
             lastKnownBranch = currentBranch;
             //Trigger the data recalculation and update the dashboard with the new branch information
-            CarbonDashboardPanel.sendData();
+            CarbonDashboardPanel.sendData(budg);
         }
     });
     context.subscriptions.push(branchChangeListener);
@@ -150,8 +141,6 @@ export async function activate(context: vscode.ExtensionContext) {
         const now = new Date();
         const bumpedTime = now.getTime() + (5 * 60 * 60 * 1000);
        
-        
-        
         var newCall: budget.Call = { 
             Emissions: num, 
             Model: "TEST", 
@@ -177,7 +166,9 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         try {
             // start local server
-            proxyServer = new InterceptorProxy(PROXY_PORT);
+            proxyServer = new InterceptorProxy(PROXY_PORT, (call) => {
+                updateTree(call);
+            });
             await proxyServer.start(context.globalStorageUri.fsPath);
 
             // set VSCode to use local proxy
@@ -409,7 +400,7 @@ class statusBarManager {
 
     updateLimit(input: number) {
         this.mainItem.text = 'Last Request: 0 g CO₂e';
-        this.newColour = "statusBarItem.activeBackground";
+        this.newColour = "statusBarItem.background";
     }
     //this method updates the status bar item with the carbon emissions of the latest request and changes its colour based on predefined thresholds to provide real-time feedback on the environmental impact of development activities
     updateBar(input: number) { 
@@ -472,8 +463,9 @@ export function updateTree(call: budget.Call) {
     
     console.log("BACKEND CHECK: Stored call value:", call.Emissions, "for date:", new Date(call.DateTime).toISOString());
     tree.addMessage("Emissions: " + call.Emissions + "g CO₂e - Model: " + call.Model + " - Date: " + new Date(call.DateTime).toLocaleString());
+    
     bar.updateBar(call.Emissions);
-    CarbonDashboardPanel.sendData(); 
+    CarbonDashboardPanel.sendData(budg); 
     
 }
 
@@ -486,27 +478,32 @@ export async function getLogs(context: vscode.ExtensionContext) {
 
         // reads file and outputs lines to console one at a time
         const content = fs.readFileSync(logUri, 'utf-8');
-        var lDate:string[] = (new Date(lastAccess).toLocaleString('us-GB', { 
-                        hour12: false
-                    })).split(",");
+        // var lDate:string[] = (new Date(lastAccess).toLocaleString('us-GB', { 
+        //                 hour12: false
+        //             })).split(",");
         
 
-        var dateSec = new Date(lastAccess).toISOString().slice(0, 10).split('/').join('-'); //formats the date in accordance to the log files
-        var timeSplit = dateSec+lDate[1];
-        const regex: RegExp = new RegExp(timeSplit);
-        const splitting:string[] = content.split(regex);//splits the time stamp
-        var input: string;
-        if (splitting.length < 2){//uses the entire log file if nothing can be found the timestamp
-            input= content;
-        }
-        else{
-            input = splitting[splitting.length-1];//incase multiple lines of the log file are at the same second look past the last one
-        }
-        
+        // var dateSec = new Date(lastAccess).toISOString().slice(0, 10).split('/').join('-'); //formats the date in accordance to the log files
+        // var timeSplit = dateSec+lDate[1];
+        // const regex: RegExp = new RegExp(timeSplit);
+        // const splitting:string[] = content.split(regex);//splits the time stamp
+        // var input: string;
+        // if (splitting.length < 2){//uses the entire log file if nothing can be found the timestamp
+        //     input= content;
+        // }
+        // else{
+        //     input = splitting[splitting.length-1];//incase multiple lines of the log file are at the same second look past the last one
+        // }
+
+        //the above comment used to split the log file as to avoid taking too long loading when log files get larger
+        //due to a slight last minute changes to log files this created issues and has been removed 
+
+        var input:string = content;
         const models: budget.Call[] = await logCap.identifyModel(input);
         const sortedModels = models.sort((a: budget.Call, b: budget.Call) => {
             return a.DateTime - b.DateTime;
         });
+        console.log("CALLS: ", sortedModels);
 
         for (let index = 0; index < sortedModels.length; index++) {
             if (sortedModels[index].DateTime > lastAccess) {
@@ -518,6 +515,7 @@ export async function getLogs(context: vscode.ExtensionContext) {
 
         if (sortedModels.length !== 0) {lastAccess = sortedModels[sortedModels.length-1].DateTime;}
 
+                //vscode.window.showInformationMessage("Copilot log files refreshed.");
         
     }
     catch (error) {
@@ -533,8 +531,9 @@ export function wrappedGetCall() {
 export function wrappedGetBudget(): number {
     return budg.getBudget();
 }
-
+// This function is used in the dashboard to determine the start of the current budget tracking window
 export function wrappedGetBudgetWindowStart(): number {
+    
     return budg.getBudgetWindowStart();
 }
 
