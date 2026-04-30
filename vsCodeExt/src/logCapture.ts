@@ -82,7 +82,6 @@ export async function identifyModel(rawLog: string): Promise<budget.Call[]> {
 
             switch (model) {
                 case 'claude-haiku-4.5': //adds specific models to a queue of relevant models
-                    console.log("claude-haiku-4.5 found");
                     claudes.push(model);
                     claudeFlag = true;
                     break;              
