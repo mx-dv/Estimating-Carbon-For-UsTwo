@@ -154,6 +154,7 @@ We aim to design a toolkit that:
   <ul>
     <li>Paolo Rizzi</li>
     <li>Nayan Jain</li>
+    <li>Nick Hegarty</li>
   </ul>
   
   <h2 id="team"> Team Members </h2>
