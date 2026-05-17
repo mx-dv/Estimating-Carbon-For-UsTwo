@@ -99,7 +99,7 @@ We aim to design a toolkit that:
 3. Run <code>npm install</code>
 4. Run <code>npm run compile</code>
 5. install Extension Test Runner in vscode
-6. Run extension.ts to start the extension development environment window
+6. Run extension.ts using `f5` to start the extension development environment window
 7. For runtime analysis, within the extension development environment:
    - run "Start Proxy Interceptor" command
    - run "Open Runtime Terminal" command
@@ -113,7 +113,9 @@ We aim to design a toolkit that:
 
 <br>
    
-<p>This is currently the same for both developers and users. However, we plan to have the extension downloadable from the VScode store for users.</p>
+## User Instructions
+Please reference the "How to Use" in the ReadMe of the Extension [here](vsCodeExt/README.md)
+
 
     
 <h2 id="structure">Project Structure</h2>
